@@ -1,79 +1,16 @@
 "use client";
-import { useState, useMemo, useRef } from "react";
-import { TOPICS, topicsForGrade, generateWorksheet, Difficulty, Question } from "@/lib/generators";
+import { useState, useMemo, useRef, useEffect } from "react";
+import {
+  SUBJECTS, SubjectId, Difficulty, Question,
+  topicsForGrade, topicLabel, generateWorksheet, parseCommand, allGrades,
+} from "@/lib/subjects";
 
 function newSeed() {
   return Math.floor(Math.random() * 2147483647);
 }
 
-function parseCommand(text: string, current: { grade: number; topic: string; difficulty: Difficulty; count: number }) {
-  const t = text.toLowerCase();
-
-  let grade: number | null = null;
-  const gm = t.match(/grade\s*(\d{1,2})/) || t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s*grade\b/);
-  if (gm) grade = Math.max(1, Math.min(8, parseInt(gm[1], 10)));
-
-  let difficulty: Difficulty | null = null;
-  if (/\b(easy|simple|basic)\b/.test(t)) difficulty = "easy";
-  else if (/\b(hard|difficult|advanced|challenging)\b/.test(t)) difficulty = "hard";
-  else if (/\b(medium|moderate|normal)\b/.test(t)) difficulty = "medium";
-
-  let count: number | null = null;
-  const cm = t.match(/(\d{1,2})\s*(questions|problems|q\b)/);
-  if (cm) count = Math.max(3, Math.min(30, parseInt(cm[1], 10)));
-
-  const aliasMap: Record<string, string[]> = {
-    addsub: ["addition", "subtraction", "add and subtract"],
-    counting: ["counting", "number sequence", "skip counting"],
-    comparing: ["comparing numbers", "compare numbers", "greater than", "less than"],
-    shapes: ["shapes", "sides and corners", "vertices"],
-    placevalue: ["place value", "rounding"],
-    multdiv: ["multiplication", "division", "times table", "multiply", "divide"],
-    fractions_intro: ["intro fraction", "simple fraction", "basic fraction"],
-    decimals_intro: ["intro decimal", "simple decimal", "basic decimal"],
-    wordproblems: ["word problem"],
-    fractions: ["fraction"],
-    decimals: ["decimal"],
-    geometry: ["geometry", "area", "perimeter", "volume"],
-    stats: ["statistic", "mean", "median", "mode", "range of data"],
-    order: ["order of operations", "pemdas", "bodmas"],
-    ratios: ["ratio", "unit rate"],
-    percent: ["percent", "percentage"],
-    integers: ["integer", "negative number"],
-    expressions: ["expression", "algebra", "one-step equation"],
-    proportions: ["proportion"],
-    linear: ["linear equation", "two-step equation"],
-    exponents: ["exponent", "power of", "squared number", "cubed number"],
-  };
-
-  let topicId: string | null = null;
-  for (const top of TOPICS) {
-    const aliases = aliasMap[top.id] || [];
-    if (aliases.some((alias) => t.includes(alias))) { topicId = top.id; break; }
-  }
-
-  if (topicId && grade) {
-    const top = TOPICS.find((x) => x.id === topicId)!;
-    if (!top.grades.includes(grade)) {
-      grade = top.grades.reduce((best, g) => (Math.abs(g - grade!) < Math.abs(best - grade!) ? g : best), top.grades[0]);
-    }
-  } else if (topicId && !grade) {
-    const top = TOPICS.find((x) => x.id === topicId)!;
-    grade = top.grades.includes(current.grade) ? current.grade : top.grades[0];
-  } else if (!topicId && grade) {
-    const available = topicsForGrade(grade);
-    topicId = available.find((x) => x.id === current.topic) ? current.topic : available[0].id;
-  }
-
-  return {
-    grade: grade ?? current.grade,
-    topic: topicId ?? current.topic,
-    difficulty: difficulty ?? current.difficulty,
-    count: count ?? current.count,
-  };
-}
-
 export default function WorksheetGenerator() {
+  const [subject, setSubject] = useState<SubjectId>("math");
   const [grade, setGrade] = useState(6);
   const [topic, setTopic] = useState("fractions");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
@@ -86,39 +23,73 @@ export default function WorksheetGenerator() {
   const seedRef = useRef<number>(newSeed());
   const printRef = useRef<HTMLDivElement>(null);
 
-  const availableTopics = useMemo(() => topicsForGrade(grade), [grade]);
-  const topicLabel = (id: string) => TOPICS.find((t) => t.id === id)?.label || id;
+  const availableTopics = useMemo(() => topicsForGrade(subject, grade), [subject, grade]);
+
+  // Restore an exact shared worksheet if the URL carries wsg_* params (from the Share button)
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const seedParam = p.get("wsg_seed");
+    if (!seedParam) return;
+    const s = (p.get("wsg_subject") as SubjectId) || "math";
+    const g = parseInt(p.get("wsg_grade") || "", 10);
+    const t = p.get("wsg_topic") || "";
+    const d = (p.get("wsg_diff") as Difficulty) || "medium";
+    const c = parseInt(p.get("wsg_count") || "", 10);
+    const seed = parseInt(seedParam, 10);
+    if (!t || isNaN(g) || isNaN(c) || isNaN(seed)) return;
+
+    setSubject(s);
+    setGrade(g);
+    setTopic(t);
+    setDifficulty(d);
+    setCount(c);
+    seedRef.current = seed;
+    setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function toast(msg: string) {
     setToastMsg(msg);
     setTimeout(() => setToastMsg((m) => (m === msg ? "" : m)), 3500);
   }
 
-  function handleGradeChange(g: number) {
-    setGrade(g);
-    const avail = topicsForGrade(g);
-    if (!avail.find((t) => t.id === topic)) setTopic(avail[0].id);
+  function pickFirstValidTopic(s: SubjectId, g: number, currentTopic: string) {
+    const avail = topicsForGrade(s, g);
+    return avail.find((t) => t.id === currentTopic) ? currentTopic : avail[0]?.id || "";
   }
 
-  function generate(overrides?: Partial<{ grade: number; topic: string; difficulty: Difficulty; count: number }>) {
+  function handleSubjectChange(s: SubjectId) {
+    setSubject(s);
+    setTopic(pickFirstValidTopic(s, grade, topic));
+    setQuestions([]);
+  }
+
+  function handleGradeChange(g: number) {
+    setGrade(g);
+    setTopic(pickFirstValidTopic(subject, g, topic));
+  }
+
+  function generate(overrides?: Partial<{ subject: SubjectId; grade: number; topic: string; difficulty: Difficulty; count: number }>) {
+    const s = overrides?.subject ?? subject;
     const g = overrides?.grade ?? grade;
     const t = overrides?.topic ?? topic;
     const d = overrides?.difficulty ?? difficulty;
     const c = overrides?.count ?? count;
     seedRef.current = newSeed();
     setShowAnswers(false);
-    setQuestions(generateWorksheet({ grade: g, topic: t, difficulty: d, count: c, seed: seedRef.current }));
+    setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed: seedRef.current }));
   }
 
   function handleCommandGo() {
-    if (!command.trim()) { setFeedback('Type a request first, e.g. "grade 5 percentages, 12 hard questions".'); return; }
-    const parsed = parseCommand(command, { grade, topic, difficulty, count });
+    if (!command.trim()) { setFeedback('Type a request first, e.g. "grade 5 science, 12 hard questions".'); return; }
+    const parsed = parseCommand(command, { subject, grade, topic, difficulty, count });
+    setSubject(parsed.subject);
     setGrade(parsed.grade);
     setTopic(parsed.topic);
     setDifficulty(parsed.difficulty);
     setCount(parsed.count);
     generate(parsed);
-    setFeedback(`Understood: Grade ${parsed.grade} · ${topicLabel(parsed.topic)} · ${parsed.difficulty} · ${parsed.count} questions.`);
+    setFeedback(`Understood: ${SUBJECTS.find((s) => s.id === parsed.subject)?.label} · Grade ${parsed.grade} · ${topicLabel(parsed.subject, parsed.topic)} · ${parsed.difficulty} · ${parsed.count} questions.`);
   }
 
   function handlePrint() {
@@ -138,7 +109,7 @@ export default function WorksheetGenerator() {
       const imgW = pageW - 20;
       const imgH = (canvas.height * imgW) / canvas.width;
       pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, imgW, Math.min(imgH, 297 - 20));
-      pdf.save(`${topic}-grade${grade}-worksheet.pdf`);
+      pdf.save(`${subject}-${topic}-grade${grade}-worksheet.pdf`);
       toast("Downloaded.");
     } catch {
       toast("Could not generate the PDF — try Print instead.");
@@ -147,6 +118,7 @@ export default function WorksheetGenerator() {
 
   function buildShareUrl() {
     const url = new URL(window.location.href);
+    url.searchParams.set("wsg_subject", subject);
     url.searchParams.set("wsg_grade", String(grade));
     url.searchParams.set("wsg_topic", topic);
     url.searchParams.set("wsg_diff", difficulty);
@@ -157,7 +129,7 @@ export default function WorksheetGenerator() {
 
   async function handleShare() {
     const url = buildShareUrl();
-    const shareData = { title: `${topicLabel(topic)} — Grade ${grade} Math`, url };
+    const shareData = { title: `${topicLabel(subject, topic)} — Grade ${grade} ${SUBJECTS.find((s) => s.id === subject)?.label}`, url };
     if (navigator.share) {
       try { await navigator.share(shareData); return; } catch { /* fall through */ }
     }
@@ -175,9 +147,26 @@ export default function WorksheetGenerator() {
       {/* ---------- Controls ---------- */}
       <aside className="space-y-5">
         <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Subject</p>
+          <div className="flex gap-2">
+            {SUBJECTS.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => handleSubjectChange(s.id)}
+                className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border ${
+                  subject === s.id ? "bg-slate-900 text-white border-slate-900" : "border-slate-300 text-slate-600"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Grade</p>
-          <div className="grid grid-cols-8 lg:grid-cols-4 gap-1.5">
-            {Array.from({ length: 8 }, (_, i) => i + 1).map((g) => (
+          <div className="grid grid-cols-6 gap-1.5">
+            {allGrades().map((g) => (
               <button
                 key={g}
                 onClick={() => handleGradeChange(g)}
@@ -193,7 +182,7 @@ export default function WorksheetGenerator() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Topic</p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
             {availableTopics.map((t) => (
               <button
                 key={t.id}
@@ -205,6 +194,9 @@ export default function WorksheetGenerator() {
                 {t.label}
               </button>
             ))}
+            {availableTopics.length === 0 && (
+              <p className="text-xs text-slate-400 col-span-2">No topics yet for this grade — try another.</p>
+            )}
           </div>
         </div>
 
@@ -244,7 +236,8 @@ export default function WorksheetGenerator() {
 
         <button
           onClick={() => generate()}
-          className="w-full bg-amber-400 text-amber-950 font-semibold py-3 rounded-lg hover:bg-amber-300"
+          disabled={!topic}
+          className="w-full bg-amber-400 text-amber-950 font-semibold py-3 rounded-lg hover:bg-amber-300 disabled:opacity-50"
         >
           ✎ Generate Worksheet
         </button>
@@ -254,7 +247,7 @@ export default function WorksheetGenerator() {
           <textarea
             value={command}
             onChange={(e) => setCommand(e.target.value)}
-            placeholder='e.g. "grade 4 fractions, 15 hard questions"'
+            placeholder='e.g. "grade 9 algebra, 15 hard questions" or "grade 3 science, 10 questions"'
             className="w-full text-sm border border-slate-300 rounded-lg p-2 min-h-[56px]"
           />
           <button
@@ -270,14 +263,14 @@ export default function WorksheetGenerator() {
       {/* ---------- Worksheet ---------- */}
       <div className="flex justify-center">
         {questions.length === 0 ? (
-          <div className="text-center text-slate-400 py-24">Pick a grade and topic, then generate a worksheet.</div>
+          <div className="text-center text-slate-400 py-24">Pick a subject, grade, and topic, then generate a worksheet.</div>
         ) : (
           <div className="w-full max-w-xl">
             <div id="worksheet-print-area" ref={printRef} className="bg-white rounded-lg shadow-lg p-8">
               <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-2">
-                <h2 className="text-2xl font-bold">{topicLabel(topic)}</h2>
+                <h2 className="text-2xl font-bold">{topicLabel(subject, topic)}</h2>
                 <div className="text-right text-xs text-slate-500 uppercase tracking-wide">
-                  Grade {grade} · Math<br />{difficulty} · {questions.length} questions
+                  Grade {grade} · {SUBJECTS.find((s) => s.id === subject)?.label}<br />{difficulty} · {questions.length} questions
                 </div>
               </div>
               <div className="flex gap-6 text-sm text-slate-500 my-4">
