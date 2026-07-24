@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body * { visibility: hidden !important; }
+  #worksheet-print-area, #worksheet-print-area * { visibility: visible !important; }
+  #worksheet-print-area {
+    position: absolute; left: 0; top: 0; width: 100%;
+    box-shadow: none !important; border-radius: 0 !important;
+  }
+}
