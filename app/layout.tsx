@@ -2,8 +2,8 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 
 export const metadata = {
-  title: "Practice Sheet — Worksheets for Grades 1–8",
-  description: "Generate accurate, printable math worksheets in seconds.",
+  title: "Practice Sheet — Math, English & Science Worksheets, Grades 1–12",
+  description: "Generate accurate, printable worksheets in seconds.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
