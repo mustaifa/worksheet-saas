@@ -13,6 +13,7 @@ model User {
   email                String    @unique
   passwordHash         String
   createdAt            DateTime  @default(now())
+  role                 String    @default("user") // user | admin
 
   // Trial + subscription state
   trialEndsAt          DateTime
@@ -21,4 +22,9 @@ model User {
   currentPeriodEnd     DateTime?
   stripeCustomerId     String?   @unique
   stripeSubscriptionId String?   @unique
+
+  // Email lifecycle tracking (prevents duplicate sends from the daily cron)
+  welcomeEmailSentAt     DateTime?
+  trialReminderSentAt    DateTime? // "2 days left" email
+  trialEndedEmailSentAt  DateTime? // "trial has ended" email
 }
