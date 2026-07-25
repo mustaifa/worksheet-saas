@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const TRIAL_DAYS = parseInt(process.env.TRIAL_DAYS || "7", 10);
 
@@ -33,6 +34,10 @@ export async function POST(req: Request) {
         subscriptionStatus: "trialing",
       },
     });
+
+    sendWelcomeEmail(user.email, user.name, TRIAL_DAYS)
+      .then(() => prisma.user.update({ where: { id: user.id }, data: { welcomeEmailSentAt: new Date() } }))
+      .catch((err) => console.error("Welcome email failed:", err));
 
     return NextResponse.json({ id: user.id, email: user.email });
   } catch (err) {
