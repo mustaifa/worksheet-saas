@@ -12,6 +12,7 @@ export default function Navbar() {
       </Link>
       <div className="flex items-center gap-5 text-sm">
         <Link href="/worksheets" className="text-slate-600 hover:text-slate-900">Worksheets</Link>
+        <Link href="/blog" className="text-slate-600 hover:text-slate-900">Blog</Link>
         <Link href="/pricing" className="text-slate-600 hover:text-slate-900">Pricing</Link>
         {status === "authenticated" ? (
           <>
