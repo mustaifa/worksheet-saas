@@ -12,19 +12,32 @@ export default function Contact() {
     e.preventDefault();
     setStatus("sending");
     setError("");
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || "Something went wrong.");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        // response wasn't JSON (e.g. a 404/500 HTML error page) — fall through with a generic error
+      }
+
+      if (!res.ok) {
+        setError(data.error || `Something went wrong (status ${res.status}). Please try again.`);
+        setStatus("error");
+        return;
+      }
+
+      setStatus("sent");
+      setForm({ name: "", email: "", message: "" });
+    } catch (err) {
+      setError("Could not reach the server. Check your connection and try again.");
       setStatus("error");
-      return;
     }
-    setStatus("sent");
-    setForm({ name: "", email: "", message: "" });
   }
 
   return (
