@@ -1,4 +1,3 @@
-
 "use client";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
@@ -9,6 +8,17 @@ import {
 function newSeed() {
   return Math.floor(Math.random() * 2147483647);
 }
+
+const QUICK_START_PRESETS: { label: string; subject: SubjectId; grade: number; topic: string; icon: string }[] = [
+  { label: "Grade 2 Addition", subject: "math", grade: 2, topic: "addsub", icon: "➕" },
+  { label: "Grade 6 Fractions", subject: "math", grade: 6, topic: "fractions", icon: "🍰" },
+  { label: "Grade 9 Algebra", subject: "math", grade: 9, topic: "algebra_basics", icon: "𝑥" },
+  { label: "Grade 3 Spelling", subject: "english", grade: 3, topic: "spelling", icon: "✏️" },
+  { label: "Grade 7 Vocabulary", subject: "english", grade: 7, topic: "vocabulary", icon: "📖" },
+  { label: "Grade 2 Living vs Non-living", subject: "science", grade: 2, topic: "living_nonliving", icon: "🌱" },
+  { label: "Grade 6 Human Body", subject: "science", grade: 6, topic: "human_body_systems", icon: "🫀" },
+  { label: "Grade 11 Physics", subject: "science", grade: 11, topic: "physics_formulas", icon: "⚛️" },
+];
 
 export default function WorksheetGenerator() {
   const [subject, setSubject] = useState<SubjectId>("math");
@@ -79,6 +89,13 @@ export default function WorksheetGenerator() {
     seedRef.current = newSeed();
     setShowAnswers(false);
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed: seedRef.current }));
+  }
+
+  function handlePreset(preset: { subject: SubjectId; grade: number; topic: string }) {
+    setSubject(preset.subject);
+    setGrade(preset.grade);
+    setTopic(preset.topic);
+    generate({ subject: preset.subject, grade: preset.grade, topic: preset.topic });
   }
 
   function handleCommandGo() {
@@ -264,7 +281,43 @@ export default function WorksheetGenerator() {
       {/* ---------- Worksheet ---------- */}
       <div className="flex justify-center">
         {questions.length === 0 ? (
-          <div className="text-center text-slate-400 py-24">Pick a subject, grade, and topic, then generate a worksheet.</div>
+          <div className="w-full max-w-2xl py-6">
+            <div className="text-center mb-8">
+              <div className="text-4xl mb-3">📝</div>
+              <h2 className="text-xl font-bold text-slate-900">Ready when you are</h2>
+              <p className="text-slate-500 text-sm mt-1">
+                Pick a subject and grade on the left, or jump straight into one of these:
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {QUICK_START_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  onClick={() => handlePreset(preset)}
+                  className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-4 text-center hover:border-slate-900 hover:shadow-md transition-all"
+                >
+                  <span className="text-2xl">{preset.icon}</span>
+                  <span className="text-xs font-medium text-slate-700 leading-snug">{preset.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+              <div className="rounded-lg bg-slate-50 p-4">
+                <p className="text-lg font-bold text-slate-900">64+</p>
+                <p className="text-xs text-slate-500 mt-1">topics across Math, English & Science</p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-4">
+                <p className="text-lg font-bold text-slate-900">Grades 1–12</p>
+                <p className="text-xs text-slate-500 mt-1">every worksheet matched to grade level</p>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-4">
+                <p className="text-lg font-bold text-slate-900">100%</p>
+                <p className="text-xs text-slate-500 mt-1">verified answers — never AI-guessed</p>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="w-full max-w-xl">
             <div id="worksheet-print-area" ref={printRef} className="bg-white rounded-lg shadow-lg p-8">
