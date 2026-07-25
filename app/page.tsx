@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
@@ -23,6 +24,7 @@ export default function Home() {
         </div>
         <p className="mt-4 text-sm text-slate-500">No card required to start.</p>
       </section>
+      <Footer />
     </main>
   );
 }
