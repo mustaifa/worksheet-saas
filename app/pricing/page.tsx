@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 function PlanCard({
   title, price, period, plan, highlighted,
@@ -54,6 +55,7 @@ export default function Pricing() {
           <PlanCard title="Yearly" price="$79" period="year" plan="yearly" highlighted />
         </div>
       </section>
+      <Footer />
     </main>
   );
 }
