@@ -11,10 +11,12 @@ export default function Navbar() {
         Practice Sheet
       </Link>
       <div className="flex items-center gap-5 text-sm">
+        <Link href="/worksheets" className="text-slate-600 hover:text-slate-900">Worksheets</Link>
         <Link href="/pricing" className="text-slate-600 hover:text-slate-900">Pricing</Link>
         {status === "authenticated" ? (
           <>
             <Link href="/dashboard" className="text-slate-600 hover:text-slate-900">Dashboard</Link>
+            <Link href="/admin" className="text-slate-400 hover:text-slate-900">Admin</Link>
             <button onClick={() => signOut({ callbackUrl: "/" })} className="text-slate-600 hover:text-slate-900">
               Sign out
             </button>
