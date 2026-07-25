@@ -77,3 +77,13 @@ export async function sendTrialEndedEmail(to: string, name: string | null) {
   `);
   return sendEmail(to, "Your Practice Sheet trial has ended", html);
 }
+
+export async function sendContactFormEmail(fromName: string, fromEmail: string, message: string) {
+  const to = process.env.CONTACT_EMAIL_TO || process.env.EMAIL_FROM || "";
+  const html = wrapper(`
+    <h2 style="color: #0f172a;">New contact form message</h2>
+    <p style="color: #334155;"><strong>From:</strong> ${fromName} (${fromEmail})</p>
+    <p style="color: #334155; white-space: pre-wrap; border-left: 3px solid #e2e8f0; padding-left: 12px; margin-top: 12px;">${message}</p>
+  `);
+  return sendEmail(to, `Contact form: ${fromName}`, html);
+}
