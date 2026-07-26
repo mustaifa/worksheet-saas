@@ -9,13 +9,7 @@ export default function Terms() {
       <Navbar />
       <section className="max-w-2xl mx-auto px-6 py-16">
         <h1 className="text-3xl font-bold">Terms of Service</h1>
-        <p className="text-sm text-slate-500 mt-2">Last updated: [DATE]</p>
-
-        <div className="mt-6 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
-          <strong>Template notice:</strong> this is a generic starting draft, not legal advice.
-          Have a lawyer review and customize it — especially the sections on refunds, liability,
-          and children's use — before relying on it for a live product with real customers.
-        </div>
+        <p className="text-sm text-slate-500 mt-2">Last updated: July 25, 2026</p>
 
         <div className="prose prose-slate mt-6 text-slate-700 space-y-5 leading-relaxed text-sm">
           <div>
