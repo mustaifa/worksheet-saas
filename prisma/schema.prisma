@@ -27,4 +27,8 @@ model User {
   welcomeEmailSentAt     DateTime?
   trialReminderSentAt    DateTime? // "2 days left" email
   trialEndedEmailSentAt  DateTime? // "trial has ended" email
+
+  // Tutor chat usage (resets daily, caps API cost exposure per user)
+  chatMessagesUsedToday  Int       @default(0)
+  chatUsageResetAt       DateTime  @default(now())
 }
