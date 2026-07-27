@@ -165,14 +165,14 @@ export default function WorksheetGenerator() {
       {/* ---------- Controls ---------- */}
       <aside className="space-y-5">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Subject</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Subject</p>
           <div className="flex gap-2">
             {SUBJECTS.map((s) => (
               <button
                 key={s.id}
                 onClick={() => handleSubjectChange(s.id)}
                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border ${
-                  subject === s.id ? "bg-slate-900 text-white border-slate-900" : "border-slate-300 text-slate-600"
+                  subject === s.id ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
               >
                 {s.label}
@@ -182,14 +182,14 @@ export default function WorksheetGenerator() {
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Grade</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Grade</p>
           <div className="grid grid-cols-6 gap-1.5">
             {allGrades().map((g) => (
               <button
                 key={g}
                 onClick={() => handleGradeChange(g)}
                 className={`aspect-square rounded-md text-sm font-semibold border ${
-                  grade === g ? "bg-slate-900 text-white border-slate-900" : "border-slate-300 text-slate-600"
+                  grade === g ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
               >
                 {g}
@@ -199,34 +199,34 @@ export default function WorksheetGenerator() {
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Topic</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Topic</p>
           <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
             {availableTopics.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTopic(t.id)}
                 className={`text-xs rounded-lg border px-2 py-2 text-left ${
-                  topic === t.id ? "border-slate-900 bg-slate-100 font-medium" : "border-slate-300 text-slate-600"
+                  topic === t.id ? "border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 font-medium dark:text-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
               >
                 {t.label}
               </button>
             ))}
             {availableTopics.length === 0 && (
-              <p className="text-xs text-slate-400 col-span-2">No topics yet for this grade — try another.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 col-span-2">No topics yet for this grade — try another.</p>
             )}
           </div>
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Difficulty</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Difficulty</p>
           <div className="flex gap-2">
             {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
               <button
                 key={d}
                 onClick={() => setDifficulty(d)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
-                  difficulty === d ? "bg-slate-900 text-white border-slate-900" : "border-slate-300 text-slate-600"
+                  difficulty === d ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
               >
                 {d[0].toUpperCase() + d.slice(1)}
@@ -236,14 +236,14 @@ export default function WorksheetGenerator() {
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Questions</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Questions</p>
           <div className="flex gap-2">
             {[5, 10, 15, 20].map((n) => (
               <button
                 key={n}
                 onClick={() => setCount(n)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
-                  count === n ? "bg-slate-900 text-white border-slate-900" : "border-slate-300 text-slate-600"
+                  count === n ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
               >
                 {n}
@@ -261,20 +261,20 @@ export default function WorksheetGenerator() {
         </button>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Or describe what you need</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Or describe what you need</p>
           <textarea
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             placeholder='e.g. "grade 9 algebra, 15 hard questions" or "grade 3 science, 10 questions"'
-            className="w-full text-sm border border-slate-300 rounded-lg p-2 min-h-[56px]"
+            className="w-full text-sm border border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-white rounded-lg p-2 min-h-[56px]"
           />
           <button
             onClick={handleCommandGo}
-            className="w-full mt-2 border border-dashed border-amber-500 text-amber-700 text-xs font-semibold py-2 rounded-lg hover:bg-amber-50"
+            className="w-full mt-2 border border-dashed border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 text-xs font-semibold py-2 rounded-lg hover:bg-amber-50"
           >
             ⌨ Generate from request
           </button>
-          {feedback && <p className="text-xs text-slate-500 mt-2">{feedback}</p>}
+          {feedback && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{feedback}</p>}
         </div>
       </aside>
 
@@ -284,8 +284,8 @@ export default function WorksheetGenerator() {
           <div className="w-full max-w-2xl py-6">
             <div className="text-center mb-8">
               <div className="text-4xl mb-3">📝</div>
-              <h2 className="text-xl font-bold text-slate-900">Ready when you are</h2>
-              <p className="text-slate-500 text-sm mt-1">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Ready when you are</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                 Pick a subject and grade on the left, or jump straight into one of these:
               </p>
             </div>
@@ -295,26 +295,26 @@ export default function WorksheetGenerator() {
                 <button
                   key={preset.label}
                   onClick={() => handlePreset(preset)}
-                  className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-4 text-center hover:border-slate-900 hover:shadow-md transition-all"
+                  className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-center hover:border-slate-900 dark:hover:border-white hover:shadow-md transition-all"
                 >
                   <span className="text-2xl">{preset.icon}</span>
-                  <span className="text-xs font-medium text-slate-700 leading-snug">{preset.label}</span>
+                  <span className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-snug">{preset.label}</span>
                 </button>
               ))}
             </div>
 
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="text-lg font-bold text-slate-900">64+</p>
-                <p className="text-xs text-slate-500 mt-1">topics across Math, English & Science</p>
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-900 p-4">
+                <p className="text-lg font-bold text-slate-900 dark:text-white">64+</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">topics across Math, English & Science</p>
               </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="text-lg font-bold text-slate-900">Grades 1–12</p>
-                <p className="text-xs text-slate-500 mt-1">every worksheet matched to grade level</p>
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-900 p-4">
+                <p className="text-lg font-bold text-slate-900 dark:text-white">Grades 1–12</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">every worksheet matched to grade level</p>
               </div>
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="text-lg font-bold text-slate-900">100%</p>
-                <p className="text-xs text-slate-500 mt-1">verified answers — never AI-guessed</p>
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-900 p-4">
+                <p className="text-lg font-bold text-slate-900 dark:text-white">100%</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">verified answers — never AI-guessed</p>
               </div>
             </div>
           </div>
@@ -349,13 +349,13 @@ export default function WorksheetGenerator() {
             </div>
 
             <div className="flex flex-wrap gap-2 mt-4">
-              <button onClick={() => setShowAnswers(!showAnswers)} className="border border-slate-900 text-sm px-4 py-2 rounded-lg">
+              <button onClick={() => setShowAnswers(!showAnswers)} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">
                 {showAnswers ? "Hide key" : "Show key"}
               </button>
-              <button onClick={handlePrint} className="bg-slate-900 text-white text-sm px-4 py-2 rounded-lg">Print (A4)</button>
-              <button onClick={handleDownload} className="border border-slate-900 text-sm px-4 py-2 rounded-lg">Download PDF</button>
-              <button onClick={handleShare} className="border border-slate-900 text-sm px-4 py-2 rounded-lg">Share</button>
-              <button onClick={() => generate()} className="border border-slate-900 text-sm px-4 py-2 rounded-lg">New set</button>
+              <button onClick={handlePrint} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm px-4 py-2 rounded-lg">Print (A4)</button>
+              <button onClick={handleDownload} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">Download PDF</button>
+              <button onClick={handleShare} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">Share</button>
+              <button onClick={() => generate()} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">New set</button>
             </div>
             {toastMsg && <p className="text-xs text-red-600 mt-2">{toastMsg}</p>}
           </div>
