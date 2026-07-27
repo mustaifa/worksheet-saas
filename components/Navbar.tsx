@@ -1,35 +1,38 @@
 "use client";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
 
   return (
-    <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-white">
-      <Link href="/" className="font-bold text-lg text-slate-900">
+    <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+      <Link href="/" className="font-bold text-lg text-slate-900 dark:text-white">
         Practice Sheet
       </Link>
       <div className="flex items-center gap-5 text-sm">
-        <Link href="/worksheets" className="text-slate-600 hover:text-slate-900">Worksheets</Link>
-        <Link href="/blog" className="text-slate-600 hover:text-slate-900">Blog</Link>
-        <Link href="/pricing" className="text-slate-600 hover:text-slate-900">Pricing</Link>
+        <Link href="/worksheets" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Worksheets</Link>
+        <Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Blog</Link>
+        <Link href="/pricing" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Pricing</Link>
         {status === "authenticated" ? (
           <>
-            <Link href="/dashboard" className="text-slate-600 hover:text-slate-900">Dashboard</Link>
-            <Link href="/admin" className="text-slate-400 hover:text-slate-900">Admin</Link>
-            <button onClick={() => signOut({ callbackUrl: "/" })} className="text-slate-600 hover:text-slate-900">
+            <Link href="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Dashboard</Link>
+            <Link href="/dashboard/tutor" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Tutor</Link>
+            <Link href="/admin" className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white">Admin</Link>
+            <button onClick={() => signOut({ callbackUrl: "/" })} className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
               Sign out
             </button>
           </>
         ) : (
           <>
-            <Link href="/login" className="text-slate-600 hover:text-slate-900">Log in</Link>
-            <Link href="/signup" className="bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-700">
+            <Link href="/login" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Log in</Link>
+            <Link href="/signup" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-200">
               Start free trial
             </Link>
           </>
         )}
+        <ThemeToggle />
       </div>
     </nav>
   );
