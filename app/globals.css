@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Every input/textarea/select gets sensible dark-mode colors automatically —
+   fixes the recurring "text invisible in dark mode" bug across all forms
+   (login, signup, contact, tutor chat, and any future form) in one place. */
+@layer base {
+  input, textarea, select {
+    @apply bg-white text-slate-900 dark:bg-slate-900 dark:text-white dark:border-slate-700 dark:placeholder-slate-500;
+  }
+}
+
 @media print {
   @page { size: A4; margin: 14mm; }
   body * { visibility: hidden !important; }
