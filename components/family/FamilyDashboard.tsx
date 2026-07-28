@@ -21,9 +21,19 @@ export default function FamilyDashboard() {
 
   async function loadChildren() {
     setLoading(true);
-    const res = await fetch("/api/family/children");
-    const data = await res.json();
-    if (res.ok) setChildren(data.children);
+    setError("");
+    try {
+      const res = await fetch("/api/family/children");
+      let data: any = {};
+      try { data = await res.json(); } catch { /* non-JSON response */ }
+      if (!res.ok) {
+        setError(data.error || `Could not load family profiles (status ${res.status}).`);
+      } else {
+        setChildren(data.children || []);
+      }
+    } catch {
+      setError("Could not reach the server. Check your connection and try again.");
+    }
     setLoading(false);
   }
 
@@ -65,6 +75,13 @@ export default function FamilyDashboard() {
   }
 
   if (loading) return <p className="text-slate-400 dark:text-slate-500">Loading…</p>;
+  if (error && children.length === 0) {
+    return (
+      <div className="text-sm text-red-600">
+        {error} <button onClick={loadChildren} className="underline">Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div>
