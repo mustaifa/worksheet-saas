@@ -49,16 +49,16 @@ export default function TutorChat() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto flex flex-col h-[70vh] border border-slate-200 rounded-xl overflow-hidden bg-white">
-      <div className="border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+    <div className="max-w-2xl mx-auto flex flex-col h-[70vh] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-white dark:bg-slate-900">
+      <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
         <div>
-          <p className="font-semibold">Homework Tutor</p>
-          <p className="text-xs text-slate-500">Share a specific problem you're stuck on.</p>
+          <p className="font-semibold text-slate-900 dark:text-white">Homework Tutor</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Share a specific problem you're stuck on.</p>
         </div>
         <select
           value={grade}
           onChange={(e) => setGrade(parseInt(e.target.value, 10))}
-          className="text-sm border border-slate-300 rounded-lg px-2 py-1"
+          className="text-sm border border-slate-300 rounded-lg px-2 py-1 dark:border-slate-700"
         >
           {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => (
             <option key={g} value={g}>Grade {g}</option>
@@ -68,7 +68,7 @@ export default function TutorChat() {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
-          <p className="text-sm text-slate-400 text-center mt-8">
+          <p className="text-sm text-slate-400 dark:text-slate-500 text-center mt-8">
             Try: "I'm stuck on 3/4 + 1/2, can you help?" or "Explain what a metaphor is with an example."
           </p>
         )}
@@ -76,7 +76,7 @@ export default function TutorChat() {
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[80%] rounded-xl px-4 py-2 text-sm whitespace-pre-wrap ${
-                m.role === "user" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-800"
+                m.role === "user" ? "bg-slate-900 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100"
               }`}
             >
               {m.content}
@@ -90,18 +90,18 @@ export default function TutorChat() {
       {error && <p className="text-xs text-red-600 px-4">{error}</p>}
       {remaining !== null && <p className="text-xs text-slate-400 px-4 pb-1">{remaining} messages left today</p>}
 
-      <div className="border-t border-slate-200 p-3 flex gap-2">
+      <div className="border-t border-slate-200 dark:border-slate-800 p-3 flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
           placeholder="Ask about a specific problem…"
-          className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm dark:border-slate-700"
         />
         <button
           onClick={sendMessage}
           disabled={loading}
-          className="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+          className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
         >
           Send
         </button>
