@@ -320,7 +320,7 @@ export default function WorksheetGenerator() {
           </div>
         ) : (
           <div className="w-full max-w-xl">
-            <div id="worksheet-print-area" ref={printRef} className="bg-white rounded-lg shadow-lg p-8">
+            <div id="worksheet-print-area" ref={printRef} className="bg-white text-slate-900 rounded-lg shadow-lg p-8">
               <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-2">
                 <h2 className="text-2xl font-bold">{topicLabel(subject, topic)}</h2>
                 <div className="text-right text-xs text-slate-500 uppercase tracking-wide">
