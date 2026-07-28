@@ -30,7 +30,7 @@ export default function Terms() {
           </div>
           <div>
             <h2 className="font-semibold text-slate-900 text-base">5. Refunds</h2>
-            <p>[Define your refund policy here — e.g., "Refunds are available within 14 days of a charge upon request" or "All sales are final." This is a business decision, not a legal one, but should be stated clearly.]</p>
+            <p>We're an early-stage service, and at this time all subscription charges are final — we do not offer refunds. You can cancel anytime to stop future billing; cancellation takes effect at the end of your current billing period, and you'll keep access until then. If something went wrong on our end (a billing error, a duplicate charge), <a href="/contact" className="underline">contact us</a> and we'll sort it out.</p>
           </div>
           <div>
             <h2 className="font-semibold text-slate-900 text-base">6. Acceptable use</h2>
