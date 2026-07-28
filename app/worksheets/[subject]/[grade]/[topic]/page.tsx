@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import Navbar from "@/components/Navbar";
 import { SUBJECTS, SubjectId, allGrades, topicsForGrade, topicLabel, generateWorksheet } from "@/lib/subjects";
 
@@ -36,7 +38,7 @@ export function generateMetadata({ params }: { params: { subject: string; grade:
   };
 }
 
-export default function TopicPage({ params }: { params: { subject: string; grade: string; topic: string } }) {
+export default async function TopicPage({ params }: { params: { subject: string; grade: string; topic: string } }) {
   const subject = SUBJECTS.find((s) => s.id === params.subject);
   const grade = parseInt(params.grade, 10);
   if (!subject || isNaN(grade)) notFound();
@@ -48,22 +50,27 @@ export default function TopicPage({ params }: { params: { subject: string; grade
   const seed = stableSeed(`${subject.id}-${grade}-${topic.id}`);
   const sample = generateWorksheet({ subject: subject.id as SubjectId, grade, topic: topic.id, difficulty: "medium", count: 6, seed });
 
+  // If already signed in, send them to their dashboard instead of the signup form
+  const session = await getServerSession(authOptions);
+  const ctaHref = session?.user ? "/dashboard" : "/signup";
+  const ctaLabel = session?.user ? "Go to your dashboard" : "Generate unlimited worksheets";
+
   return (
     <main>
       <Navbar />
       <section className="max-w-3xl mx-auto px-6 py-12">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           <Link href="/worksheets" className="hover:underline">Worksheets</Link> /{" "}
           <Link href={`/worksheets/${subject.id}`} className="hover:underline">{subject.label}</Link> /{" "}
           <Link href={`/worksheets/${subject.id}/${grade}`} className="hover:underline">Grade {grade}</Link> / {topic.label}
         </p>
-        <h1 className="text-3xl font-bold mt-2">Grade {grade} {topic.label} Worksheet</h1>
-        <p className="text-slate-600 mt-2">
+        <h1 className="text-3xl font-bold mt-2 text-slate-900 dark:text-white">Grade {grade} {topic.label} Worksheet</h1>
+        <p className="text-slate-600 dark:text-slate-300 mt-2">
           A free sample below. Every answer is verified, not AI-guessed — sign up to generate unlimited
           fresh worksheets on this topic, with printable A4 and PDF export.
         </p>
 
-        <div className="mt-8 bg-white rounded-lg shadow-lg p-8 border border-slate-200">
+        <div className="mt-8 bg-white text-slate-900 rounded-lg shadow-lg p-8 border border-slate-200">
           <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4">
             <h2 className="text-xl font-bold">{topic.label}</h2>
             <div className="text-right text-xs text-slate-500 uppercase tracking-wide">
@@ -80,11 +87,11 @@ export default function TopicPage({ params }: { params: { subject: string; grade
           </ul>
         </div>
 
-        <div className="mt-8 text-center bg-slate-50 rounded-xl p-8">
-          <p className="text-lg font-semibold">Want a fresh set every time, plus the answer key?</p>
-          <p className="text-slate-500 text-sm mt-1">Free {process.env.NEXT_PUBLIC_TRIAL_DAYS || "7"}-day trial, no card required.</p>
-          <Link href="/signup" className="inline-block mt-4 bg-slate-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-slate-700">
-            Generate unlimited worksheets
+        <div className="mt-8 text-center bg-slate-50 dark:bg-slate-900 rounded-xl p-8">
+          <p className="text-lg font-semibold text-slate-900 dark:text-white">Want a fresh set every time, plus the answer key?</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Free {process.env.NEXT_PUBLIC_TRIAL_DAYS || "7"}-day trial, no card required.</p>
+          <Link href={ctaHref} className="inline-block mt-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg font-medium hover:bg-slate-700 dark:hover:bg-slate-200">
+            {ctaLabel}
           </Link>
         </div>
       </section>
