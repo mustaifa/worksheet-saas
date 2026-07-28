@@ -31,4 +31,72 @@ model User {
   // Tutor chat usage (resets daily, caps API cost exposure per user)
   chatMessagesUsedToday  Int       @default(0)
   chatUsageResetAt       DateTime  @default(now())
+
+  children               ChildProfile[]
+}
+
+model ChildProfile {
+  id           String   @id @default(cuid())
+  parentId     String
+  name         String
+  avatar       String   @default("🧒")
+  pin          String?  // optional 4-digit PIN, just to prevent siblings mixing up profiles on a shared device — not real auth
+  gradeDefault Int      @default(3)
+  createdAt    DateTime @default(now())
+
+  parent       User               @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  rewardItems  RewardItem[]
+  attempts     ChallengeAttempt[]
+  claims       RewardClaim[]
+
+  @@index([parentId])
+}
+
+model RewardItem {
+  id         String   @id @default(cuid())
+  childId    String
+  difficulty String   // easy | medium | hard
+  label      String   // e.g. "$5", "Roblox gift card", "Choose dinner tonight"
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  child      ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
+}
+
+model ChallengeAttempt {
+  id          String    @id @default(cuid())
+  childId     String
+  subject     String
+  grade       Int
+  topic       String
+  difficulty  String
+  seed        Int
+  count       Int
+  status      String    @default("in_progress") // in_progress | completed
+  score       Int?
+  passed      Boolean?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  child       ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+  claim       RewardClaim?
+
+  @@index([childId])
+}
+
+model RewardClaim {
+  id          String    @id @default(cuid())
+  childId     String
+  attemptId   String    @unique
+  prizeLabel  String
+  status      String    @default("pending") // pending | fulfilled
+  createdAt   DateTime  @default(now())
+  fulfilledAt DateTime?
+
+  child       ChildProfile     @relation(fields: [childId], references: [id], onDelete: Cascade)
+  attempt     ChallengeAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@index([childId])
 }

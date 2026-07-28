@@ -18,6 +18,7 @@ export default function Navbar() {
         {status === "authenticated" ? (
           <>
             <Link href="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Dashboard</Link>
+            <Link href="/dashboard/family" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Family</Link>
             <Link href="/dashboard/tutor" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Tutor</Link>
             <Link href="/admin" className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white">Admin</Link>
             <button onClick={() => signOut({ callbackUrl: "/" })} className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
