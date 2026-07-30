@@ -18,6 +18,7 @@ export default function HostPanel({ code }: { code: string }) {
   const [state, setState] = useState<State | null>(null);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -54,16 +55,40 @@ export default function HostPanel({ code }: { code: string }) {
   if (error) return <p className="text-sm text-red-600 text-center">{error}</p>;
   if (!state) return <p className="text-slate-400 text-center">Loading…</p>;
 
-  const joinUrl = typeof window !== "undefined" ? `${window.location.origin}/play` : "/play";
+  const joinUrl = typeof window !== "undefined" ? `${window.location.origin}/play?code=${code}` : `/play?code=${code}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(joinUrl)}`;
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(joinUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      window.prompt("Copy this link:", joinUrl);
+    }
+  }
 
   if (state.status === "lobby") {
     return (
       <div className="max-w-lg mx-auto text-center">
         <p className="text-sm text-slate-500 dark:text-slate-400">Grade {state.grade} · {state.topicLabel}</p>
-        <p className="text-xs text-slate-400 mt-1">Players go to <strong>{joinUrl}</strong> and enter this code:</p>
         <div className="my-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl py-8 text-6xl font-mono font-bold tracking-widest">
           {code}
         </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-6">
+          <img src={qrUrl} alt="QR code to join the quiz" className="rounded-lg border border-slate-200 dark:border-slate-700" width={140} height={140} />
+          <div className="text-left">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Scan the code, or share this link:</p>
+            <div className="flex items-center gap-2">
+              <input readOnly value={joinUrl} onFocus={(e) => e.target.select()} className="text-xs border border-slate-300 rounded-lg px-2 py-1.5 w-56" />
+              <button onClick={copyLink} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs px-3 py-1.5 rounded-lg font-medium whitespace-nowrap">
+                {copied ? "Copied ✓" : "Copy Link"}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">{state.participants.length} joined</p>
         <div className="flex flex-wrap justify-center gap-2 mb-8">
           {state.participants.map((p) => (

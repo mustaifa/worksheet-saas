@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { SUBJECTS, SubjectId, Difficulty, topicsForGrade, allGrades } from "@/lib/subjects";
+import { FREE_TEXT_TOPICS } from "@/lib/challenge";
 
 export default function CreateLiveQuiz() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function CreateLiveQuiz() {
   const [error, setError] = useState("");
 
   const availableTopics = useMemo(
-    () => topicsForGrade(subject, grade).filter((t) => t.id !== "reading_comprehension"),
+    () => topicsForGrade(subject, grade).filter((t) => !FREE_TEXT_TOPICS.has(t.id)),
     [subject, grade]
   );
   const currentTopic = topic && availableTopics.find((t) => t.id === topic) ? topic : availableTopics[0]?.id || "";

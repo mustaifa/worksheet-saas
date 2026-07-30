@@ -2,6 +2,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { SUBJECTS, SubjectId, Difficulty, topicsForGrade, topicLabel, allGrades } from "@/lib/subjects";
+import { FREE_TEXT_TOPICS } from "@/lib/challenge";
 
 type Stage = "setup" | "playing" | "result";
 type Question = { q: string; passage?: string; passageTitle?: string };
@@ -20,12 +21,11 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
 
-  // Reading comprehension is excluded here — free-text answers can't be graded
-  // fairly with exact-match comparison, and rewards are tied to score, so an
-  // unfair "wrong" would be a real problem. It's still available in the
-  // printable worksheet generator, just not the auto-graded challenge.
+  // Excludes topics with full-sentence/open-ended answers — see FREE_TEXT_TOPICS
+  // in lib/challenge.ts for why. Rewards are tied to score, so unfair grading
+  // is a real problem here, not just an inconvenience.
   const availableTopics = useMemo(
-    () => topicsForGrade(subject, grade).filter((t) => t.id !== "reading_comprehension"),
+    () => topicsForGrade(subject, grade).filter((t) => !FREE_TEXT_TOPICS.has(t.id)),
     [subject, grade]
   );
   const currentTopic = topic && availableTopics.find((t) => t.id === topic) ? topic : availableTopics[0]?.id || "";

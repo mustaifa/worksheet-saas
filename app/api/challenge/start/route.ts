@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getOwnedChild } from "@/lib/family";
 import { generateWorksheet, SubjectId, Difficulty } from "@/lib/subjects";
+import { FREE_TEXT_TOPICS } from "@/lib/challenge";
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
@@ -15,6 +16,9 @@ export async function POST(req: Request) {
 
   if (!["easy", "medium", "hard"].includes(difficulty)) {
     return NextResponse.json({ error: "Invalid difficulty." }, { status: 400 });
+  }
+  if (FREE_TEXT_TOPICS.has(topic)) {
+    return NextResponse.json({ error: "This topic isn't available for auto-graded challenges — answers are too open-ended to grade fairly." }, { status: 400 });
   }
 
   const seed = Math.floor(Math.random() * 2147483647);
