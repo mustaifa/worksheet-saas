@@ -19,8 +19,8 @@ export default function PlayerView({ code }: { code: string }) {
   const [error, setError] = useState("");
   const [answer, setAnswer] = useState("");
   const [answered, setAnswered] = useState(false);
-  const [lastAnsweredIndex, setLastAnsweredIndex] = useState(-1);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const seenIndexRef = useRef(-1); // which question index we've already reset the input for
 
   useEffect(() => {
     const stored = sessionStorage.getItem(`live-participant-${code}`);
@@ -44,7 +44,10 @@ export default function PlayerView({ code }: { code: string }) {
       try { data = await res.json(); } catch {}
       if (!res.ok) { setError(data.error || "Session not found."); return; }
       setState(data);
-      if (data.currentIndex !== lastAnsweredIndexRef.current) {
+      // only reset the input when a genuinely NEW question appears — not on
+      // every 2-second poll while the player is still typing an answer
+      if (data.currentIndex !== seenIndexRef.current) {
+        seenIndexRef.current = data.currentIndex;
         setAnswered(false);
         setAnswer("");
       }
@@ -54,14 +57,9 @@ export default function PlayerView({ code }: { code: string }) {
     }
   }
 
-  // avoid stale-closure issues in the interval callback
-  const lastAnsweredIndexRef = useRef(-1);
-  useEffect(() => { lastAnsweredIndexRef.current = lastAnsweredIndex; }, [lastAnsweredIndex]);
-
   async function submitAnswer() {
     if (!participantId || !state || answered) return;
     setAnswered(true);
-    setLastAnsweredIndex(state.currentIndex);
     await fetch(`/api/live/${code}/answer`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -106,7 +104,7 @@ export default function PlayerView({ code }: { code: string }) {
               value={answer} onChange={(e) => setAnswer(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") submitAnswer(); }}
               placeholder="Your answer" autoFocus
-              className="flex-1 border border-slate-300 rounded-lg px-3 py-2.5"
+              className="flex-1 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2.5"
             />
             <button onClick={submitAnswer} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-5 rounded-lg font-medium">
               Submit
