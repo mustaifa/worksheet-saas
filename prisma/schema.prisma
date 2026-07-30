@@ -33,6 +33,7 @@ model User {
   chatUsageResetAt       DateTime  @default(now())
 
   children               ChildProfile[]
+  liveSessions           LiveSession[]
 }
 
 model ChildProfile {
@@ -99,4 +100,54 @@ model RewardClaim {
   attempt     ChallengeAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 
   @@index([childId])
+}
+
+model LiveSession {
+  id            String    @id @default(cuid())
+  hostUserId    String
+  code          String    @unique
+  subject       String
+  grade         Int
+  topic         String
+  difficulty    String
+  seed          Int
+  questionCount Int
+  status        String    @default("lobby") // lobby | active | finished
+  currentIndex  Int       @default(0)
+  showAnswer    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  startedAt     DateTime?
+  endedAt       DateTime?
+
+  host          User              @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+  participants  LiveParticipant[]
+
+  @@index([hostUserId])
+}
+
+model LiveParticipant {
+  id         String   @id @default(cuid())
+  sessionId  String
+  nickname   String
+  score      Int      @default(0)
+  joinedAt   DateTime @default(now())
+
+  session    LiveSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  answers    LiveAnswer[]
+
+  @@index([sessionId])
+}
+
+model LiveAnswer {
+  id            String   @id @default(cuid())
+  participantId String
+  questionIndex Int
+  submitted     String
+  correct       Boolean
+  createdAt     DateTime @default(now())
+
+  participant   LiveParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, questionIndex])
+  @@index([participantId])
 }
