@@ -77,6 +77,12 @@ export default async function TopicPage({ params }: { params: { subject: string;
               Grade {grade} · {subject.label}
             </div>
           </div>
+          {sample[0]?.passage && (
+            <div className="mb-5 bg-slate-50 rounded-lg p-4 border border-slate-200">
+              <p className="font-semibold text-sm mb-2">{sample[0].passageTitle}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-line">{sample[0].passage}</p>
+            </div>
+          )}
           <ul>
             {sample.map((item, i) => (
               <li key={i} className="flex gap-3 py-3 border-b border-dotted border-slate-200 last:border-0">

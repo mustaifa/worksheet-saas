@@ -237,19 +237,23 @@ export default function WorksheetGenerator() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Questions</p>
-          <div className="flex gap-2">
-            {[5, 10, 15, 20].map((n) => (
-              <button
-                key={n}
-                onClick={() => setCount(n)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
-                  count === n ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
+          {topic === "reading_comprehension" ? (
+            <p className="text-xs text-slate-400 dark:text-slate-500">One passage with its full question set — count doesn't apply here.</p>
+          ) : (
+            <div className="flex gap-2">
+              {[5, 10, 15, 20].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setCount(n)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border ${
+                    count === n ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <button
@@ -331,6 +335,12 @@ export default function WorksheetGenerator() {
                 <span className="border-b border-slate-400 pb-0.5">Name: ______________</span>
                 <span className="border-b border-slate-400 pb-0.5">Date: {today}</span>
               </div>
+              {questions[0]?.passage && (
+                <div className="mb-5 bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <p className="font-semibold text-sm mb-2">{questions[0].passageTitle}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-line">{questions[0].passage}</p>
+                </div>
+              )}
               <ul>
                 {questions.map((item, i) => (
                   <li key={i} className="flex gap-3 py-3 border-b border-dotted border-slate-200 last:border-0">

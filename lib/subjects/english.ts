@@ -15,6 +15,7 @@ export const ENGLISH_TOPICS: Topic[] = [
   { id: "sentence_types", label: "Sentence Structure", grades: [7, 8, 9, 10], aliases: ["sentence structure", "simple sentence", "compound sentence", "complex sentence"] },
   { id: "literary_devices", label: "Literary Devices", grades: [8, 9, 10, 11, 12], aliases: ["literary device", "metaphor", "simile", "personification", "alliteration"] },
   { id: "grammar_advanced", label: "Advanced Grammar", grades: [9, 10, 11, 12], aliases: ["subject verb agreement", "clause", "grammar rule"] },
+  { id: "reading_comprehension", label: "Reading Comprehension", grades: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], aliases: ["reading comprehension", "reading passage", "comprehension"] },
 ];
 
 function pickAndFormat<T>(rng: () => number, arr: T[]): T {

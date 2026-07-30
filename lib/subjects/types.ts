@@ -1,5 +1,5 @@
 export type Difficulty = "easy" | "medium" | "hard";
-export type Question = { q: string; a: string };
+export type Question = { q: string; a: string; passage?: string; passageTitle?: string };
 export type RNG = () => number;
 
 export type Topic = {

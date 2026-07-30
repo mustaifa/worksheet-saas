@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     },
   });
 
-  // strip answers before sending to the client
-  const questionsOnly = questions.map((q) => ({ q: q.q }));
+  // strip answers before sending to the client — passage text is safe to include, it's not the answer
+  const questionsOnly = questions.map((q) => ({ q: q.q, passage: q.passage, passageTitle: q.passageTitle }));
 
   return NextResponse.json({ attemptId: attempt.id, questions: questionsOnly });
 }

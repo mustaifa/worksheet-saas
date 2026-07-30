@@ -4,7 +4,7 @@ import Link from "next/link";
 import { SUBJECTS, SubjectId, Difficulty, topicsForGrade, topicLabel, allGrades } from "@/lib/subjects";
 
 type Stage = "setup" | "playing" | "result";
-type Question = { q: string };
+type Question = { q: string; passage?: string; passageTitle?: string };
 type Result = { score: number; total: number; passed: boolean; prize: string | null; results: { q: string; correctAnswer: string; submitted: string; correct: boolean }[] };
 
 export default function ChallengeRunner({ childId, childName, childAvatar, defaultGrade }: { childId: string; childName: string; childAvatar: string; defaultGrade: number }) {
@@ -20,7 +20,14 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
 
-  const availableTopics = useMemo(() => topicsForGrade(subject, grade), [subject, grade]);
+  // Reading comprehension is excluded here — free-text answers can't be graded
+  // fairly with exact-match comparison, and rewards are tied to score, so an
+  // unfair "wrong" would be a real problem. It's still available in the
+  // printable worksheet generator, just not the auto-graded challenge.
+  const availableTopics = useMemo(
+    () => topicsForGrade(subject, grade).filter((t) => t.id !== "reading_comprehension"),
+    [subject, grade]
+  );
   const currentTopic = topic && availableTopics.find((t) => t.id === topic) ? topic : availableTopics[0]?.id || "";
 
   async function startChallenge() {
@@ -149,6 +156,12 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
           <p className="text-xs text-slate-400">{answers.filter((a) => a.trim()).length}/{questions.length} answered</p>
         </div>
         <div className="space-y-3 border border-slate-200 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-slate-900">
+          {questions[0]?.passage && (
+            <div className="mb-4 bg-slate-50 dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+              <p className="font-semibold text-sm mb-2 text-slate-900 dark:text-white">{questions[0].passageTitle}</p>
+              <p className="text-sm leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">{questions[0].passage}</p>
+            </div>
+          )}
           {questions.map((q, i) => (
             <div key={i} className="flex items-center gap-3">
               <span className="text-slate-400 font-mono text-sm w-6">{i + 1}.</span>
@@ -156,7 +169,7 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
               <input
                 value={answers[i]}
                 onChange={(e) => { const next = [...answers]; next[i] = e.target.value; setAnswers(next); }}
-                className="w-28 border border-slate-300 rounded-lg px-2 py-1 text-sm"
+                className={`border border-slate-300 rounded-lg px-2 py-1 text-sm ${q.passage ? "w-40" : "w-28"}`}
                 placeholder="answer"
               />
             </div>

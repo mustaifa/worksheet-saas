@@ -2,6 +2,7 @@ import { Topic, Difficulty, Question, mulberry32, buildQuestionSet } from "./typ
 import { MATH_TOPICS, MATH_GENERATORS } from "./math";
 import { ENGLISH_TOPICS, ENGLISH_GENERATORS } from "./english";
 import { SCIENCE_TOPICS, SCIENCE_GENERATORS } from "./science";
+import { pickPassageForGrade } from "./comprehension";
 
 export type { Difficulty, Question, Topic };
 
@@ -49,9 +50,23 @@ export function generateWorksheet(opts: {
   count: number;
   seed: number;
 }): Question[] {
+  const rng = mulberry32(opts.seed);
+
+  // Reading comprehension doesn't fit the "N independent random questions"
+  // shape everything else uses — it's one shared passage plus its own fixed
+  // set of questions, so it's handled separately here.
+  if (opts.subject === "english" && opts.topic === "reading_comprehension") {
+    const passage = pickPassageForGrade(opts.grade, rng);
+    return passage.questions.map((q) => ({
+      q: q.q,
+      a: q.a,
+      passage: passage.passage,
+      passageTitle: passage.title,
+    }));
+  }
+
   const gen = GENERATORS_BY_SUBJECT[opts.subject]?.[opts.topic];
   if (!gen) return [];
-  const rng = mulberry32(opts.seed);
   return buildQuestionSet(gen, opts.grade, opts.difficulty, opts.count, rng);
 }
 
