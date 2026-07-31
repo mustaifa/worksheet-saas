@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { hasAccess, daysLeftInTrial } from "@/lib/access";
+import { hasAccess, daysLeftInTrial, isFreeMode } from "@/lib/access";
 import Navbar from "@/components/Navbar";
 import WorksheetGenerator from "@/components/WorksheetGenerator";
 import UpgradeButtons from "@/components/UpgradeButtons";
@@ -21,6 +21,7 @@ export default async function Dashboard() {
   }
 
   const allowed = hasAccess(user);
+  const freeMode = isFreeMode();
   const trialing = user.subscriptionStatus === "trialing";
   const daysLeft = daysLeftInTrial(user);
 
@@ -28,14 +29,14 @@ export default async function Dashboard() {
     <main>
       <Navbar />
       <section className="max-w-6xl mx-auto px-6 py-8">
-        {trialing && allowed && (
+        {!freeMode && trialing && allowed && (
           <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm">
             You have {daysLeft} day{daysLeft === 1 ? "" : "s"} left in your free trial.{" "}
             <a href="/pricing" className="underline font-medium">Subscribe anytime</a> to keep access after it ends.
           </div>
         )}
 
-        {user.subscriptionStatus === "active" && (
+        {!freeMode && user.subscriptionStatus === "active" && (
           <div className="mb-6 flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 text-sm">
             <span>You're subscribed ({user.subscriptionPlan}). Thanks for supporting the project!</span>
             <ManageBillingButton />

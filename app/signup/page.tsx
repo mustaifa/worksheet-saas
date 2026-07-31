@@ -3,12 +3,14 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { isFreeMode } from "@/lib/access";
 
 export default function Signup() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const freeMode = isFreeMode();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,9 +45,9 @@ export default function Signup() {
     <main>
       <Navbar />
       <section className="max-w-sm mx-auto px-6 py-16">
-        <h1 className="text-2xl font-bold">Start your free trial</h1>
+        <h1 className="text-2xl font-bold">{freeMode ? "Create your free account" : "Start your free trial"}</h1>
         <p className="text-slate-600 mt-1 text-sm">
-          {process.env.NEXT_PUBLIC_TRIAL_DAYS || "7"} days free, no card required.
+          {freeMode ? "Free to use — no card, ever, during our launch." : `${process.env.NEXT_PUBLIC_TRIAL_DAYS || "7"} days free, no card required.`}
         </p>
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <input

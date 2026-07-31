@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { isFreeMode } from "@/lib/access";
 
 function PlanCard({
   title, price, period, plan, highlighted,
@@ -42,18 +44,37 @@ function PlanCard({
 }
 
 export default function Pricing() {
+  const freeMode = isFreeMode();
+
   return (
     <main>
       <Navbar />
       <section className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="text-3xl font-bold text-center">Simple pricing</h1>
-        <p className="text-center text-slate-600 mt-2">
-          Start with a free trial — no card required. Subscribe whenever you're ready.
-        </p>
-        <div className="mt-10 flex flex-col sm:flex-row gap-6">
-          <PlanCard title="Monthly" price="$9" period="month" plan="monthly" />
-          <PlanCard title="Yearly" price="$79" period="year" plan="yearly" highlighted />
-        </div>
+        {freeMode ? (
+          <>
+            <h1 className="text-3xl font-bold text-center">Free to use right now 🎉</h1>
+            <p className="text-center text-slate-600 mt-2 max-w-lg mx-auto">
+              We're in an early launch period — every feature is completely free, no card, no catch.
+              Paid plans will return later, but nothing changes for accounts already using it for free.
+            </p>
+            <div className="mt-10 text-center">
+              <Link href="/signup" className="inline-block bg-slate-900 text-white px-8 py-3 rounded-lg font-medium hover:bg-slate-700">
+                Get started free
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="text-3xl font-bold text-center">Simple pricing</h1>
+            <p className="text-center text-slate-600 mt-2">
+              Start with a free trial — no card required. Subscribe whenever you're ready.
+            </p>
+            <div className="mt-10 flex flex-col sm:flex-row gap-6">
+              <PlanCard title="Monthly" price="$9" period="month" plan="monthly" />
+              <PlanCard title="Yearly" price="$79" period="year" plan="yearly" highlighted />
+            </div>
+          </>
+        )}
       </section>
       <Footer />
     </main>

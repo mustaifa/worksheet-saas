@@ -1,8 +1,11 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { isFreeMode } from "@/lib/access";
 
 export default function Home() {
+  const freeMode = isFreeMode();
+
   return (
     <main>
       <Navbar />
@@ -16,13 +19,15 @@ export default function Home() {
         </p>
         <div className="mt-8 flex items-center justify-center gap-4">
           <Link href="/signup" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg font-medium hover:bg-slate-700 dark:hover:bg-slate-200">
-            Start your {process.env.TRIAL_DAYS || "7"}-day free trial
+            {freeMode ? "Sign up — it's free" : `Start your ${process.env.TRIAL_DAYS || "7"}-day free trial`}
           </Link>
           <Link href="/pricing" className="px-6 py-3 rounded-lg font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">
-            See pricing
+            {freeMode ? "Learn more" : "See pricing"}
           </Link>
         </div>
-        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">No card required to start.</p>
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+          {freeMode ? "100% free during our launch — no card, ever." : "No card required to start."}
+        </p>
       </section>
       <Footer />
     </main>
