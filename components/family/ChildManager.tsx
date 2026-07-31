@@ -1,19 +1,33 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type RewardItem = { id: string; difficulty: string; label: string };
 type Attempt = { id: string; subject: string; grade: number; topic: string; difficulty: string; score: number | null; count: number; passed: boolean | null; createdAt: string };
 type Claim = { id: string; prizeLabel: string; status: string; createdAt: string; attempt: { subject: string; topic: string; difficulty: string } };
 
 const DIFFICULTIES = ["easy", "medium", "hard"] as const;
+const AVATARS = ["🧒", "👦", "👧", "🦸", "🦸‍♀️", "🐯", "🦄", "🐼", "🚀", "⭐"];
 
-export default function ChildManager({ childId, childName, childAvatar }: { childId: string; childName: string; childAvatar: string }) {
+export default function ChildManager({
+  childId, childName, childAvatar, childGrade, childHasPin,
+}: { childId: string; childName: string; childAvatar: string; childGrade: number; childHasPin: boolean }) {
+  const router = useRouter();
   const [items, setItems] = useState<RewardItem[]>([]);
   const [claims, setClaims] = useState<Claim[]>([]);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [newLabel, setNewLabel] = useState<Record<string, string>>({ easy: "", medium: "", hard: "" });
   const [loading, setLoading] = useState(true);
+
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(childName);
+  const [avatar, setAvatar] = useState(childAvatar);
+  const [grade, setGrade] = useState(childGrade);
+  const [pin, setPin] = useState(""); // blank = leave unchanged
+  const [clearPin, setClearPin] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState("");
 
   useEffect(() => { loadAll(); }, [childId]);
 
@@ -28,6 +42,36 @@ export default function ChildManager({ childId, childName, childAvatar }: { chil
     if (rewardsRes.ok) setItems(rewardsData.items);
     if (historyRes.ok) { setClaims(historyData.claims); setAttempts(historyData.attempts); }
     setLoading(false);
+  }
+
+  async function saveEdits(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setEditError("");
+    const res = await fetch(`/api/family/children/${childId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        avatar,
+        gradeDefault: grade,
+        pin: clearPin ? "" : pin || undefined, // omit entirely if left blank and not clearing — keeps existing PIN
+      }),
+    });
+    let data: any = {};
+    try { data = await res.json(); } catch {}
+    setSaving(false);
+    if (!res.ok) { setEditError(data.error || "Something went wrong."); return; }
+    setEditing(false);
+    setPin("");
+    setClearPin(false);
+    router.refresh(); // re-fetch server-rendered props (name/avatar/grade shown in the header)
+  }
+
+  async function deleteChild() {
+    if (!confirm(`Delete ${name}'s profile? This removes their reward history and challenge history too — this can't be undone.`)) return;
+    await fetch(`/api/family/children/${childId}`, { method: "DELETE" });
+    router.push("/dashboard/family");
   }
 
   async function addReward(difficulty: string) {
@@ -60,10 +104,15 @@ export default function ChildManager({ childId, childName, childAvatar }: { chil
 
   return (
     <div className="space-y-10">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <span className="text-3xl">{childAvatar}</span>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{childName}</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{childName}</h1>
+            <button onClick={() => setEditing(!editing)} className="text-xs text-slate-500 dark:text-slate-400 underline">
+              {editing ? "Cancel editing" : "Edit profile"}
+            </button>
+          </div>
         </div>
         <Link
           href={`/dashboard/family/${childId}/challenge`}
@@ -72,6 +121,54 @@ export default function ChildManager({ childId, childName, childAvatar }: { chil
           🎯 Start a Challenge
         </Link>
       </div>
+
+      {editing && (
+        <form onSubmit={saveEdits} className="border border-slate-200 dark:border-slate-700 rounded-xl p-5 space-y-3 bg-white dark:bg-slate-900 max-w-sm">
+          <input
+            value={name} onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+          />
+          <div className="flex flex-wrap gap-2">
+            {AVATARS.map((a) => (
+              <button
+                type="button" key={a} onClick={() => setAvatar(a)}
+                className={`text-xl p-1.5 rounded-lg border ${avatar === a ? "border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800" : "border-transparent"}`}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-3 items-center">
+            <label className="text-sm text-slate-600 dark:text-slate-300">Grade</label>
+            <select value={grade} onChange={(e) => setGrade(parseInt(e.target.value, 10))} className="border border-slate-300 rounded-lg px-2 py-1 text-sm">
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </div>
+          <div>
+            <input
+              value={pin} onChange={(e) => { setPin(e.target.value.replace(/\D/g, "")); setClearPin(false); }}
+              maxLength={4} placeholder={childHasPin ? "New 4-digit PIN (leave blank to keep current)" : "Optional 4-digit PIN"}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+            />
+            {childHasPin && (
+              <label className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-1.5">
+                <input type="checkbox" checked={clearPin} onChange={(e) => { setClearPin(e.target.checked); if (e.target.checked) setPin(""); }} />
+                Remove PIN entirely
+              </label>
+            )}
+          </div>
+          {editError && <p className="text-xs text-red-600">{editError}</p>}
+          <div className="flex gap-2 pt-1">
+            <button type="submit" disabled={saving} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50">
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+            <button type="button" onClick={deleteChild} className="text-red-600 text-sm px-3 py-2 hover:underline">
+              Delete profile
+            </button>
+          </div>
+        </form>
+      )}
 
       {pendingClaims.length > 0 && (
         <div className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950 dark:border-amber-800 p-5">

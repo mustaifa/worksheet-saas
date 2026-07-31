@@ -14,7 +14,13 @@ export default async function ChildPage({ params }: { params: { childId: string 
     <main>
       <Navbar />
       <section className="max-w-4xl mx-auto px-6 py-8">
-        <ChildManager childId={child.id} childName={child.name} childAvatar={child.avatar} />
+        <ChildManager
+          childId={child.id}
+          childName={child.name}
+          childAvatar={child.avatar}
+          childGrade={child.gradeDefault}
+          childHasPin={!!child.pin}
+        />
       </section>
     </main>
   );
