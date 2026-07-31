@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   SUBJECTS, SubjectId, Difficulty, Question,
-  topicsForGrade, topicLabel, generateWorksheet, parseCommand, allGrades,
+  topicsForGrade, topicLabel, generateWorksheet, parseCommand, allGrades, groupTopics,
 } from "@/lib/subjects";
 
 function newSeed() {
@@ -200,20 +200,27 @@ export default function WorksheetGenerator() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Topic</p>
-          <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
-            {availableTopics.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTopic(t.id)}
-                className={`text-xs rounded-lg border px-2 py-2 text-left ${
-                  topic === t.id ? "border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 font-medium dark:text-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                {t.label}
-              </button>
+          <div className="max-h-72 overflow-y-auto pr-1 space-y-3">
+            {groupTopics(availableTopics).map(({ group, topics }) => (
+              <div key={group ?? "_"}>
+                {group && <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 mb-1">{group}</p>}
+                <div className="grid grid-cols-2 gap-2">
+                  {topics.map((t) => (
+                    <button
+                      key={t.id}
+                      onClick={() => setTopic(t.id)}
+                      className={`text-xs rounded-lg border px-2 py-2 text-left ${
+                        topic === t.id ? "border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 font-medium dark:text-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
             {availableTopics.length === 0 && (
-              <p className="text-xs text-slate-400 dark:text-slate-500 col-span-2">No topics yet for this grade — try another.</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">No topics yet for this grade — try another.</p>
             )}
           </div>
         </div>

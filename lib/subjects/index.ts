@@ -42,6 +42,22 @@ export function allTopics(subject: SubjectId): Topic[] {
   return TOPICS_BY_SUBJECT[subject];
 }
 
+/**
+ * Clusters topics by their optional `group` field, preserving first-seen
+ * order, for UI pickers to render as labeled sections instead of one flat
+ * list. Ungrouped topics come back under a null group and render plainly.
+ */
+export function groupTopics(topics: Topic[]): { group: string | null; topics: Topic[] }[] {
+  const order: (string | null)[] = [];
+  const buckets = new Map<string | null, Topic[]>();
+  for (const t of topics) {
+    const key = t.group ?? null;
+    if (!buckets.has(key)) { buckets.set(key, []); order.push(key); }
+    buckets.get(key)!.push(t);
+  }
+  return order.map((key) => ({ group: key, topics: buckets.get(key)! }));
+}
+
 export function generateWorksheet(opts: {
   subject: SubjectId;
   grade: number;

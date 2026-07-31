@@ -8,7 +8,9 @@ export const ENGLISH_TOPICS: Topic[] = [
   { id: "punctuation", label: "Punctuation", grades: [2, 3, 4, 5], aliases: ["punctuation", "comma", "period", "question mark"] },
   { id: "grammar_tenses", label: "Verb Tenses", grades: [3, 4, 5, 6], aliases: ["verb tense", "past tense", "future tense", "present tense"] },
   { id: "synonyms_antonyms", label: "Synonyms & Antonyms", grades: [3, 4, 5, 6, 7, 8], aliases: ["synonym", "antonym", "opposite", "same meaning"] },
-  { id: "parts_of_speech", label: "Parts of Speech", grades: [4, 5, 6, 7], aliases: ["part of speech", "adjective", "adverb", "preposition"] },
+  { id: "parts_of_speech", label: "Parts of Speech (Mixed)", grades: [4, 5, 6, 7], aliases: ["part of speech"], group: "Parts of Speech" },
+  { id: "pos_adjectives_adverbs", label: "Adjectives & Adverbs", grades: [4, 5, 6, 7], aliases: ["adjective", "adverb"], group: "Parts of Speech" },
+  { id: "pos_prepositions", label: "Prepositions", grades: [4, 5, 6, 7], aliases: ["preposition"], group: "Parts of Speech" },
   { id: "idioms", label: "Idioms & Expressions", grades: [5, 6, 7, 8, 9], aliases: ["idiom", "expression means"] },
   { id: "analogies", label: "Analogies", grades: [6, 7, 8, 9, 10], aliases: ["analogy", "is to as"] },
   { id: "vocabulary", label: "Vocabulary Building", grades: [6, 7, 8, 9, 10, 11, 12], aliases: ["vocabulary", "define", "word meaning"] },
@@ -70,6 +72,19 @@ const PARTS_OF_SPEECH: [string, string, string][] = [
   ["She walked into the room.", "into", "preposition"], ["He is very tall.", "very", "adverb"],
   ["The tiny kitten slept.", "tiny", "adjective"], ["They arrived before noon.", "before", "preposition"],
   ["The loud thunder scared us.", "loud", "adjective"], ["She sings beautifully.", "beautifully", "adverb"],
+];
+const ADJECTIVES_ADVERBS: [string, string, string][] = [
+  ["The bright sun rose quickly.", "bright", "adjective"], ["The bright sun rose quickly.", "quickly", "adverb"],
+  ["He is very tall.", "very", "adverb"], ["The tiny kitten slept.", "tiny", "adjective"],
+  ["The loud thunder scared us.", "loud", "adjective"], ["She sings beautifully.", "beautifully", "adverb"],
+  ["The enormous elephant walked slowly.", "enormous", "adjective"], ["The enormous elephant walked slowly.", "slowly", "adverb"],
+  ["He answered the question correctly.", "correctly", "adverb"], ["It was a colorful painting.", "colorful", "adjective"],
+];
+const PREPOSITIONS: [string, string, string][] = [
+  ["She walked into the room.", "into", "preposition"], ["They arrived before noon.", "before", "preposition"],
+  ["The cat is hiding under the bed.", "under", "preposition"], ["We walked across the bridge.", "across", "preposition"],
+  ["He put the book on the table.", "on", "preposition"], ["She stood between her two friends.", "between", "preposition"],
+  ["The ball rolled down the hill.", "down", "preposition"], ["They live near the school.", "near", "preposition"],
 ];
 const IDIOMS: [string, string][] = [
   ["break the ice", "to start a conversation or ease tension"], ["piece of cake", "something very easy"],
@@ -158,6 +173,16 @@ const genPartsOfSpeech: Gen = (grade, diff, rng) => {
   const [sentence, word, part] = pick(PARTS_OF_SPEECH);
   return { q: `In "${sentence}", what part of speech is "${word}"?`, a: part };
 };
+const genAdjectivesAdverbs: Gen = (grade, diff, rng) => {
+  const { pick } = makeHelpers(rng);
+  const [sentence, word, part] = pick(ADJECTIVES_ADVERBS);
+  return { q: `In "${sentence}", is "${word}" an adjective or an adverb?`, a: part };
+};
+const genPrepositions: Gen = (grade, diff, rng) => {
+  const { pick } = makeHelpers(rng);
+  const [sentence, word] = pick(PREPOSITIONS);
+  return { q: `Find the preposition in: "${sentence}"`, a: word };
+};
 const genIdioms: Gen = (grade, diff, rng) => {
   const { pick } = makeHelpers(rng);
   const [idiom, meaning] = pick(IDIOMS);
@@ -192,7 +217,8 @@ const genGrammarAdvanced: Gen = (grade, diff, rng) => {
 export const ENGLISH_GENERATORS: Record<string, Gen> = {
   phonics: genPhonics, sight_words: genSightWords, nouns_verbs: genNounsVerbs,
   spelling: genSpelling, punctuation: genPunctuation, grammar_tenses: genGrammarTenses,
-  synonyms_antonyms: genSynonymsAntonyms, parts_of_speech: genPartsOfSpeech, idioms: genIdioms,
+  synonyms_antonyms: genSynonymsAntonyms, parts_of_speech: genPartsOfSpeech,
+  pos_adjectives_adverbs: genAdjectivesAdverbs, pos_prepositions: genPrepositions, idioms: genIdioms,
   analogies: genAnalogies, vocabulary: genVocabulary, sentence_types: genSentenceTypes,
   literary_devices: genLiteraryDevices, grammar_advanced: genGrammarAdvanced,
 };

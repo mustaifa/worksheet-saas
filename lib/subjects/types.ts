@@ -7,6 +7,7 @@ export type Topic = {
   label: string;
   grades: number[];
   aliases: string[]; // keywords the command-box parser matches against
+  group?: string; // optional cluster label — topics sharing a group render together under one heading
 };
 
 export type Gen = (grade: number, diff: Difficulty, rng: RNG) => Question;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { SUBJECTS, SubjectId, allGrades, topicsForGrade } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, allGrades, topicsForGrade, groupTopics } from "@/lib/subjects";
 
 export function generateStaticParams() {
   const params: { subject: string; grade: string }[] = [];
@@ -40,15 +40,23 @@ export default function GradePage({ params }: { params: { subject: string; grade
         </p>
         <h1 className="text-3xl font-bold mt-2">Grade {grade} {subject.label} Worksheets</h1>
         <p className="text-slate-600 mt-2">Pick a topic to see a free sample worksheet.</p>
-        <div className="grid sm:grid-cols-2 gap-3 mt-8">
-          {topics.map((t) => (
-            <Link
-              key={t.id}
-              href={`/worksheets/${subject.id}/${grade}/${t.id}`}
-              className="rounded-xl border border-slate-200 p-5 hover:border-slate-900 hover:shadow-md transition-all"
-            >
-              <p className="font-semibold">{t.label}</p>
-            </Link>
+
+        <div className="mt-8 space-y-8">
+          {groupTopics(topics).map(({ group, topics: groupedTopics }) => (
+            <div key={group ?? "_"}>
+              {group && <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">{group}</h2>}
+              <div className="grid sm:grid-cols-2 gap-3">
+                {groupedTopics.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/worksheets/${subject.id}/${grade}/${t.id}`}
+                    className="rounded-xl border border-slate-200 p-5 hover:border-slate-900 hover:shadow-md transition-all"
+                  >
+                    <p className="font-semibold">{t.label}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </section>

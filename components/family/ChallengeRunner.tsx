@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { SUBJECTS, SubjectId, Difficulty, topicsForGrade, topicLabel, allGrades } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, Difficulty, topicsForGrade, topicLabel, allGrades, groupTopics } from "@/lib/subjects";
 import { FREE_TEXT_TOPICS } from "@/lib/challenge";
 
 type Stage = "setup" | "playing" | "result";
@@ -110,14 +110,21 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
 
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Topic</p>
-            <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
-              {availableTopics.map((t) => (
-                <button
-                  key={t.id} onClick={() => setTopic(t.id)}
-                  className={`text-xs rounded-lg border px-2 py-2 text-left ${currentTopic === t.id ? "border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 font-medium text-slate-900 dark:text-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
-                >
-                  {t.label}
-                </button>
+            <div className="max-h-48 overflow-y-auto pr-1 space-y-3">
+              {groupTopics(availableTopics).map(({ group, topics }) => (
+                <div key={group ?? "_"}>
+                  {group && <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 mb-1">{group}</p>}
+                  <div className="grid grid-cols-2 gap-2">
+                    {topics.map((t) => (
+                      <button
+                        key={t.id} onClick={() => setTopic(t.id)}
+                        className={`text-xs rounded-lg border px-2 py-2 text-left ${currentTopic === t.id ? "border-slate-900 dark:border-white bg-slate-100 dark:bg-slate-800 font-medium text-slate-900 dark:text-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>

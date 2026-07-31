@@ -10,14 +10,32 @@ export const MATH_TOPICS: Topic[] = [
   { id: "fractions_intro", label: "Intro to Fractions", grades: [3, 4], aliases: ["intro fraction", "simple fraction", "basic fraction"] },
   { id: "decimals_intro", label: "Intro to Decimals", grades: [4, 5], aliases: ["intro decimal", "simple decimal", "basic decimal"] },
   { id: "wordproblems", label: "Word Problems", grades: [1, 2, 3, 4], aliases: ["word problem"] },
-  { id: "fractions", label: "Fractions", grades: [5, 6], aliases: ["fraction"] },
-  { id: "decimals", label: "Decimals", grades: [5, 6], aliases: ["decimal"] },
-  { id: "geometry", label: "Geometry", grades: [4, 5, 6, 7, 8], aliases: ["geometry", "area", "perimeter", "volume"] },
+  { id: "fractions", label: "Fractions (Mixed Practice)", grades: [5, 6], aliases: ["fraction"], group: "Fractions" },
+  { id: "fractions_add_sub", label: "Adding & Subtracting Fractions", grades: [5, 6], aliases: ["add fraction", "subtract fraction", "adding fractions", "subtracting fractions"], group: "Fractions" },
+  { id: "fractions_mul_div", label: "Multiplying & Dividing Fractions", grades: [5, 6], aliases: ["multiply fraction", "divide fraction", "multiplying fractions", "dividing fractions"], group: "Fractions" },
+  { id: "fractions_simplify", label: "Simplifying Fractions", grades: [5, 6], aliases: ["simplify fraction", "reduce fraction", "lowest terms"], group: "Fractions" },
+  { id: "fractions_compare", label: "Comparing Fractions", grades: [5, 6], aliases: ["compare fraction", "comparing fractions", "greater fraction"], group: "Fractions" },
+
+  { id: "decimals", label: "Decimals (Mixed Practice)", grades: [5, 6], aliases: ["decimal"], group: "Decimals" },
+  { id: "decimals_add_sub", label: "Adding & Subtracting Decimals", grades: [5, 6], aliases: ["add decimal", "subtract decimal", "adding decimals", "subtracting decimals"], group: "Decimals" },
+  { id: "decimals_mul_div", label: "Multiplying & Dividing Decimals", grades: [5, 6], aliases: ["multiply decimal", "divide decimal", "multiplying decimals", "dividing decimals"], group: "Decimals" },
+  { id: "decimals_round", label: "Rounding Decimals", grades: [5, 6], aliases: ["round decimal", "rounding decimals"], group: "Decimals" },
+  { id: "decimals_compare", label: "Comparing Decimals", grades: [5, 6], aliases: ["compare decimal", "comparing decimals"], group: "Decimals" },
+
+  { id: "geometry", label: "Geometry (Mixed Practice)", grades: [4, 5, 6, 7, 8], aliases: ["geometry", "area", "perimeter", "volume"], group: "Geometry" },
+  { id: "geometry_area_rect", label: "Area: Rectangles & Parallelograms", grades: [4, 5, 6, 7, 8], aliases: ["area of rectangle", "area of parallelogram"], group: "Geometry" },
+  { id: "geometry_area_triangle", label: "Area: Triangles", grades: [4, 5, 6, 7, 8], aliases: ["area of triangle", "triangle area"], group: "Geometry" },
+  { id: "geometry_volume", label: "Volume: Rectangular Prisms", grades: [5, 6, 7, 8], aliases: ["volume", "rectangular prism"], group: "Geometry" },
+
   { id: "stats", label: "Statistics", grades: [5, 6, 7, 8, 11], aliases: ["statistic", "mean", "median", "mode", "range"] },
   { id: "order", label: "Order of Operations", grades: [5, 6, 7], aliases: ["order of operations", "pemdas", "bodmas"] },
   { id: "ratios", label: "Ratios & Rates", grades: [6, 7], aliases: ["ratio", "unit rate"] },
   { id: "percent", label: "Percentages", grades: [6, 7, 8], aliases: ["percent", "percentage"] },
-  { id: "integers", label: "Integers", grades: [6, 7, 8], aliases: ["integer", "negative number"] },
+
+  { id: "integers", label: "Integers (Mixed Practice)", grades: [6, 7, 8], aliases: ["integer", "negative number"], group: "Integers" },
+  { id: "integers_add_sub", label: "Adding & Subtracting Integers", grades: [6, 7, 8], aliases: ["add integer", "subtract integer", "adding integers", "subtracting integers"], group: "Integers" },
+  { id: "integers_mul_div", label: "Multiplying & Dividing Integers", grades: [6, 7, 8], aliases: ["multiply integer", "divide integer", "multiplying integers", "dividing integers"], group: "Integers" },
+
   { id: "expressions", label: "Expressions & Equations", grades: [6, 7], aliases: ["expression", "one-step equation"] },
   { id: "proportions", label: "Proportions", grades: [7, 8], aliases: ["proportion"] },
   { id: "linear", label: "Linear Equations", grades: [8, 9], aliases: ["linear equation", "two-step equation"] },
@@ -28,9 +46,9 @@ export const MATH_TOPICS: Topic[] = [
   { id: "systems", label: "Systems of Equations", grades: [9], aliases: ["system of equations", "simultaneous equations"] },
   { id: "quadratics", label: "Quadratic Equations", grades: [9, 10], aliases: ["quadratic", "factoring", "parabola"] },
   { id: "radicals", label: "Radicals & Roots", grades: [9, 10], aliases: ["radical", "square root", "simplify root"] },
-  { id: "pythagorean", label: "Pythagorean Theorem", grades: [8, 9, 10], aliases: ["pythagorean", "right triangle", "hypotenuse"] },
-  { id: "circle_geo", label: "Circles: Area & Circumference", grades: [7, 8, 9, 10], aliases: ["circle", "circumference", "radius", "diameter"] },
-  { id: "coordinate_geo", label: "Coordinate Geometry", grades: [9, 10], aliases: ["coordinate plane", "distance formula", "midpoint", "slope"] },
+  { id: "pythagorean", label: "Pythagorean Theorem", grades: [8, 9, 10], aliases: ["pythagorean", "right triangle", "hypotenuse"], group: "Geometry" },
+  { id: "circle_geo", label: "Circles: Area & Circumference", grades: [7, 8, 9, 10], aliases: ["circle", "circumference", "radius", "diameter"], group: "Geometry" },
+  { id: "coordinate_geo", label: "Coordinate Geometry", grades: [9, 10], aliases: ["coordinate plane", "distance formula", "midpoint", "slope"], group: "Geometry" },
   { id: "quadratic_formula", label: "Quadratic Formula & Vertex", grades: [10, 11], aliases: ["quadratic formula", "vertex form", "discriminant"] },
   { id: "exponential", label: "Exponential Growth & Decay", grades: [10, 11], aliases: ["exponential growth", "exponential decay", "compound"] },
   { id: "logarithms", label: "Logarithms", grades: [11], aliases: ["logarithm", "log base"] },
@@ -216,6 +234,123 @@ const genGeometry: Gen = (grade, diff, rng) => {
   const l = randInt(2, 10), w = randInt(2, 10), h = randInt(2, 10);
   return { q: `Find the volume of a rectangular prism with length ${l} cm, width ${w} cm, and height ${h} cm.`, a: `${l * w * h} cm³` };
 };
+
+// ---------- focused sub-topic generators (Phase 1 of topic splitting) ----------
+const genFractionsAddSub: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const dens = dr(diff, { easy: [2, 3, 4, 5, 6], medium: [2, 3, 4, 5, 6, 8, 9, 10, 12], hard: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12] });
+  const op = pick(["+", "-"]);
+  let d1 = pick(dens), d2 = pick(dens), n1 = randInt(1, d1 * 2), n2 = randInt(1, d2 * 2);
+  if (diff === "easy") { n1 = randInt(1, d1 - 1); n2 = randInt(1, d1 - 1); d2 = d1; }
+  const num = op === "+" ? n1 * d2 + n2 * d1 : n1 * d2 - n2 * d1;
+  const [sn, sd] = simplifyFrac(num, d1 * d2);
+  return { q: `${fracStr(n1, d1)} ${op} ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) };
+};
+const genFractionsMulDiv: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const dens = dr(diff, { easy: [2, 3, 4, 5], medium: [2, 3, 4, 5, 6, 8], hard: [2, 3, 4, 5, 6, 7, 8, 9, 10] });
+  const op = pick(["×", "÷"]);
+  const d1 = pick(dens), d2 = pick(dens), n1 = randInt(1, d1 - 1), n2 = randInt(1, d2 - 1);
+  if (op === "×") { const [sn, sd] = simplifyFrac(n1 * n2, d1 * d2); return { q: `${fracStr(n1, d1)} × ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) }; }
+  const [sn, sd] = simplifyFrac(n1 * d2, d1 * n2);
+  return { q: `${fracStr(n1, d1)} ÷ ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) };
+};
+const genFractionsSimplify: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const factor = randInt(2, diff === "hard" ? 9 : 5);
+  const [baseN, baseD] = [randInt(1, diff === "hard" ? 8 : 5), pick(diff === "easy" ? [2, 3, 4] : [2, 3, 4, 5, 6, 7])];
+  const n = baseN * factor, d = baseD * factor;
+  const [sn, sd] = simplifyFrac(n, d);
+  return { q: `Simplify to lowest terms: ${fracStr(n, d)}`, a: mixedStr(sn, sd) };
+};
+const genFractionsCompare: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const dens = dr(diff, { easy: [2, 3, 4], medium: [2, 3, 4, 5, 6, 8], hard: [2, 3, 4, 5, 6, 7, 8, 9, 10] });
+  const d1 = pick(dens), d2 = pick(dens), n1 = randInt(1, d1 - 1), n2 = randInt(1, d2 - 1);
+  const symbol = n1 * d2 > n2 * d1 ? ">" : n1 * d2 < n2 * d1 ? "<" : "=";
+  return { q: `Compare: ${fracStr(n1, d1)} ___ ${fracStr(n2, d2)}  (use <, >, or =)`, a: symbol };
+};
+
+const genDecimalsAddSub: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const places = dr(diff, { easy: 1, medium: 2, hard: 2 });
+  const maxWhole = dr(diff, { easy: 20, medium: 80, hard: 300 });
+  const op = rng() < 0.5 ? "+" : "-";
+  const rnd = () => parseFloat((rng() * maxWhole).toFixed(places));
+  let a = rnd(), b = rnd();
+  if (op === "-" && b > a) [a, b] = [b, a];
+  const result = op === "+" ? a + b : a - b;
+  return { q: `${a} ${op} ${b} = ?`, a: `${Math.round(result * 100) / 100}` };
+};
+const genDecimalsMulDiv: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const op = rng() < 0.5 ? "×" : "÷";
+  if (op === "×") {
+    const a = parseFloat((rng() * (diff === "hard" ? 50 : 20)).toFixed(diff === "easy" ? 1 : 2));
+    const b = parseFloat((rng() * 9 + 1).toFixed(1));
+    return { q: `${a} × ${b} = ?`, a: `${Math.round(a * b * 100) / 100}` };
+  }
+  const divisor = randInt(2, 9);
+  const a = parseFloat((divisor * randInt(2, diff === "hard" ? 30 : 10)).toFixed(0));
+  return { q: `${a} ÷ ${divisor} = ?`, a: `${Math.round((a / divisor) * 100) / 100}` };
+};
+const genDecimalsRound: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const places = dr(diff, { easy: 1, medium: 2, hard: 3 });
+  const whole = randInt(1, 999);
+  const frac = randInt(0, Math.pow(10, places) - 1);
+  const num = parseFloat(`${whole}.${frac.toString().padStart(places, "0")}`);
+  const roundTo = pick(["nearest whole number", "nearest tenth"]);
+  const rounded = roundTo === "nearest whole number" ? Math.round(num) : Math.round(num * 10) / 10;
+  return { q: `Round ${num} to the ${roundTo}.`, a: `${rounded}` };
+};
+const genDecimalsCompare: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const places = dr(diff, { easy: 1, medium: 2, hard: 2 });
+  const rnd = () => parseFloat((randInt(1, 999) / Math.pow(10, places)).toFixed(places));
+  const a = rnd(), b = rnd();
+  return { q: `Compare: ${a} ___ ${b}  (use <, >, or =)`, a: a > b ? ">" : a < b ? "<" : "=" };
+};
+
+const genGeometryAreaRect: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const max = diff === "hard" ? 30 : diff === "medium" ? 18 : 12;
+  const shape = pick(["rectangle", "parallelogram"]);
+  const w = randInt(3, max), h = randInt(3, max);
+  const label = shape === "rectangle" ? `length ${w} cm and width ${h} cm` : `base ${w} cm and height ${h} cm`;
+  return { q: `Find the area of a ${shape} with ${label}.`, a: `${w * h} cm²` };
+};
+const genGeometryAreaTriangle: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const max = diff === "hard" ? 30 : diff === "medium" ? 20 : 12;
+  const b = randInt(4, max), h = randInt(4, max);
+  return { q: `Find the area of a triangle with base ${b} cm and height ${h} cm.`, a: `${(b * h) / 2} cm²` };
+};
+const genGeometryVolume: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const max = diff === "hard" ? 15 : diff === "medium" ? 10 : 6;
+  const l = randInt(2, max), w = randInt(2, max), h = randInt(2, max);
+  return { q: `Find the volume of a rectangular prism with length ${l} cm, width ${w} cm, and height ${h} cm.`, a: `${l * w * h} cm³` };
+};
+
+const genIntegersAddSub: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const range = dr(diff, { easy: 10, medium: 25, hard: 60 });
+  const op = rng() < 0.5 ? "+" : "-";
+  const a = randInt(-range, range) || 1, b = randInt(-range, range) || 1;
+  const result = op === "+" ? a + b : a - b;
+  const bStr = b < 0 ? `(${b})` : `${b}`;
+  return { q: `${a} ${op} ${bStr} = ?`, a: `${result}` };
+};
+const genIntegersMulDiv: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const op = rng() < 0.5 ? "×" : "÷";
+  let a: number, b: number, result: number;
+  if (op === "×") { a = randInt(-12, 12) || 1; b = randInt(-12, 12) || 3; result = a * b; }
+  else { const divisor = randInt(2, 9) * (rng() < 0.5 ? -1 : 1); const q = randInt(-12, 12) || 2; a = divisor * q; b = divisor; result = q; }
+  const bStr = b < 0 ? `(${b})` : `${b}`;
+  return { q: `${a} ${op} ${bStr} = ?`, a: `${result}` };
+};
 const genStats: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
   const size = dr(diff, { easy: 5, medium: 6, hard: 7 });
@@ -396,4 +531,10 @@ export const MATH_GENERATORS: Record<string, Gen> = {
   pythagorean: genPythagorean, circle_geo: genCircleGeo, coordinate_geo: genCoordinateGeo,
   quadratic_formula: genQuadraticFormula, exponential: genExponential, logarithms: genLogarithms,
   sequences: genSequences, trig_ratios: genTrigRatios, polynomials: genPolynomials, probability: genProbability,
+  fractions_add_sub: genFractionsAddSub, fractions_mul_div: genFractionsMulDiv,
+  fractions_simplify: genFractionsSimplify, fractions_compare: genFractionsCompare,
+  decimals_add_sub: genDecimalsAddSub, decimals_mul_div: genDecimalsMulDiv,
+  decimals_round: genDecimalsRound, decimals_compare: genDecimalsCompare,
+  geometry_area_rect: genGeometryAreaRect, geometry_area_triangle: genGeometryAreaTriangle, geometry_volume: genGeometryVolume,
+  integers_add_sub: genIntegersAddSub, integers_mul_div: genIntegersMulDiv,
 };
