@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { isFreeMode } from "@/lib/access";
 
 export default function Footer() {
+  const freeMode = isFreeMode();
+
   return (
     <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-20">
       <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
@@ -12,7 +15,7 @@ export default function Footer() {
           <p className="font-semibold text-slate-900 dark:text-white mb-2">Product</p>
           <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
             <li><Link href="/worksheets" className="hover:text-slate-900 dark:hover:text-white">Browse worksheets</Link></li>
-            <li><Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">Pricing</Link></li>
+            {!freeMode && <li><Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">Pricing</Link></li>}
             <li><Link href="/blog" className="hover:text-slate-900 dark:hover:text-white">Blog</Link></li>
           </ul>
         </div>

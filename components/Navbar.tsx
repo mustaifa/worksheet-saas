@@ -2,9 +2,11 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import ThemeToggle from "./ThemeToggle";
+import { isFreeMode } from "@/lib/access";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const freeMode = isFreeMode();
 
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
@@ -14,7 +16,7 @@ export default function Navbar() {
       <div className="flex items-center gap-5 text-sm">
         <Link href="/worksheets" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Worksheets</Link>
         <Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Blog</Link>
-        <Link href="/pricing" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Pricing</Link>
+        {!freeMode && <Link href="/pricing" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Pricing</Link>}
         {status === "authenticated" ? (
           <>
             <Link href="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Dashboard</Link>
@@ -30,7 +32,7 @@ export default function Navbar() {
           <>
             <Link href="/login" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Log in</Link>
             <Link href="/signup" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-200">
-              Start free trial
+              {freeMode ? "Sign up free" : "Start free trial"}
             </Link>
           </>
         )}
