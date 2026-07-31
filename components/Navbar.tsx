@@ -10,7 +10,8 @@ export default function Navbar() {
 
   return (
     <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-      <Link href="/" className="font-bold text-lg text-slate-900 dark:text-white">
+      <Link href="/" className="flex items-center gap-2 font-bold text-lg text-slate-900 dark:text-white">
+        <img src="/logo-mark.png" alt="" width={28} height={28} className="rounded-md" />
         Practice Sheet
       </Link>
       <div className="flex items-center gap-5 text-sm">

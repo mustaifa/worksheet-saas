@@ -8,7 +8,10 @@ export default function Footer() {
     <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-20">
       <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
         <div className="col-span-2 sm:col-span-1">
-          <p className="font-bold text-slate-900 dark:text-white">Practice Sheet</p>
+          <p className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <img src="/logo-mark.png" alt="" width={22} height={22} className="rounded-md" />
+            Practice Sheet
+          </p>
           <p className="text-slate-500 dark:text-slate-400 mt-2">Worksheets for Math, English & Science, grades 1–12.</p>
         </div>
         <div>
