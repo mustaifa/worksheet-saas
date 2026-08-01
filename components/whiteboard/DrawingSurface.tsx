@@ -4,9 +4,10 @@ import { useRef, useState, useEffect, useCallback } from "react";
 const COLORS = ["#0f172a", "#dc2626", "#2563eb", "#16a34a", "#ea580c"];
 const CANVAS_W = 1200;
 const CANVAS_H = 675;
-const HEADER_H = 130; // content starts below this
+const HEADER_H = 155; // content starts below this — includes a full blank line of breathing room after the Name/Date fields
 const FOOTER_H = 40;  // content ends above this
-const MARGIN_X = 60;
+const MARGIN_X = 76;  // where questions/text start, to the right of the vertical margin line
+const MARGIN_LINE_X = 48; // classic ruled-paper vertical margin line, like real notebook paper
 const LINE_SPACING = 40; // equal width/height for math grid squares, and equal gap for ruled lines
 
 export type WorksheetTemplate = {
@@ -93,6 +94,15 @@ export default function DrawingSurface({
     const brand = "Practice Sheet";
     const brandW = ctx.measureText(brand).width;
     ctx.fillText(brand, CANVAS_W - MARGIN_X - brandW, CANVAS_H - FOOTER_H + 12);
+
+    // classic vertical margin line, like real ruled notebook paper — spans
+    // nearly the full page height, content sits to the right of it
+    ctx.strokeStyle = "#fca5a5";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(MARGIN_LINE_X, 14);
+    ctx.lineTo(MARGIN_LINE_X, CANVAS_H - 14);
+    ctx.stroke();
   }
 
   function drawContentRuling(ctx: CanvasRenderingContext2D) {
@@ -100,8 +110,8 @@ export default function DrawingSurface({
     const top = HEADER_H, bottom = CANVAS_H - FOOTER_H;
     const left = MARGIN_X, right = CANVAS_W - MARGIN_X;
     ctx.save();
-    ctx.strokeStyle = "#e2e8f0"; // light, consistent tone for both patterns — visible guide, not a distraction
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#94a3b8"; // darkened from the original — the light version was nearly invisible once the canvas is scaled down for display
+    ctx.lineWidth = 1.25;
 
     if (template.subject === "math") {
       for (let x = left; x <= right; x += LINE_SPACING) {
@@ -111,7 +121,7 @@ export default function DrawingSurface({
         ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
       }
     } else {
-      for (let y = top + LINE_SPACING; y <= bottom; y += LINE_SPACING) {
+      for (let y = top; y <= bottom; y += LINE_SPACING) {
         ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
       }
     }
