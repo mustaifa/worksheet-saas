@@ -34,6 +34,7 @@ model User {
 
   children               ChildProfile[]
   liveSessions           LiveSession[]
+  whiteboards            Whiteboard[]
 }
 
 model ChildProfile {
@@ -150,4 +151,30 @@ model LiveAnswer {
 
   @@unique([participantId, questionIndex])
   @@index([participantId])
+}
+
+model Whiteboard {
+  id         String    @id @default(cuid())
+  hostUserId String
+  code       String    @unique
+  title      String?
+  snapshot   String?   @db.Text // base64 PNG data URL of the current board
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  host       User                @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+  viewers    WhiteboardViewer[]
+
+  @@index([hostUserId])
+}
+
+model WhiteboardViewer {
+  id           String   @id @default(cuid())
+  whiteboardId String
+  nickname     String
+  joinedAt     DateTime @default(now())
+
+  whiteboard   Whiteboard @relation(fields: [whiteboardId], references: [id], onDelete: Cascade)
+
+  @@index([whiteboardId])
 }

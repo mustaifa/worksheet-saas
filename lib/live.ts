@@ -10,11 +10,17 @@ function randomCode(length = 6): string {
   return code;
 }
 
+// Shared across every join-code feature (Live Quiz, Whiteboard, and anything
+// added later) so the same 6-character code can never mean two different
+// things — avoids confusion if a code gets shared out of context.
 export async function generateUniqueCode(): Promise<string> {
   for (let attempt = 0; attempt < 10; attempt++) {
     const code = randomCode();
-    const existing = await prisma.liveSession.findUnique({ where: { code } });
-    if (!existing) return code;
+    const [existingQuiz, existingBoard] = await Promise.all([
+      prisma.liveSession.findUnique({ where: { code } }),
+      prisma.whiteboard.findUnique({ where: { code } }),
+    ]);
+    if (!existingQuiz && !existingBoard) return code;
   }
   throw new Error("Could not generate a unique join code — try again.");
 }
