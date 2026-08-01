@@ -24,6 +24,7 @@ export default function JoinBoardForm() {
       let data: any = {};
       try { data = await res.json(); } catch {}
       if (!res.ok) { setError(data.error || "Could not join."); setLoading(false); return; }
+      sessionStorage.setItem(`whiteboard-viewer-${code.trim().toUpperCase()}`, data.viewerId);
       router.push(`/whiteboard/${code.trim().toUpperCase()}`);
     } catch {
       setError("Could not reach the server. Check your connection.");

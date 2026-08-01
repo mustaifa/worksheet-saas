@@ -12,6 +12,7 @@ export async function GET(req: Request, { params }: { params: { code: string } }
     title: board.title,
     snapshot: board.snapshot,
     updatedAt: board.updatedAt,
+    activeDrawerId: board.activeDrawerId,
     viewers: board.viewers.map((v) => ({ id: v.id, nickname: v.nickname })),
   });
 }

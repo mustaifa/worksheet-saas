@@ -154,16 +154,17 @@ model LiveAnswer {
 }
 
 model Whiteboard {
-  id         String    @id @default(cuid())
-  hostUserId String
-  code       String    @unique
-  title      String?
-  snapshot   String?   @db.Text // base64 PNG data URL of the current board
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  hostUserId    String
+  code          String    @unique
+  title         String?
+  snapshot      String?   @db.Text // base64 PNG data URL of the current board
+  activeDrawerId String?  // WhiteboardViewer.id currently granted drawing permission, or null (host-only)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  host       User                @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
-  viewers    WhiteboardViewer[]
+  host          User                @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+  viewers       WhiteboardViewer[]
 
   @@index([hostUserId])
 }
