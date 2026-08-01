@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import DrawingSurface from "@/components/whiteboard/DrawingSurface";
+import DrawingSurface, { WorksheetTemplate } from "@/components/whiteboard/DrawingSurface";
 import { exportPagesToPdf } from "./pdfExport";
 
 type WorksheetPage = { id: string; snapshot: string | null };
@@ -131,7 +131,12 @@ export default function CustomWorksheetEditor({ id }: { id: string }) {
         remoteSnapshot={currentPage.snapshot}
         remoteVersion={null}
         onUpload={(dataUrl) => savePage(currentPage.id, dataUrl)}
+        template={{ title: ws.title, subject: ws.subject, grade: ws.grade, pageNumber: currentPageIndex + 1 }}
+        autoNumberQuestions
       />
+      <p className="text-xs text-slate-400 mt-2">
+        Typed questions are automatically numbered and lined up on the left. Use the pen for diagrams or handwritten work anywhere on the page.
+      </p>
 
       <div className="mt-6 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3">Share with students</p>

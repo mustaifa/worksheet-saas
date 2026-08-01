@@ -4,16 +4,28 @@ import { useRef, useState, useEffect, useCallback } from "react";
 const COLORS = ["#0f172a", "#dc2626", "#2563eb", "#16a34a", "#ea580c"];
 const CANVAS_W = 1200;
 const CANVAS_H = 675;
+const HEADER_H = 130; // content starts below this
+const FOOTER_H = 40;  // content ends above this
+const MARGIN_X = 60;
+
+export type WorksheetTemplate = {
+  title: string;
+  subject?: string | null;
+  grade?: number | null;
+  pageNumber: number;
+};
 
 type Tool = "pen" | "eraser" | "text";
 
 export default function DrawingSurface({
-  remoteSnapshot, remoteVersion, onUpload, showClear = true,
+  remoteSnapshot, remoteVersion, onUpload, showClear = true, template, autoNumberQuestions = false,
 }: {
   remoteSnapshot: string | null;
   remoteVersion: string | number | null; // changes whenever the server's copy changes (e.g. updatedAt) — triggers a re-sync
   onUpload: (dataUrl: string) => Promise<void>;
   showClear?: boolean;
+  template?: WorksheetTemplate; // when set, draws a professional header/footer frame (used by Custom Worksheets, not the live Whiteboard)
+  autoNumberQuestions?: boolean; // when set, the Type tool auto-numbers and left-aligns entries instead of placing text freely
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,8 +33,9 @@ export default function DrawingSurface({
   const drawing = useRef(false);
   const dirty = useRef(false);
   const appliedVersion = useRef<string | number | null>(null);
+  const questionCounter = useRef(1);
   const [color, setColor] = useState(COLORS[0]);
-  const [tool, setTool] = useState<Tool>("pen");
+  const [tool, setTool] = useState<Tool>(autoNumberQuestions ? "text" : "pen");
   const [lineWidth, setLineWidth] = useState(4);
   const [toast, setToast] = useState("");
   const [textBox, setTextBox] = useState<{ canvasX: number; canvasY: number; screenX: number; screenY: number; value: string } | null>(null);
@@ -38,6 +51,55 @@ export default function DrawingSurface({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [textBox === null]);
 
+  function drawFrame(ctx: CanvasRenderingContext2D) {
+    if (!template) return;
+    ctx.fillStyle = "#0f172a";
+    ctx.textBaseline = "top";
+    ctx.font = "bold 34px system-ui, sans-serif";
+    ctx.fillText(template.title, MARGIN_X, 28);
+
+    const metaParts = [template.subject ? template.subject[0].toUpperCase() + template.subject.slice(1) : null, template.grade ? `Grade ${template.grade}` : null].filter(Boolean);
+    if (metaParts.length) {
+      ctx.font = "18px system-ui, sans-serif";
+      ctx.fillStyle = "#64748b";
+      const metaText = metaParts.join(" · ");
+      const w = ctx.measureText(metaText).width;
+      ctx.fillText(metaText, CANVAS_W - MARGIN_X - w, 36);
+    }
+
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(MARGIN_X, 74);
+    ctx.lineTo(CANVAS_W - MARGIN_X, 74);
+    ctx.stroke();
+
+    ctx.font = "16px system-ui, sans-serif";
+    ctx.fillStyle = "#334155";
+    ctx.fillText("Name: ______________________", MARGIN_X, 90);
+    ctx.fillText("Date: ______________________", CANVAS_W / 2 + 20, 90);
+
+    ctx.strokeStyle = "#cbd5e1";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(MARGIN_X, CANVAS_H - FOOTER_H);
+    ctx.lineTo(CANVAS_W - MARGIN_X, CANVAS_H - FOOTER_H);
+    ctx.stroke();
+
+    ctx.font = "13px system-ui, sans-serif";
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText(`Page ${template.pageNumber}`, MARGIN_X, CANVAS_H - FOOTER_H + 12);
+    const brand = "Practice Sheet";
+    const brandW = ctx.measureText(brand).width;
+    ctx.fillText(brand, CANVAS_W - MARGIN_X - brandW, CANVAS_H - FOOTER_H + 12);
+  }
+
+  function blankPage(ctx: CanvasRenderingContext2D) {
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    drawFrame(ctx);
+  }
+
   function drawImageOnto(dataUrl: string) {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -51,9 +113,11 @@ export default function DrawingSurface({
   useEffect(() => {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-    if (remoteSnapshot) drawImageOnto(remoteSnapshot);
+    if (remoteSnapshot) {
+      drawImageOnto(remoteSnapshot);
+    } else {
+      blankPage(ctx);
+    }
     appliedVersion.current = remoteVersion;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -81,6 +145,21 @@ export default function DrawingSurface({
     if (tool === "text") {
       const canvasPos = getCanvasPos(e.clientX, e.clientY);
       const containerRect = containerRef.current!.getBoundingClientRect();
+
+      if (autoNumberQuestions && template) {
+        // force left-aligned placement within the content area, ignoring click X —
+        // this is what keeps a series of typed questions looking like a tidy list
+        const clampedY = Math.min(Math.max(canvasPos.y, HEADER_H), CANVAS_H - FOOTER_H - 40);
+        const rect = canvasRef.current!.getBoundingClientRect();
+        const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
+        setTextBox({
+          canvasX: MARGIN_X, canvasY: clampedY,
+          screenX: (MARGIN_X / scaleX), screenY: (clampedY / scaleY),
+          value: "",
+        });
+        return;
+      }
+
       setTextBox({
         canvasX: canvasPos.x, canvasY: canvasPos.y,
         screenX: e.clientX - containerRect.left, screenY: e.clientY - containerRect.top,
@@ -135,7 +214,9 @@ export default function DrawingSurface({
         ctx.font = `${fontSize}px system-ui, sans-serif`;
         ctx.fillStyle = color;
         ctx.textBaseline = "top";
-        ctx.fillText(textBox.value, textBox.canvasX, textBox.canvasY);
+        const text = autoNumberQuestions ? `${questionCounter.current}. ${textBox.value}` : textBox.value;
+        ctx.fillText(text, textBox.canvasX, textBox.canvasY);
+        if (autoNumberQuestions) questionCounter.current += 1;
         dirty.current = true;
         upload();
       }
@@ -146,8 +227,8 @@ export default function DrawingSurface({
   function clearBoard() {
     const ctx = canvasRef.current?.getContext("2d");
     if (!ctx) return;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    blankPage(ctx);
+    if (autoNumberQuestions) questionCounter.current = 1;
     dirty.current = true;
     upload();
   }
