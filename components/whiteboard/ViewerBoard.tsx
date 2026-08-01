@@ -7,6 +7,7 @@ export default function ViewerBoard({ code }: { code: string }) {
   const router = useRouter();
   const [viewerId, setViewerId] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [title, setTitle] = useState<string | null>(null);
   const [viewerCount, setViewerCount] = useState(0);
   const [hasPen, setHasPen] = useState(false);
@@ -35,6 +36,7 @@ export default function ViewerBoard({ code }: { code: string }) {
       try { data = await res.json(); } catch {}
       if (!res.ok) { setError(data.error || "Board not found."); return; }
       setSnapshot(data.snapshot);
+      setUpdatedAt(data.updatedAt);
       setTitle(data.title);
       setViewerCount((data.viewers || []).length);
       setHasPen(data.activeDrawerId === viewerId);
@@ -70,7 +72,7 @@ export default function ViewerBoard({ code }: { code: string }) {
       )}
 
       {hasPen ? (
-        <DrawingSurface initialSnapshot={snapshot} onUpload={uploadSnapshot} showClear={false} />
+        <DrawingSurface remoteSnapshot={snapshot} remoteVersion={updatedAt} onUpload={uploadSnapshot} showClear={false} />
       ) : (
         <div className="rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden bg-white">
           {snapshot ? (

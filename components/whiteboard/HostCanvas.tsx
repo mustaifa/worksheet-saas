@@ -3,7 +3,8 @@ import { useState, useEffect, useCallback } from "react";
 import DrawingSurface from "./DrawingSurface";
 
 export default function HostCanvas({ code }: { code: string }) {
-  const [initialSnapshot, setInitialSnapshot] = useState<string | null>(null);
+  const [remoteSnapshot, setRemoteSnapshot] = useState<string | null>(null);
+  const [remoteVersion, setRemoteVersion] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [viewers, setViewers] = useState<{ id: string; nickname: string }[]>([]);
   const [activeDrawerId, setActiveDrawerId] = useState<string | null>(null);
@@ -17,18 +18,18 @@ export default function HostCanvas({ code }: { code: string }) {
       if (res.ok) {
         setViewers(data.viewers || []);
         setActiveDrawerId(data.activeDrawerId || null);
-        if (!loaded) { setInitialSnapshot(data.snapshot); setLoaded(true); }
+        setRemoteSnapshot(data.snapshot);
+        setRemoteVersion(data.updatedAt);
+        setLoaded(true);
       }
     } catch { /* ignore transient errors */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code, loaded]);
+  }, [code]);
 
   useEffect(() => {
     pollState();
-    const interval = setInterval(pollState, 3000);
+    const interval = setInterval(pollState, 2000);
     return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [pollState]);
 
   async function uploadSnapshot(dataUrl: string) {
     await fetch(`/api/whiteboard/${code}/update`, {
@@ -122,8 +123,8 @@ export default function HostCanvas({ code }: { code: string }) {
         )}
       </div>
 
-      <DrawingSurface initialSnapshot={initialSnapshot} onUpload={uploadSnapshot} />
-      <p className="text-xs text-slate-400 mt-2">Draw with a mouse, finger, or stylus — students' screens update every couple of seconds.</p>
+      <DrawingSurface remoteSnapshot={remoteSnapshot} remoteVersion={remoteVersion} onUpload={uploadSnapshot} />
+      <p className="text-xs text-slate-400 mt-2">Draw with a mouse, finger, or stylus, or use the Type tool — the board syncs every couple of seconds.</p>
     </div>
   );
 }
