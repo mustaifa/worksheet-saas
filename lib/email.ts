@@ -87,3 +87,16 @@ export async function sendContactFormEmail(fromName: string, fromEmail: string, 
   `);
   return sendEmail(to, `Contact form: ${fromName}`, html);
 }
+
+export async function sendCustomWorksheetEmail(to: string, teacherName: string | null, title: string, shareUrl: string) {
+  const html = wrapper(`
+    <h2 style="color: #0f172a;">${title}</h2>
+    <p style="color: #334155; line-height: 1.6;">
+      ${teacherName || "Your teacher"} shared a worksheet with you.
+    </p>
+    <a href="${shareUrl}" style="display:inline-block; background:#0f172a; color:white; padding:12px 20px; border-radius:8px; text-decoration:none; margin-top:12px;">
+      View worksheet
+    </a>
+  `);
+  return sendEmail(to, `${teacherName || "Your teacher"} shared a worksheet: ${title}`, html);
+}
