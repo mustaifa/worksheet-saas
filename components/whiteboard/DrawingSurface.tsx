@@ -40,7 +40,7 @@ export default function DrawingSurface({
   const [tool, setTool] = useState<Tool>(autoNumberQuestions ? "text" : "pen");
   const [lineWidth, setLineWidth] = useState(4);
   const [toast, setToast] = useState("");
-  const [textBox, setTextBox] = useState<{ canvasX: number; canvasY: number; screenX: number; screenY: number; value: string } | null>(null);
+  const [textBox, setTextBox] = useState<{ canvasX: number; canvasY: number; screenX: number; screenY: number; value: string; mode: "cell" | "line" | "free" } | null>(null);
 
   useEffect(() => {
     if (textBox && textInputRef.current) {
@@ -181,10 +181,32 @@ export default function DrawingSurface({
       const canvasPos = getCanvasPos(e.clientX, e.clientY);
       const containerRect = containerRef.current!.getBoundingClientRect();
 
+      if (autoNumberQuestions && template?.subject === "math") {
+        // snap to the single grid cell that was clicked, so a digit/answer
+        // can be typed into one specific square — like real graph paper
+        // used for column arithmetic, not a left-aligned list
+        const colIndex = Math.floor((canvasPos.x - MARGIN_X) / LINE_SPACING);
+        const rowIndex = Math.floor((canvasPos.y - HEADER_H) / LINE_SPACING);
+        const maxCol = Math.floor((CANVAS_W - MARGIN_X * 2) / LINE_SPACING) - 1;
+        const maxRow = Math.floor((CANVAS_H - FOOTER_H - HEADER_H) / LINE_SPACING) - 1;
+        const clampedCol = Math.min(Math.max(colIndex, 0), Math.max(maxCol, 0));
+        const clampedRow = Math.min(Math.max(rowIndex, 0), Math.max(maxRow, 0));
+        const cellCenterX = MARGIN_X + clampedCol * LINE_SPACING + LINE_SPACING / 2;
+        const cellCenterY = HEADER_H + clampedRow * LINE_SPACING + LINE_SPACING / 2;
+        const rect = canvasRef.current!.getBoundingClientRect();
+        const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
+        setTextBox({
+          canvasX: cellCenterX, canvasY: cellCenterY,
+          screenX: cellCenterX / scaleX, screenY: cellCenterY / scaleY,
+          value: "", mode: "cell",
+        });
+        return;
+      }
+
       if (autoNumberQuestions && template) {
         // snap to the nearest ruled line and force the left margin — this is
         // what makes typed questions look like they were placed on real
-        // ruled/grid paper instead of floating at an arbitrary click point
+        // ruled paper instead of floating at an arbitrary click point
         const rawY = Math.min(Math.max(canvasPos.y, HEADER_H), CANVAS_H - FOOTER_H - LINE_SPACING);
         const lineIndex = Math.round((rawY - HEADER_H) / LINE_SPACING);
         const snappedY = HEADER_H + lineIndex * LINE_SPACING;
@@ -193,7 +215,7 @@ export default function DrawingSurface({
         setTextBox({
           canvasX: MARGIN_X, canvasY: snappedY,
           screenX: MARGIN_X / scaleX, screenY: snappedY / scaleY,
-          value: "",
+          value: "", mode: "line",
         });
         return;
       }
@@ -201,7 +223,7 @@ export default function DrawingSurface({
       setTextBox({
         canvasX: canvasPos.x, canvasY: canvasPos.y,
         screenX: e.clientX - containerRect.left, screenY: e.clientY - containerRect.top,
-        value: "",
+        value: "", mode: "free",
       });
       return;
     }
@@ -248,16 +270,29 @@ export default function DrawingSurface({
     if (textBox.value.trim()) {
       const ctx = canvasRef.current?.getContext("2d");
       if (ctx) {
-        const fontSize = autoNumberQuestions ? (lineWidth >= 8 ? 26 : 20) : (lineWidth >= 8 ? 44 : 28);
-        ctx.font = `${fontSize}px system-ui, sans-serif`;
-        ctx.fillStyle = color;
-        ctx.textBaseline = autoNumberQuestions ? "alphabetic" : "top";
-        const text = autoNumberQuestions ? `${questionCounter.current}. ${textBox.value}` : textBox.value;
-        // when sitting on a ruled line, lift the baseline slightly above the
-        // line itself rather than drawing straight through it
-        const yPos = autoNumberQuestions ? textBox.canvasY - 6 : textBox.canvasY;
-        ctx.fillText(text, textBox.canvasX, yPos);
-        if (autoNumberQuestions) questionCounter.current += 1;
+        if (textBox.mode === "cell") {
+          // centered in a single grid cell — no numbering, short entries like a digit or short answer
+          ctx.font = "24px system-ui, sans-serif";
+          ctx.fillStyle = color;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(textBox.value, textBox.canvasX, textBox.canvasY);
+          ctx.textAlign = "left"; // reset — other draw calls assume default left alignment
+        } else if (textBox.mode === "line") {
+          const fontSize = lineWidth >= 8 ? 26 : 20;
+          ctx.font = `${fontSize}px system-ui, sans-serif`;
+          ctx.fillStyle = color;
+          ctx.textBaseline = "alphabetic";
+          const text = `${questionCounter.current}. ${textBox.value}`;
+          ctx.fillText(text, textBox.canvasX, textBox.canvasY - 6); // small lift so text sits just above the rule line
+          questionCounter.current += 1;
+        } else {
+          const fontSize = lineWidth >= 8 ? 44 : 28;
+          ctx.font = `${fontSize}px system-ui, sans-serif`;
+          ctx.fillStyle = color;
+          ctx.textBaseline = "top";
+          ctx.fillText(textBox.value, textBox.canvasX, textBox.canvasY);
+        }
         dirty.current = true;
         upload();
       }
@@ -325,7 +360,13 @@ export default function DrawingSurface({
       </div>
 
       {tool === "text" && !textBox && (
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">Click anywhere on the board to type text there.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">
+          {template?.subject === "math"
+            ? "Click any grid cell to type a number into it."
+            : autoNumberQuestions
+              ? "Click anywhere to add the next numbered question on a line."
+              : "Click anywhere on the board to type text there."}
+        </p>
       )}
 
       <div ref={containerRef} className="relative">
@@ -347,9 +388,15 @@ export default function DrawingSurface({
             onChange={(e) => setTextBox({ ...textBox, value: e.target.value })}
             onKeyDown={(e) => { if (e.key === "Enter") commitText(); if (e.key === "Escape") setTextBox(null); }}
             onBlur={commitText}
-            placeholder="Type…"
-            className="absolute border-2 border-slate-900 rounded px-2 py-1.5 outline-none"
-            style={{ left: textBox.screenX, top: textBox.screenY, color: "#0f172a", backgroundColor: "#ffffff", fontSize: 16, minWidth: 160, zIndex: 20 }}
+            placeholder={textBox.mode === "cell" ? "" : "Type…"}
+            className={`absolute border-2 border-slate-900 rounded outline-none ${textBox.mode === "cell" ? "text-center px-0 py-1" : "px-2 py-1.5"}`}
+            style={{
+              left: textBox.screenX, top: textBox.screenY,
+              color: "#0f172a", backgroundColor: "#ffffff", fontSize: 16, zIndex: 20,
+              ...(textBox.mode === "cell"
+                ? { width: 34, transform: "translate(-50%, -50%)" } // small box, truly centered on the clicked cell
+                : { minWidth: 160 }),
+            }}
           />
         )}
       </div>
