@@ -40,7 +40,10 @@ export default function DrawingSurface({
   const [tool, setTool] = useState<Tool>(autoNumberQuestions ? "text" : "pen");
   const [lineWidth, setLineWidth] = useState(4);
   const [toast, setToast] = useState("");
-  const [textBox, setTextBox] = useState<{ canvasX: number; canvasY: number; screenX: number; screenY: number; value: string; mode: "cell" | "line" | "free" } | null>(null);
+  const [textBox, setTextBox] = useState<{
+    canvasX: number; canvasY: number; screenX: number; screenY: number; value: string;
+    mode: "cell" | "line" | "free"; col?: number; row?: number; lineIndex?: number;
+  } | null>(null);
 
   useEffect(() => {
     if (textBox && textInputRef.current) {
@@ -50,8 +53,11 @@ export default function DrawingSurface({
       const t = setTimeout(() => textInputRef.current?.focus(), 50);
       return () => clearTimeout(t);
     }
+    // re-fires whenever a *new* box opens (including auto-advancing to the
+    // next cell/line), not just when one opens or closes — that's what
+    // makes the refocus actually happen on each advance
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textBox === null]);
+  }, [textBox ? `${textBox.canvasX}-${textBox.canvasY}` : null]);
 
   function drawFrame(ctx: CanvasRenderingContext2D) {
     if (!template) return;
@@ -176,6 +182,36 @@ export default function DrawingSurface({
     return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
   };
 
+  const maxCol = Math.floor((CANVAS_W - MARGIN_X * 2) / LINE_SPACING) - 1;
+  const maxRow = Math.floor((CANVAS_H - FOOTER_H - HEADER_H) / LINE_SPACING) - 1;
+  const maxLineIndex = Math.floor((CANVAS_H - FOOTER_H - HEADER_H) / LINE_SPACING) - 1;
+
+  function openCell(col: number, row: number) {
+    const clampedCol = Math.min(Math.max(col, 0), Math.max(maxCol, 0));
+    const clampedRow = Math.min(Math.max(row, 0), Math.max(maxRow, 0));
+    const cellCenterX = MARGIN_X + clampedCol * LINE_SPACING + LINE_SPACING / 2;
+    const cellCenterY = HEADER_H + clampedRow * LINE_SPACING + LINE_SPACING / 2;
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
+    setTextBox({
+      canvasX: cellCenterX, canvasY: cellCenterY,
+      screenX: cellCenterX / scaleX, screenY: cellCenterY / scaleY,
+      value: "", mode: "cell", col: clampedCol, row: clampedRow,
+    });
+  }
+
+  function openLine(lineIndex: number) {
+    const clampedIndex = Math.min(Math.max(lineIndex, 0), Math.max(maxLineIndex, 0));
+    const snappedY = HEADER_H + clampedIndex * LINE_SPACING;
+    const rect = canvasRef.current!.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
+    setTextBox({
+      canvasX: MARGIN_X, canvasY: snappedY,
+      screenX: MARGIN_X / scaleX, screenY: snappedY / scaleY,
+      value: "", mode: "line", lineIndex: clampedIndex,
+    });
+  }
+
   function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     if (tool === "text") {
       const canvasPos = getCanvasPos(e.clientX, e.clientY);
@@ -187,19 +223,7 @@ export default function DrawingSurface({
         // used for column arithmetic, not a left-aligned list
         const colIndex = Math.floor((canvasPos.x - MARGIN_X) / LINE_SPACING);
         const rowIndex = Math.floor((canvasPos.y - HEADER_H) / LINE_SPACING);
-        const maxCol = Math.floor((CANVAS_W - MARGIN_X * 2) / LINE_SPACING) - 1;
-        const maxRow = Math.floor((CANVAS_H - FOOTER_H - HEADER_H) / LINE_SPACING) - 1;
-        const clampedCol = Math.min(Math.max(colIndex, 0), Math.max(maxCol, 0));
-        const clampedRow = Math.min(Math.max(rowIndex, 0), Math.max(maxRow, 0));
-        const cellCenterX = MARGIN_X + clampedCol * LINE_SPACING + LINE_SPACING / 2;
-        const cellCenterY = HEADER_H + clampedRow * LINE_SPACING + LINE_SPACING / 2;
-        const rect = canvasRef.current!.getBoundingClientRect();
-        const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
-        setTextBox({
-          canvasX: cellCenterX, canvasY: cellCenterY,
-          screenX: cellCenterX / scaleX, screenY: cellCenterY / scaleY,
-          value: "", mode: "cell",
-        });
+        openCell(colIndex, rowIndex);
         return;
       }
 
@@ -209,14 +233,7 @@ export default function DrawingSurface({
         // ruled paper instead of floating at an arbitrary click point
         const rawY = Math.min(Math.max(canvasPos.y, HEADER_H), CANVAS_H - FOOTER_H - LINE_SPACING);
         const lineIndex = Math.round((rawY - HEADER_H) / LINE_SPACING);
-        const snappedY = HEADER_H + lineIndex * LINE_SPACING;
-        const rect = canvasRef.current!.getBoundingClientRect();
-        const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
-        setTextBox({
-          canvasX: MARGIN_X, canvasY: snappedY,
-          screenX: MARGIN_X / scaleX, screenY: snappedY / scaleY,
-          value: "", mode: "line",
-        });
+        openLine(lineIndex);
         return;
       }
 
@@ -265,39 +282,49 @@ export default function DrawingSurface({
     if (drawing.current) { drawing.current = false; upload(); }
   }
 
-  function commitText() {
+  function commitText(advance: boolean = true) {
     if (!textBox) return;
-    if (textBox.value.trim()) {
+    const current = textBox;
+    if (current.value.trim()) {
       const ctx = canvasRef.current?.getContext("2d");
       if (ctx) {
-        if (textBox.mode === "cell") {
+        if (current.mode === "cell") {
           // centered in a single grid cell — no numbering, short entries like a digit or short answer
           ctx.font = "24px system-ui, sans-serif";
           ctx.fillStyle = color;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText(textBox.value, textBox.canvasX, textBox.canvasY);
+          ctx.fillText(current.value, current.canvasX, current.canvasY);
           ctx.textAlign = "left"; // reset — other draw calls assume default left alignment
-        } else if (textBox.mode === "line") {
+        } else if (current.mode === "line") {
           const fontSize = lineWidth >= 8 ? 26 : 20;
           ctx.font = `${fontSize}px system-ui, sans-serif`;
           ctx.fillStyle = color;
           ctx.textBaseline = "alphabetic";
-          const text = `${questionCounter.current}. ${textBox.value}`;
-          ctx.fillText(text, textBox.canvasX, textBox.canvasY - 6); // small lift so text sits just above the rule line
+          const text = `${questionCounter.current}. ${current.value}`;
+          ctx.fillText(text, current.canvasX, current.canvasY - 6); // small lift so text sits just above the rule line
           questionCounter.current += 1;
         } else {
           const fontSize = lineWidth >= 8 ? 44 : 28;
           ctx.font = `${fontSize}px system-ui, sans-serif`;
           ctx.fillStyle = color;
           ctx.textBaseline = "top";
-          ctx.fillText(textBox.value, textBox.canvasX, textBox.canvasY);
+          ctx.fillText(current.value, current.canvasX, current.canvasY);
         }
         dirty.current = true;
         upload();
       }
     }
     setTextBox(null);
+
+    // auto-advance to the next cell/line so typing can continue without a
+    // fresh click each time — Tab, Enter, or clicking the next spot all work
+    if (advance && current.mode === "cell" && current.col !== undefined && current.row !== undefined) {
+      if (current.col >= maxCol) openCell(0, current.row + 1);
+      else openCell(current.col + 1, current.row);
+    } else if (advance && current.mode === "line" && current.lineIndex !== undefined) {
+      openLine(current.lineIndex + 1);
+    }
   }
 
   function clearBoard() {
@@ -386,8 +413,12 @@ export default function DrawingSurface({
             ref={textInputRef}
             value={textBox.value}
             onChange={(e) => setTextBox({ ...textBox, value: e.target.value })}
-            onKeyDown={(e) => { if (e.key === "Enter") commitText(); if (e.key === "Escape") setTextBox(null); }}
-            onBlur={commitText}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { commitText(true); }
+              else if (e.key === "Tab") { e.preventDefault(); commitText(true); }
+              else if (e.key === "Escape") { setTextBox(null); }
+            }}
+            onBlur={() => commitText(false)}
             placeholder={textBox.mode === "cell" ? "" : "Type…"}
             className={`absolute border-2 border-slate-900 rounded outline-none ${textBox.mode === "cell" ? "text-center px-0 py-1" : "px-2 py-1.5"}`}
             style={{
