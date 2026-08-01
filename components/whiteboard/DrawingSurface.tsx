@@ -7,6 +7,7 @@ const CANVAS_H = 675;
 const HEADER_H = 130; // content starts below this
 const FOOTER_H = 40;  // content ends above this
 const MARGIN_X = 60;
+const LINE_SPACING = 40; // equal width/height for math grid squares, and equal gap for ruled lines
 
 export type WorksheetTemplate = {
   title: string;
@@ -94,10 +95,34 @@ export default function DrawingSurface({
     ctx.fillText(brand, CANVAS_W - MARGIN_X - brandW, CANVAS_H - FOOTER_H + 12);
   }
 
+  function drawContentRuling(ctx: CanvasRenderingContext2D) {
+    if (!template) return;
+    const top = HEADER_H, bottom = CANVAS_H - FOOTER_H;
+    const left = MARGIN_X, right = CANVAS_W - MARGIN_X;
+    ctx.save();
+    ctx.strokeStyle = "#e2e8f0"; // light, consistent tone for both patterns — visible guide, not a distraction
+    ctx.lineWidth = 1;
+
+    if (template.subject === "math") {
+      for (let x = left; x <= right; x += LINE_SPACING) {
+        ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke();
+      }
+      for (let y = top; y <= bottom; y += LINE_SPACING) {
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+      }
+    } else {
+      for (let y = top + LINE_SPACING; y <= bottom; y += LINE_SPACING) {
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
   function blankPage(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
     drawFrame(ctx);
+    drawContentRuling(ctx);
   }
 
   function drawImageOnto(dataUrl: string) {
@@ -147,14 +172,17 @@ export default function DrawingSurface({
       const containerRect = containerRef.current!.getBoundingClientRect();
 
       if (autoNumberQuestions && template) {
-        // force left-aligned placement within the content area, ignoring click X —
-        // this is what keeps a series of typed questions looking like a tidy list
-        const clampedY = Math.min(Math.max(canvasPos.y, HEADER_H), CANVAS_H - FOOTER_H - 40);
+        // snap to the nearest ruled line and force the left margin — this is
+        // what makes typed questions look like they were placed on real
+        // ruled/grid paper instead of floating at an arbitrary click point
+        const rawY = Math.min(Math.max(canvasPos.y, HEADER_H), CANVAS_H - FOOTER_H - LINE_SPACING);
+        const lineIndex = Math.round((rawY - HEADER_H) / LINE_SPACING);
+        const snappedY = HEADER_H + lineIndex * LINE_SPACING;
         const rect = canvasRef.current!.getBoundingClientRect();
         const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
         setTextBox({
-          canvasX: MARGIN_X, canvasY: clampedY,
-          screenX: (MARGIN_X / scaleX), screenY: (clampedY / scaleY),
+          canvasX: MARGIN_X, canvasY: snappedY,
+          screenX: MARGIN_X / scaleX, screenY: snappedY / scaleY,
           value: "",
         });
         return;
@@ -210,12 +238,15 @@ export default function DrawingSurface({
     if (textBox.value.trim()) {
       const ctx = canvasRef.current?.getContext("2d");
       if (ctx) {
-        const fontSize = lineWidth >= 8 ? 44 : 28;
+        const fontSize = autoNumberQuestions ? (lineWidth >= 8 ? 26 : 20) : (lineWidth >= 8 ? 44 : 28);
         ctx.font = `${fontSize}px system-ui, sans-serif`;
         ctx.fillStyle = color;
-        ctx.textBaseline = "top";
+        ctx.textBaseline = autoNumberQuestions ? "alphabetic" : "top";
         const text = autoNumberQuestions ? `${questionCounter.current}. ${textBox.value}` : textBox.value;
-        ctx.fillText(text, textBox.canvasX, textBox.canvasY);
+        // when sitting on a ruled line, lift the baseline slightly above the
+        // line itself rather than drawing straight through it
+        const yPos = autoNumberQuestions ? textBox.canvasY - 6 : textBox.canvasY;
+        ctx.fillText(text, textBox.canvasX, yPos);
         if (autoNumberQuestions) questionCounter.current += 1;
         dirty.current = true;
         upload();
