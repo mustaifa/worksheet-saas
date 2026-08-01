@@ -226,8 +226,8 @@ export default function DrawingSurface({
             onKeyDown={(e) => { if (e.key === "Enter") commitText(); if (e.key === "Escape") setTextBox(null); }}
             onBlur={commitText}
             placeholder="Type…"
-            className="absolute bg-white border-2 border-slate-900 rounded px-2 py-1.5 outline-none"
-            style={{ left: textBox.screenX, top: textBox.screenY, color: "#0f172a", fontSize: 16, minWidth: 160, zIndex: 20 }}
+            className="absolute border-2 border-slate-900 rounded px-2 py-1.5 outline-none"
+            style={{ left: textBox.screenX, top: textBox.screenY, color: "#0f172a", backgroundColor: "#ffffff", fontSize: 16, minWidth: 160, zIndex: 20 }}
           />
         )}
       </div>

@@ -9,24 +9,36 @@ export const SCIENCE_TOPICS: Topic[] = [
   { id: "water_cycle", label: "The Water Cycle", grades: [3, 4, 5, 6], aliases: ["water cycle", "evaporation", "condensation"] },
   { id: "simple_machines", label: "Simple Machines", grades: [4, 5, 6], aliases: ["simple machine", "lever", "pulley", "wedge"] },
   { id: "food_chain", label: "Food Chains", grades: [3, 4, 5, 6], aliases: ["food chain", "producer", "consumer", "predator"] },
-  { id: "solar_system", label: "The Solar System", grades: [3, 4, 5, 6, 7], aliases: ["solar system", "planet", "orbit"] },
+  { id: "solar_system", label: "The Solar System (Mixed)", grades: [3, 4, 5, 6, 7], aliases: ["solar system"], group: "Solar System" },
+  { id: "solar_system_planets", label: "The Planets", grades: [3, 4, 5, 6, 7], aliases: ["planet", "planets in order"], group: "Solar System" },
+  { id: "solar_system_earth_moon", label: "Earth, Sun & Moon", grades: [3, 4, 5, 6, 7], aliases: ["orbit", "moon phases", "day and night", "seasons"], group: "Solar System" },
   { id: "human_body_systems", label: "Human Body Systems (Mixed)", grades: [5, 6, 7, 8], aliases: ["body system", "organ"], group: "Human Body" },
   { id: "body_circulatory", label: "Circulatory System", grades: [5, 6, 7, 8], aliases: ["circulatory", "heart", "blood"], group: "Human Body" },
   { id: "body_digestive", label: "Digestive System", grades: [5, 6, 7, 8], aliases: ["digestive", "stomach", "digestion"], group: "Human Body" },
   { id: "body_respiratory", label: "Respiratory System", grades: [5, 6, 7, 8], aliases: ["respiratory", "lungs", "breathing"], group: "Human Body" },
   { id: "body_skeletal_muscular", label: "Skeletal & Muscular System", grades: [5, 6, 7, 8], aliases: ["skeletal", "muscular", "bones", "muscles"], group: "Human Body" },
   { id: "cell_biology", label: "Cell Biology", grades: [6, 7, 8], aliases: ["cell", "mitochondria", "nucleus", "organelle"] },
-  { id: "ecosystems", label: "Ecosystems", grades: [6, 7, 8, 9], aliases: ["ecosystem", "biome", "symbiosis"] },
+  { id: "ecosystems", label: "Ecosystems (Mixed)", grades: [6, 7, 8, 9], aliases: ["ecosystem"], group: "Ecosystems" },
+  { id: "ecosystem_roles", label: "Producers, Consumers & Decomposers", grades: [6, 7, 8, 9], aliases: ["producer", "consumer", "decomposer", "food web"], group: "Ecosystems" },
+  { id: "ecosystem_relationships", label: "Biomes & Symbiosis", grades: [6, 7, 8, 9], aliases: ["biome", "symbiosis", "mutualism", "parasitism"], group: "Ecosystems" },
   { id: "periodic_table_basics", label: "Periodic Table Basics", grades: [7, 8, 9], aliases: ["periodic table", "element symbol", "atomic number"] },
-  { id: "forces_motion", label: "Forces & Motion", grades: [6, 7, 8, 9], aliases: ["force", "motion", "speed", "newton's law"] },
-  { id: "earth_science", label: "Earth Science", grades: [6, 7, 8, 9], aliases: ["rock cycle", "plate tectonics", "weather", "earthquake"] },
+  { id: "forces_motion", label: "Forces & Motion (Mixed)", grades: [6, 7, 8, 9], aliases: ["force", "motion"], group: "Forces & Motion" },
+  { id: "forces_speed", label: "Speed & Motion Calculations", grades: [6, 7, 8, 9], aliases: ["speed", "distance", "motion calculation"], group: "Forces & Motion" },
+  { id: "forces_laws", label: "Forces & Newton's Laws", grades: [6, 7, 8, 9], aliases: ["newton's law", "gravity", "friction"], group: "Forces & Motion" },
+  { id: "earth_science", label: "Earth Science (Mixed)", grades: [6, 7, 8, 9], aliases: ["earth science"], group: "Earth Science" },
+  { id: "earth_rocks_tectonics", label: "Rocks & Plate Tectonics", grades: [6, 7, 8, 9], aliases: ["rock cycle", "plate tectonics", "earthquake"], group: "Earth Science" },
+  { id: "earth_weather", label: "Weather & Water Cycle", grades: [6, 7, 8, 9], aliases: ["weather", "water cycle", "evaporation"], group: "Earth Science" },
   { id: "chemistry_basics", label: "Chemistry Basics (Mixed)", grades: [8, 9, 10], aliases: ["chemistry", "chemical reaction"], group: "Chemistry" },
   { id: "chemistry_atoms", label: "Atoms & Elements", grades: [8, 9, 10], aliases: ["atom", "element", "proton", "electron"], group: "Chemistry" },
   { id: "chemistry_compounds", label: "Compounds & Molecules", grades: [8, 9, 10], aliases: ["compound", "molecule", "chemical formula"], group: "Chemistry" },
   { id: "chemistry_reactions", label: "Chemical Reactions", grades: [8, 9, 10], aliases: ["chemical reaction", "exothermic", "endothermic"], group: "Chemistry" },
   { id: "physics_formulas", label: "Physics Formulas", grades: [9, 10, 11, 12], aliases: ["physics", "velocity", "acceleration", "density", "kinetic energy"] },
-  { id: "genetics_basics", label: "Genetics Basics", grades: [9, 10, 11, 12], aliases: ["genetics", "dominant", "recessive", "punnett square", "dna"] },
-  { id: "biology_advanced", label: "Advanced Biology", grades: [10, 11, 12], aliases: ["photosynthesis", "mitosis", "meiosis", "biology"] },
+  { id: "genetics_basics", label: "Genetics Basics (Mixed)", grades: [9, 10, 11, 12], aliases: ["genetics"], group: "Genetics" },
+  { id: "genetics_vocabulary", label: "Genetics Vocabulary", grades: [9, 10, 11, 12], aliases: ["dominant", "recessive", "allele", "dna"], group: "Genetics" },
+  { id: "genetics_punnett", label: "Punnett Squares & Crosses", grades: [9, 10, 11, 12], aliases: ["punnett square", "genetic cross"], group: "Genetics" },
+  { id: "biology_advanced", label: "Advanced Biology (Mixed)", grades: [10, 11, 12], aliases: ["biology"], group: "Advanced Biology" },
+  { id: "bio_photosynthesis_respiration", label: "Photosynthesis & Respiration", grades: [10, 11, 12], aliases: ["photosynthesis", "cellular respiration"], group: "Advanced Biology" },
+  { id: "bio_cell_division", label: "Mitosis & Meiosis", grades: [10, 11, 12], aliases: ["mitosis", "meiosis", "cell division"], group: "Advanced Biology" },
 ];
 
 // ---------- curated fact banks: [question, answer] ----------
@@ -87,6 +99,25 @@ const SOLAR_SYSTEM: [string, string][] = [
   ["What natural satellite orbits the Earth?", "the Moon"],
   ["How many planets are in our solar system?", "8"],
 ];
+const SOLAR_SYSTEM_PLANETS: [string, string][] = [
+  ["Which planet is closest to the sun?", "Mercury"], ["Which planet is known as the Red Planet?", "Mars"],
+  ["Which planet has the most well-known ring system?", "Saturn"],
+  ["Which planet is the largest in our solar system?", "Jupiter"],
+  ["Which planet is the smallest in our solar system?", "Mercury"],
+  ["How many planets are in our solar system?", "8"],
+  ["Which planet is known for being tilted on its side?", "Uranus"],
+  ["Which two planets are closest in size to Earth?", "Venus and Mars"],
+  ["Which planet is farthest from the sun?", "Neptune"],
+];
+const SOLAR_SYSTEM_EARTH_MOON: [string, string][] = [
+  ["What natural satellite orbits the Earth?", "the Moon"],
+  ["What is the name of the star at the center of our solar system?", "the Sun"],
+  ["What causes day and night on Earth?", "Earth rotating on its axis"],
+  ["About how long does it take Earth to orbit the Sun once?", "one year (about 365 days)"],
+  ["About how long does it take the Moon to orbit the Earth once?", "about 27-29 days (about a month)"],
+  ["What causes the different phases of the Moon?", "how much of its sunlit side we can see as it orbits Earth"],
+  ["What causes the four seasons on Earth?", "Earth's tilt as it orbits the Sun"],
+];
 const HUMAN_BODY_SYSTEMS: [string, string][] = [
   ["Which organ pumps blood through the body?", "the heart"], ["Which system helps you breathe?", "the respiratory system"],
   ["Which organ digests food?", "the stomach"], ["Which system carries blood through the body?", "the circulatory system"],
@@ -140,6 +171,23 @@ const ECOSYSTEMS: [string, string][] = [
   ["What do we call all the populations of different species living in one area?", "a community"],
   ["What is a large area with a distinct climate and organisms called, like a desert or rainforest?", "a biome"],
 ];
+const ECOSYSTEM_ROLES: [string, string][] = [
+  ["What do we call an organism that makes its own food, like a plant?", "a producer"],
+  ["What do we call an animal that eats only plants?", "an herbivore (a type of consumer)"],
+  ["What do we call an animal that eats only meat?", "a carnivore (a type of consumer)"],
+  ["What do we call an organism that breaks down dead material for nutrients?", "a decomposer"],
+  ["What do we call the path energy takes from one organism to the next when eaten?", "a food chain"],
+  ["What do we call a diagram showing many connected food chains in one ecosystem?", "a food web"],
+  ["Where does the energy in almost every food chain originally come from?", "the sun"],
+];
+const ECOSYSTEM_RELATIONSHIPS: [string, string][] = [
+  ["What is a large area with a distinct climate and organisms called, like a desert or rainforest?", "a biome"],
+  ["What is it called when two organisms live closely together and both benefit?", "mutualism"],
+  ["What is it called when one organism benefits and the other is harmed?", "parasitism"],
+  ["What is it called when one organism benefits and the other is unaffected?", "commensalism"],
+  ["What do we call all the populations of different species living in one area?", "a community"],
+  ["What do we call the specific role an organism plays in its habitat?", "its niche"],
+];
 const PERIODIC_TABLE: [string, string][] = [
   ["What is the chemical symbol for Oxygen?", "O"], ["What is the chemical symbol for Hydrogen?", "H"],
   ["What is the chemical symbol for Gold?", "Au"], ["What is the chemical symbol for Sodium?", "Na"],
@@ -154,6 +202,25 @@ const EARTH_SCIENCE: [string, string][] = [
   ["What causes weather patterns like wind?", "differences in air pressure/temperature"],
   ["What is molten rock below the Earth's surface called?", "magma"],
   ["What do we call molten rock once it reaches the surface?", "lava"],
+];
+const EARTH_ROCKS_TECTONICS: [string, string][] = [
+  ["What are the three main types of rock?", "igneous, sedimentary, and metamorphic"],
+  ["What is it called when the Earth's plates shift and cause shaking?", "an earthquake"],
+  ["What layer of the Earth do we live on?", "the crust"],
+  ["What is molten rock below the Earth's surface called?", "magma"],
+  ["What do we call molten rock once it reaches the surface?", "lava"],
+  ["What do we call the giant pieces the Earth's crust is broken into?", "tectonic plates"],
+  ["What type of rock forms when melted rock cools and hardens?", "igneous rock"],
+  ["What type of rock forms from layers of sediment pressed together over time?", "sedimentary rock"],
+];
+const EARTH_WEATHER: [string, string][] = [
+  ["What causes weather patterns like wind?", "differences in air pressure/temperature"],
+  ["What is the process where water turns into vapor and rises?", "evaporation"],
+  ["What is the process where water vapor turns back into liquid droplets?", "condensation"],
+  ["What is falling rain, snow, or hail called?", "precipitation"],
+  ["What instrument measures air pressure?", "a barometer"],
+  ["What instrument measures temperature?", "a thermometer"],
+  ["What powers the water cycle?", "the sun (heat energy)"],
 ];
 const CHEMISTRY_BASICS: [string, string][] = [
   ["What do we call a substance made of two or more elements chemically bonded?", "a compound"],
@@ -197,6 +264,23 @@ const BIOLOGY_ADVANCED: [string, string][] = [
   ["What is the term for an organism's observable traits?", "phenotype"],
   ["What is the term for an organism's genetic makeup?", "genotype"],
 ];
+const BIO_PHOTOSYNTHESIS_RESPIRATION: [string, string][] = [
+  ["Write the general word equation for photosynthesis.", "carbon dioxide + water (+ light) → glucose + oxygen"],
+  ["Where in a plant cell does photosynthesis take place?", "the chloroplasts"],
+  ["What gas do plants take in for photosynthesis?", "carbon dioxide"],
+  ["What gas do plants release as a byproduct of photosynthesis?", "oxygen"],
+  ["Write the general word equation for cellular respiration.", "glucose + oxygen → carbon dioxide + water (+ energy)"],
+  ["Which organelle is the site of cellular respiration in a cell?", "the mitochondria"],
+  ["In what way are photosynthesis and cellular respiration opposites?", "photosynthesis stores energy from sunlight, respiration releases that stored energy"],
+];
+const BIO_CELL_DIVISION: [string, string][] = [
+  ["What is the process of cell division that produces two identical cells called?", "mitosis"],
+  ["What is the process of cell division that produces sex cells (with half the chromosomes) called?", "meiosis"],
+  ["How many daughter cells does mitosis produce?", "2"],
+  ["How many daughter cells does meiosis produce?", "4"],
+  ["Are the cells produced by mitosis genetically identical or different from the parent?", "identical"],
+  ["Why does meiosis produce cells with half the chromosomes?", "so that when two sex cells combine during reproduction, the full number is restored"],
+];
 
 function randomFrom<T>(rng: () => number, arr: T[]): T {
   const { pick } = makeHelpers(rng);
@@ -227,6 +311,25 @@ const genForcesMotion: Gen = (grade, diff, rng) => {
   // ensure clean division
   const cleanDistance = time * randInt(2, diff === "hard" ? 30 : 15);
   return { q: `An object travels ${cleanDistance} meters in ${time} seconds. What is its speed?`, a: `${cleanDistance / time} m/s` };
+};
+
+const genForcesSpeed: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const time = randInt(2, 10);
+  const cleanDistance = time * randInt(2, diff === "hard" ? 30 : 15);
+  return { q: `An object travels ${cleanDistance} meters in ${time} seconds. What is its speed?`, a: `${cleanDistance / time} m/s` };
+};
+const FORCES_LAWS: [string, string][] = [
+  ["What is the SI unit of force?", "Newton (N)"],
+  ["What is Newton's First Law about?", "an object stays at rest or in motion unless acted on by a force (inertia)"],
+  ["What is Newton's Second Law formula?", "Force = mass × acceleration (F = ma)"],
+  ["What is Newton's Third Law about?", "for every action, there is an equal and opposite reaction"],
+  ["What force pulls objects toward the Earth?", "gravity"],
+  ["What force acts against motion between two surfaces touching each other?", "friction"],
+];
+const genForcesLaws: Gen = (grade, diff, rng) => {
+  const [q, a] = randomFrom(rng, FORCES_LAWS);
+  return { q, a };
 };
 
 const genPhysicsFormulas: Gen = (grade, diff, rng) => {
@@ -267,6 +370,31 @@ const genGeneticsBasics: Gen = (grade, diff, rng) => {
   };
 };
 
+const GENETICS_VOCAB: [string, string][] = [
+  ["In genetics, what do we call a trait that shows up even with only one copy of the gene?", "dominant"],
+  ["In genetics, what do we call a trait that only shows up with two copies of the gene?", "recessive"],
+  ["What are the different forms of a gene called?", "alleles"],
+  ["What molecule carries genetic information in cells?", "DNA"],
+  ["What is the term for an organism's observable traits?", "phenotype"],
+  ["What is the term for an organism's genetic makeup?", "genotype"],
+  ["What do we call an organism with two identical alleles for a trait?", "homozygous"],
+  ["What do we call an organism with two different alleles for a trait?", "heterozygous"],
+];
+const genGeneticsVocabulary: Gen = (grade, diff, rng) => {
+  const [q, a] = randomFrom(rng, GENETICS_VOCAB);
+  return { q, a };
+};
+const genGeneticsPunnett: Gen = (grade, diff, rng) => {
+  const { pick } = makeHelpers(rng);
+  const crosses: [string, string][] = [
+    ["In a cross between two heterozygous parents (Aa × Aa), what is the phenotype ratio of dominant to recessive offspring?", "3 : 1"],
+    ["In a cross between a homozygous dominant parent (AA) and a homozygous recessive parent (aa), what fraction of offspring will show the dominant trait?", "all of them (100%)"],
+    ["In a cross between a heterozygous parent (Aa) and a homozygous recessive parent (aa), what is the expected ratio of dominant to recessive offspring?", "1 : 1"],
+    ["What tool is used to predict the possible gene combinations of offspring from a cross?", "a Punnett square"],
+  ];
+  return pick(crosses.map(([q, a]) => ({ q, a })));
+};
+
 export const SCIENCE_GENERATORS: Record<string, Gen> = {
   living_nonliving: bankGen(LIVING_NONLIVING),
   five_senses: bankGen(FIVE_SENSES),
@@ -277,6 +405,8 @@ export const SCIENCE_GENERATORS: Record<string, Gen> = {
   simple_machines: bankGen(SIMPLE_MACHINES),
   food_chain: bankGen(FOOD_CHAIN),
   solar_system: bankGen(SOLAR_SYSTEM),
+  solar_system_planets: bankGen(SOLAR_SYSTEM_PLANETS),
+  solar_system_earth_moon: bankGen(SOLAR_SYSTEM_EARTH_MOON),
   human_body_systems: bankGen(HUMAN_BODY_SYSTEMS),
   body_circulatory: bankGen(BODY_CIRCULATORY),
   body_digestive: bankGen(BODY_DIGESTIVE),
@@ -284,14 +414,24 @@ export const SCIENCE_GENERATORS: Record<string, Gen> = {
   body_skeletal_muscular: bankGen(BODY_SKELETAL_MUSCULAR),
   cell_biology: bankGen(CELL_BIOLOGY),
   ecosystems: bankGen(ECOSYSTEMS),
+  ecosystem_roles: bankGen(ECOSYSTEM_ROLES),
+  ecosystem_relationships: bankGen(ECOSYSTEM_RELATIONSHIPS),
   periodic_table_basics: bankGen(PERIODIC_TABLE),
   earth_science: bankGen(EARTH_SCIENCE),
+  earth_rocks_tectonics: bankGen(EARTH_ROCKS_TECTONICS),
+  earth_weather: bankGen(EARTH_WEATHER),
   chemistry_basics: bankGen(CHEMISTRY_BASICS),
   chemistry_atoms: bankGen(CHEMISTRY_ATOMS),
   chemistry_compounds: bankGen(CHEMISTRY_COMPOUNDS),
   chemistry_reactions: bankGen(CHEMISTRY_REACTIONS),
   biology_advanced: bankGen(BIOLOGY_ADVANCED),
+  bio_photosynthesis_respiration: bankGen(BIO_PHOTOSYNTHESIS_RESPIRATION),
+  bio_cell_division: bankGen(BIO_CELL_DIVISION),
   forces_motion: genForcesMotion,
+  forces_speed: genForcesSpeed,
+  forces_laws: genForcesLaws,
   physics_formulas: genPhysicsFormulas,
   genetics_basics: genGeneticsBasics,
+  genetics_vocabulary: genGeneticsVocabulary,
+  genetics_punnett: genGeneticsPunnett,
 };

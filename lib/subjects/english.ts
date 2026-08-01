@@ -7,7 +7,9 @@ export const ENGLISH_TOPICS: Topic[] = [
   { id: "spelling", label: "Spelling", grades: [2, 3, 4, 5], aliases: ["spelling", "spell the word", "correct spelling"] },
   { id: "punctuation", label: "Punctuation", grades: [2, 3, 4, 5], aliases: ["punctuation", "comma", "period", "question mark"] },
   { id: "grammar_tenses", label: "Verb Tenses", grades: [3, 4, 5, 6], aliases: ["verb tense", "past tense", "future tense", "present tense"] },
-  { id: "synonyms_antonyms", label: "Synonyms & Antonyms", grades: [3, 4, 5, 6, 7, 8], aliases: ["synonym", "antonym", "opposite", "same meaning"] },
+  { id: "synonyms_antonyms", label: "Synonyms & Antonyms (Mixed)", grades: [3, 4, 5, 6, 7, 8], aliases: ["synonym and antonym"], group: "Synonyms & Antonyms" },
+  { id: "just_synonyms", label: "Synonyms", grades: [3, 4, 5, 6, 7, 8], aliases: ["synonym", "same meaning"], group: "Synonyms & Antonyms" },
+  { id: "just_antonyms", label: "Antonyms", grades: [3, 4, 5, 6, 7, 8], aliases: ["antonym", "opposite"], group: "Synonyms & Antonyms" },
   { id: "parts_of_speech", label: "Parts of Speech (Mixed)", grades: [4, 5, 6, 7], aliases: ["part of speech"], group: "Parts of Speech" },
   { id: "pos_adjectives_adverbs", label: "Adjectives & Adverbs", grades: [4, 5, 6, 7], aliases: ["adjective", "adverb"], group: "Parts of Speech" },
   { id: "pos_prepositions", label: "Prepositions", grades: [4, 5, 6, 7], aliases: ["preposition"], group: "Parts of Speech" },
@@ -168,6 +170,16 @@ const genSynonymsAntonyms: Gen = (grade, diff, rng) => {
   const wantSyn = rng() < 0.5;
   return wantSyn ? { q: `Give a synonym for "${word}".`, a: syn } : { q: `Give an antonym for "${word}".`, a: ant };
 };
+const genJustSynonyms: Gen = (grade, diff, rng) => {
+  const { pick } = makeHelpers(rng);
+  const [word, syn] = pick(SYNONYM_ANTONYM_PAIRS);
+  return { q: `Give a synonym for "${word}".`, a: syn };
+};
+const genJustAntonyms: Gen = (grade, diff, rng) => {
+  const { pick } = makeHelpers(rng);
+  const [word, , ant] = pick(SYNONYM_ANTONYM_PAIRS);
+  return { q: `Give an antonym for "${word}".`, a: ant };
+};
 const genPartsOfSpeech: Gen = (grade, diff, rng) => {
   const { pick } = makeHelpers(rng);
   const [sentence, word, part] = pick(PARTS_OF_SPEECH);
@@ -217,7 +229,8 @@ const genGrammarAdvanced: Gen = (grade, diff, rng) => {
 export const ENGLISH_GENERATORS: Record<string, Gen> = {
   phonics: genPhonics, sight_words: genSightWords, nouns_verbs: genNounsVerbs,
   spelling: genSpelling, punctuation: genPunctuation, grammar_tenses: genGrammarTenses,
-  synonyms_antonyms: genSynonymsAntonyms, parts_of_speech: genPartsOfSpeech,
+  synonyms_antonyms: genSynonymsAntonyms, just_synonyms: genJustSynonyms, just_antonyms: genJustAntonyms,
+  parts_of_speech: genPartsOfSpeech,
   pos_adjectives_adverbs: genAdjectivesAdverbs, pos_prepositions: genPrepositions, idioms: genIdioms,
   analogies: genAnalogies, vocabulary: genVocabulary, sentence_types: genSentenceTypes,
   literary_devices: genLiteraryDevices, grammar_advanced: genGrammarAdvanced,

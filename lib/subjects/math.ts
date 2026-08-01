@@ -27,34 +27,52 @@ export const MATH_TOPICS: Topic[] = [
   { id: "geometry_area_triangle", label: "Area: Triangles", grades: [4, 5, 6, 7, 8], aliases: ["area of triangle", "triangle area"], group: "Geometry" },
   { id: "geometry_volume", label: "Volume: Rectangular Prisms", grades: [5, 6, 7, 8], aliases: ["volume", "rectangular prism"], group: "Geometry" },
 
-  { id: "stats", label: "Statistics", grades: [5, 6, 7, 8, 11], aliases: ["statistic", "mean", "median", "mode", "range"] },
+  { id: "stats", label: "Statistics (Mixed Practice)", grades: [5, 6, 7, 8, 11], aliases: ["statistic"], group: "Statistics" },
+  { id: "stats_central_tendency", label: "Mean, Median & Mode", grades: [5, 6, 7, 8, 11], aliases: ["mean", "median", "mode", "average"], group: "Statistics" },
+  { id: "stats_range", label: "Range & Data Spread", grades: [5, 6, 7, 8, 11], aliases: ["range of data", "data spread"], group: "Statistics" },
+
   { id: "order", label: "Order of Operations", grades: [5, 6, 7], aliases: ["order of operations", "pemdas", "bodmas"] },
-  { id: "ratios", label: "Ratios & Rates", grades: [6, 7], aliases: ["ratio", "unit rate"] },
-  { id: "percent", label: "Percentages", grades: [6, 7, 8], aliases: ["percent", "percentage"] },
+
+  { id: "ratios", label: "Ratios & Rates (Mixed)", grades: [6, 7], aliases: ["ratio", "unit rate"], group: "Ratios & Rates" },
+  { id: "ratios_simplify", label: "Simplifying Ratios", grades: [6, 7], aliases: ["simplify ratio", "ratio in simplest form"], group: "Ratios & Rates" },
+  { id: "ratios_equivalent", label: "Equivalent Ratios", grades: [6, 7], aliases: ["equivalent ratio", "ratio table"], group: "Ratios & Rates" },
+  { id: "ratios_unit_rate", label: "Unit Rates", grades: [6, 7], aliases: ["unit rate", "rate per hour"], group: "Ratios & Rates" },
+
+  { id: "percent", label: "Percentages (Mixed)", grades: [6, 7, 8], aliases: ["percent", "percentage"], group: "Percentages" },
+  { id: "percent_find", label: "Finding a Percent of a Number", grades: [6, 7, 8], aliases: ["percent of a number", "what is x percent of"], group: "Percentages" },
+  { id: "percent_convert", label: "Fraction, Decimal & Percent Conversion", grades: [6, 7, 8], aliases: ["percent conversion", "fraction to percent", "decimal to percent"], group: "Percentages" },
+  { id: "percent_word_problems", label: "Percent Word Problems", grades: [6, 7, 8], aliases: ["discount", "percent off", "sale price"], group: "Percentages" },
 
   { id: "integers", label: "Integers (Mixed Practice)", grades: [6, 7, 8], aliases: ["integer", "negative number"], group: "Integers" },
   { id: "integers_add_sub", label: "Adding & Subtracting Integers", grades: [6, 7, 8], aliases: ["add integer", "subtract integer", "adding integers", "subtracting integers"], group: "Integers" },
   { id: "integers_mul_div", label: "Multiplying & Dividing Integers", grades: [6, 7, 8], aliases: ["multiply integer", "divide integer", "multiplying integers", "dividing integers"], group: "Integers" },
 
-  { id: "expressions", label: "Expressions & Equations", grades: [6, 7], aliases: ["expression", "one-step equation"] },
+  { id: "expressions", label: "Expressions & Equations (Mixed)", grades: [6, 7], aliases: ["expression"], group: "Expressions & Equations" },
+  { id: "expressions_evaluate", label: "Evaluating Expressions", grades: [6, 7], aliases: ["evaluate expression", "substitute value"], group: "Expressions & Equations" },
+  { id: "expressions_one_step", label: "Solving One-Step Equations", grades: [6, 7], aliases: ["one-step equation", "solve for x"], group: "Expressions & Equations" },
+
   { id: "proportions", label: "Proportions", grades: [7, 8], aliases: ["proportion"] },
   { id: "linear", label: "Linear Equations", grades: [8, 9], aliases: ["linear equation", "two-step equation"] },
   { id: "exponents", label: "Exponents", grades: [8, 9], aliases: ["exponent", "power of", "squared number", "cubed number"] },
 
   // ---------- grades 9-12 ----------
-  { id: "algebra_basics", label: "Algebra Basics", grades: [6, 7, 8, 9], aliases: ["algebra", "solve for x", "variables"] },
-  { id: "systems", label: "Systems of Equations", grades: [9], aliases: ["system of equations", "simultaneous equations"] },
-  { id: "quadratics", label: "Quadratic Equations", grades: [9, 10], aliases: ["quadratic", "factoring", "parabola"] },
-  { id: "radicals", label: "Radicals & Roots", grades: [9, 10], aliases: ["radical", "square root", "simplify root"] },
+  { id: "algebra_basics", label: "Algebra Basics (Mixed)", grades: [6, 7, 8, 9], aliases: ["algebra", "variables"], group: "Algebra Basics" },
+  { id: "algebra_combine_terms", label: "Combining Like Terms", grades: [6, 7, 8, 9], aliases: ["combine like terms", "simplify expression"], group: "Algebra Basics" },
+  { id: "algebra_distribute", label: "Distributive Property", grades: [6, 7, 8, 9], aliases: ["distributive property", "expand expression"], group: "Algebra Basics" },
+  { id: "algebra_solve", label: "Solving for x", grades: [6, 7, 8, 9], aliases: ["solve for x", "algebra equation"], group: "Algebra Basics" },
+
+  { id: "systems", label: "Systems of Equations", grades: [9], aliases: ["system of equations", "simultaneous equations"], group: "Algebra II" },
+  { id: "quadratics", label: "Quadratic Equations", grades: [9, 10], aliases: ["quadratic", "factoring", "parabola"], group: "Algebra II" },
+  { id: "radicals", label: "Radicals & Roots", grades: [9, 10], aliases: ["radical", "square root", "simplify root"], group: "Algebra II" },
   { id: "pythagorean", label: "Pythagorean Theorem", grades: [8, 9, 10], aliases: ["pythagorean", "right triangle", "hypotenuse"], group: "Geometry" },
   { id: "circle_geo", label: "Circles: Area & Circumference", grades: [7, 8, 9, 10], aliases: ["circle", "circumference", "radius", "diameter"], group: "Geometry" },
   { id: "coordinate_geo", label: "Coordinate Geometry", grades: [9, 10], aliases: ["coordinate plane", "distance formula", "midpoint", "slope"], group: "Geometry" },
-  { id: "quadratic_formula", label: "Quadratic Formula & Vertex", grades: [10, 11], aliases: ["quadratic formula", "vertex form", "discriminant"] },
-  { id: "exponential", label: "Exponential Growth & Decay", grades: [10, 11], aliases: ["exponential growth", "exponential decay", "compound"] },
-  { id: "logarithms", label: "Logarithms", grades: [11], aliases: ["logarithm", "log base"] },
-  { id: "sequences", label: "Sequences & Series", grades: [10, 11], aliases: ["arithmetic sequence", "geometric sequence", "nth term"] },
-  { id: "trig_ratios", label: "Trigonometric Ratios", grades: [10, 11, 12], aliases: ["trigonometry", "sine", "cosine", "tangent", "soh cah toa"] },
-  { id: "polynomials", label: "Polynomials", grades: [9, 10, 11], aliases: ["polynomial", "multiply binomials", "foil"] },
+  { id: "quadratic_formula", label: "Quadratic Formula & Vertex", grades: [10, 11], aliases: ["quadratic formula", "vertex form", "discriminant"], group: "Algebra II" },
+  { id: "exponential", label: "Exponential Growth & Decay", grades: [10, 11], aliases: ["exponential growth", "exponential decay", "compound"], group: "Algebra II" },
+  { id: "logarithms", label: "Logarithms", grades: [11], aliases: ["logarithm", "log base"], group: "Algebra II" },
+  { id: "sequences", label: "Sequences & Series", grades: [10, 11], aliases: ["arithmetic sequence", "geometric sequence", "nth term"], group: "Algebra II" },
+  { id: "trig_ratios", label: "Trigonometric Ratios", grades: [10, 11, 12], aliases: ["trigonometry", "sine", "cosine", "tangent", "soh cah toa"], group: "Trigonometry" },
+  { id: "polynomials", label: "Polynomials", grades: [9, 10, 11], aliases: ["polynomial", "multiply binomials", "foil"], group: "Algebra II" },
   { id: "probability", label: "Probability", grades: [7, 8, 9, 12], aliases: ["probability", "chance", "odds"] },
 ];
 
@@ -195,6 +213,59 @@ const genPercent: Gen = (grade, diff, rng) => {
   if (kind === "findpercent") return { q: `What is ${pct}% of ${base}?`, a: `${result}` };
   const item = pick(["backpack", "skateboard", "book set", "video game", "pair of shoes"]);
   return { q: `A ${item} costs $${base}. It is on sale for ${pct}% off. How much is the discount?`, a: `$${result}` };
+};
+
+// ---------- Phase 2 sub-topic generators ----------
+const genRatiosSimplify: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const g = randInt(2, diff === "hard" ? 9 : 6), x = randInt(2, 9), y = randInt(2, 9);
+  const [rn, rd] = simplifyFrac(x * g, y * g);
+  return { q: `Write the ratio ${x * g} : ${y * g} in simplest form.`, a: `${rn} : ${rd}` };
+};
+const genRatiosEquivalent: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const a1 = randInt(2, 9), b1 = randInt(2, 9), mult = randInt(2, diff === "hard" ? 9 : 5);
+  return { q: `${a1} : ${b1} = ${a1 * mult} : ?`, a: `${b1 * mult}` };
+};
+const genRatiosUnitRate: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const person = pick(names), item = pick(["miles", "pages", "laps", "problems", "words typed"]);
+  const hours = randInt(2, 6), rate = randInt(3, diff === "hard" ? 18 : 9);
+  return { q: `${person} completed ${hours * rate} ${item} in ${hours} hours. What is the rate per hour?`, a: `${rate} ${item} per hour` };
+};
+
+const genPercentFind: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const pct = pick(dr(diff, { easy: [10, 20, 25, 50], medium: [10, 15, 20, 25, 30, 40, 60, 75], hard: [8, 12, 15, 35, 45, 65, 85] }));
+  const base = dr(diff, { easy: () => randInt(1, 20) * 10, medium: () => randInt(1, 50) * 4, hard: () => randInt(10, 300) })();
+  return { q: `What is ${pct}% of ${base}?`, a: `${Math.round(((pct / 100) * base) * 100) / 100}` };
+};
+const genPercentConvert: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const kind = pick(["frac_to_pct", "dec_to_pct"]);
+  if (kind === "frac_to_pct") { const d = pick([4, 5, 10, 20, 25, 50]), n = randInt(1, d - 1); return { q: `Write ${n}/${d} as a percent.`, a: `${Math.round((n / d) * 100)}%` }; }
+  const dec = (randInt(1, 99) / 100).toFixed(2);
+  return { q: `Write ${dec} as a percent.`, a: `${Math.round(parseFloat(dec) * 100)}%` };
+};
+const genPercentWordProblems: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const pct = pick(dr(diff, { easy: [10, 20, 25, 50], medium: [15, 20, 30, 40], hard: [12, 35, 45, 65] }));
+  const base = dr(diff, { easy: () => randInt(1, 20) * 10, medium: () => randInt(1, 50) * 4, hard: () => randInt(10, 300) })();
+  const discount = Math.round(((pct / 100) * base) * 100) / 100;
+  const item = pick(["backpack", "skateboard", "book set", "video game", "pair of shoes"]);
+  return { q: `A ${item} costs $${base}. It is on sale for ${pct}% off. How much is the discount?`, a: `$${discount}` };
+};
+
+const genExpressionsEvaluate: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const x = randInt(1, diff === "hard" ? 12 : 8), coeff = randInt(2, 9), add = randInt(1, 15);
+  if (diff === "hard" && rng() < 0.4) return { q: `Evaluate ${coeff}x² + ${add} when x = ${x}.`, a: `${coeff * x * x + add}` };
+  return { q: `Evaluate ${coeff}x + ${add} when x = ${x}.`, a: `${coeff * x + add}` };
+};
+const genExpressionsOneStep: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const coeff = diff === "hard" ? randInt(2, 9) : 1, x = randInt(2, diff === "hard" ? 15 : 12), add = randInt(1, 20), total = coeff * x + add;
+  return { q: `Solve for x: ${coeff === 1 ? `x + ${add}` : `${coeff}x + ${add}`} = ${total}`, a: `x = ${x}` };
 };
 const genIntegerV2: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
@@ -365,6 +436,27 @@ const genStats: Gen = (grade, diff, rng) => {
   const counts: Record<number, number> = {}; data.forEach((v) => (counts[v] = (counts[v] || 0) + 1));
   return { q: `Find the mode of: ${data.join(", ")}`, a: `${Object.keys(counts).reduce((a, b) => (counts[+a] >= counts[+b] ? a : b))}` };
 };
+const genStatsCentralTendency: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const size = dr(diff, { easy: 5, medium: 6, hard: 7 });
+  const max = dr(diff, { easy: 20, medium: 50, hard: 100 });
+  const data = Array.from({ length: size }, () => randInt(1, max));
+  const sorted = [...data].sort((a, b) => a - b);
+  const kind = pick(["mean", "median", "mode"]);
+  if (kind === "mean") return { q: `Find the mean of: ${data.join(", ")}`, a: `${Math.round((data.reduce((s, v) => s + v, 0) / data.length) * 100) / 100}` };
+  if (kind === "median") { const mid = Math.floor(sorted.length / 2); return { q: `Find the median of: ${data.join(", ")}`, a: `${sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid]}` }; }
+  const dupIndex = randInt(0, data.length - 2); data[dupIndex + 1] = data[dupIndex];
+  const counts: Record<number, number> = {}; data.forEach((v) => (counts[v] = (counts[v] || 0) + 1));
+  return { q: `Find the mode of: ${data.join(", ")}`, a: `${Object.keys(counts).reduce((a, b) => (counts[+a] >= counts[+b] ? a : b))}` };
+};
+const genStatsRange: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const size = dr(diff, { easy: 5, medium: 6, hard: 8 });
+  const max = dr(diff, { easy: 20, medium: 50, hard: 100 });
+  const data = Array.from({ length: size }, () => randInt(1, max));
+  const sorted = [...data].sort((a, b) => a - b);
+  return { q: `Find the range of: ${data.join(", ")}`, a: `${sorted[sorted.length - 1] - sorted[0]}` };
+};
 const genProportions: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);
   const a = randInt(2, 12), b = randInt(2, 12), mult = randInt(2, diff === "hard" ? 9 : 6);
@@ -394,6 +486,22 @@ const genAlgebraBasics: Gen = (grade, diff, rng) => {
     const a = randInt(2, 6), b = randInt(1, 9), c = randInt(1, 9);
     return { q: `Expand: ${a}(x + ${b}) ${c >= 0 ? `+ ${c}` : ""}`.trim(), a: `${a}x + ${a * b + c}` };
   }
+  const coeff = randInt(2, diff === "hard" ? 9 : 6), x = randInt(-10, 10) || 3, add = randInt(1, 15) * (rng() < 0.5 ? -1 : 1);
+  const total = coeff * x + add;
+  return { q: `Solve for x: ${coeff}x ${add >= 0 ? `+ ${add}` : `- ${Math.abs(add)}`} = ${total}`, a: `x = ${x}` };
+};
+const genAlgebraCombineTerms: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const a = randInt(2, diff === "hard" ? 15 : 9), b = randInt(2, diff === "hard" ? 15 : 9), c = randInt(2, diff === "hard" ? 15 : 9);
+  return { q: `Simplify: ${a}x + ${b}x - ${c}x`, a: `${a + b - c}x` };
+};
+const genAlgebraDistribute: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
+  const a = randInt(2, diff === "hard" ? 9 : 6), b = randInt(1, 9), c = randInt(1, 9);
+  return { q: `Expand: ${a}(x + ${b}) + ${c}`, a: `${a}x + ${a * b + c}` };
+};
+const genAlgebraSolve: Gen = (grade, diff, rng) => {
+  const { randInt } = makeHelpers(rng);
   const coeff = randInt(2, diff === "hard" ? 9 : 6), x = randInt(-10, 10) || 3, add = randInt(1, 15) * (rng() < 0.5 ? -1 : 1);
   const total = coeff * x + add;
   return { q: `Solve for x: ${coeff}x ${add >= 0 ? `+ ${add}` : `- ${Math.abs(add)}`} = ${total}`, a: `x = ${x}` };
@@ -536,5 +644,10 @@ export const MATH_GENERATORS: Record<string, Gen> = {
   decimals_add_sub: genDecimalsAddSub, decimals_mul_div: genDecimalsMulDiv,
   decimals_round: genDecimalsRound, decimals_compare: genDecimalsCompare,
   geometry_area_rect: genGeometryAreaRect, geometry_area_triangle: genGeometryAreaTriangle, geometry_volume: genGeometryVolume,
+  stats_central_tendency: genStatsCentralTendency, stats_range: genStatsRange,
+  ratios_simplify: genRatiosSimplify, ratios_equivalent: genRatiosEquivalent, ratios_unit_rate: genRatiosUnitRate,
+  percent_find: genPercentFind, percent_convert: genPercentConvert, percent_word_problems: genPercentWordProblems,
+  expressions_evaluate: genExpressionsEvaluate, expressions_one_step: genExpressionsOneStep,
+  algebra_combine_terms: genAlgebraCombineTerms, algebra_distribute: genAlgebraDistribute, algebra_solve: genAlgebraSolve,
   integers_add_sub: genIntegersAddSub, integers_mul_div: genIntegersMulDiv,
 };
