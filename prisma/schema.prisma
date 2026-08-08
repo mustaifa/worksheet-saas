@@ -14,6 +14,9 @@ model User {
   passwordHash         String
   createdAt            DateTime  @default(now())
   role                 String    @default("user") // user | admin
+  
+  worksheetScansUsedToday    Int      @default(0)
+  worksheetScanUsageResetAt  DateTime @default(now())
 
   // Trial + subscription state
   trialEndsAt          DateTime
@@ -36,6 +39,7 @@ model User {
   liveSessions           LiveSession[]
   whiteboards            Whiteboard[]
   customWorksheets       CustomWorksheet[]
+  scannedWorksheets ScannedWorksheet[]
 }
 
 model ChildProfile {

@@ -26,6 +26,7 @@ export default function Navbar() {
             <Link href="/dashboard/whiteboard" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Whiteboard</Link>
             <Link href="/dashboard/custom-worksheet" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Custom</Link>
             <Link href="/dashboard/tutor" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Tutor</Link>
+            <Link href="/dashboard/worksheet-scan" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Scan</Link>
             <Link href="/admin" className="text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white">Admin</Link>
             <button onClick={() => signOut({ callbackUrl: "/" })} className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
               Sign out
