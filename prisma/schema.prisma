@@ -200,3 +200,15 @@ model CustomWorksheet {
 
   @@index([hostUserId])
 }
+
+model ScannedWorksheet {
+  id            String   @id @default(cuid())
+  hostUserId    String
+  title         String
+  extractedData Json
+  createdAt     DateTime @default(now())
+
+  host          User @relation(fields: [hostUserId], references: [id], onDelete: Cascade)
+
+  @@index([hostUserId])
+}
