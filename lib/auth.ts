@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
         const valid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!valid) return null;
 
-        return { id: user.id, name: user.name, email: user.email };
+        return { id: user.id, name: user.name, email: user.email, role: user.role } as any;
       },
     }),
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -73,14 +73,23 @@ export const authOptions: NextAuthOptions = {
         }
 
         token.id = dbUser.id;
+        token.role = dbUser.role;
         return token;
       }
 
-      if (user) token.id = (user as any).id;
+      if (user) { token.id = (user as any).id; token.role = (user as any).role; }
+      // Sessions created before role was stored: look it up once.
+      if (token.id && token.role === undefined) {
+        const u = await prisma.user.findUnique({ where: { id: token.id as string }, select: { role: true } });
+        token.role = u?.role || "user";
+      }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) (session.user as any).id = token.id;
+      if (session.user) {
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role || "user"; // used only to show/hide the Admin link; the admin page re-checks the database
+      }
       return session;
     },
   },
