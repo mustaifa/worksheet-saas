@@ -1,3 +1,4 @@
+import { brandedFilename } from "@/lib/brand";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -15,7 +16,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 
   const buffer = await generateWorksheetDocxBuffer(scan.extractedData as unknown as ExtractedWorksheet);
-  const filename = `${scan.title.replace(/[^a-z0-9]/gi, "-")}.docx`;
+  const filename = brandedFilename([scan.title], "docx");
 
   return new NextResponse(buffer, {
     headers: {
