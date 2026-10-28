@@ -70,7 +70,7 @@ export default function Safety() {
           </table>
         </div>
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-          We use privacy-friendly, cookie-free analytics to count page visits. Full details are in our <Link href="/privacy" className="underline underline-offset-2">Privacy Policy</Link>.
+          We count page visits with cookie-free analytics, and use Google Analytics only if you accept it on our cookie notice — never on children's quiz or challenge screens. Full details are in our <Link href="/privacy" className="underline underline-offset-2">Privacy Policy</Link>.
         </p>
       </section>
 
