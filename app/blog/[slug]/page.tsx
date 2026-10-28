@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { coverOf, subjectOf, headingId } from "@/lib/blogPresentation";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -30,7 +32,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
   const post = getPostBySlug(params.slug);
   if (!post) notFound();
   const freeMode = isFreeMode();
-  const more = BLOG_POSTS.filter((p) => p.slug !== post.slug).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 3);
+  const more = BLOG_POSTS.filter((p) => p.slug !== post.slug).sort((a, b) => Number(subjectOf(b) === subjectOf(post)) - Number(subjectOf(a) === subjectOf(post)) || b.date.localeCompare(a.date)).slice(0, 3);
 
   return (
     <main>
@@ -42,6 +44,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
             "@type": "Article",
             headline: post.title,
             description: post.excerpt,
+            image: absoluteUrl(coverOf(post).src),
             datePublished: post.date,
             dateModified: post.updated || post.date,
             mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
@@ -61,6 +64,9 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           {new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
           {post.readMinutes ? ` · ${post.readMinutes} min read` : ""}
         </p>
+        <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{post.excerpt}</p>
+        <Image src={coverOf(post).src} alt={coverOf(post).alt} width={720} height={405} priority className="mt-8 w-full rounded-2xl" />
+        {post.content.some(b => b.startsWith("## ")) && <nav aria-label="In this guide" className="mt-8 rounded-xl bg-slate-100 p-6 dark:bg-slate-900"><h2 className="font-bold">In this guide</h2><ul className="mt-3 space-y-2 text-sm">{post.content.map((b, i) => b.startsWith("## ") ? <li key={i}><a href={`#${headingId(b.slice(3), i)}`} className="underline underline-offset-4">{b.slice(3)}</a></li> : null)}</ul></nav>}
         <BlogBody blocks={post.content} />
 
         {post.worksheets && post.worksheets.length > 0 && (

@@ -17,10 +17,13 @@ export type BlogPost = {
   worksheets?: { label: string; href: string }[];
 };
 
+import { PRACTICAL_GUIDES } from "./blogPracticalGuides";
+
 import { POSTS_2026_10 } from "./blogPosts2026";
 import { POSTS_2026_10B } from "./blogPosts2026b";
 
 export const BLOG_POSTS: BlogPost[] = [
+  ...PRACTICAL_GUIDES,
   ...POSTS_2026_10B,
   ...POSTS_2026_10,
   {
