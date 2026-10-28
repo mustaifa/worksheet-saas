@@ -1,3 +1,5 @@
+export type Audience = "teachers" | "parents" | "students";
+
 export type BlogPost = {
   slug: string;
   title: string;
@@ -9,16 +11,21 @@ export type BlogPost = {
   readMinutes?: number;
   /** Blocks: paragraphs, "## heading", "### subheading", "- list item", "> tip"; inline [text](/path) and **bold**. */
   content: string[];
+  /** Who the post is for — drives the blog filter and the audience pages. */
+  audience?: Audience[];
   /** Worksheet pages to link at the end of the post. */
   worksheets?: { label: string; href: string }[];
 };
 
 import { POSTS_2026_10 } from "./blogPosts2026";
+import { POSTS_2026_10B } from "./blogPosts2026b";
 
 export const BLOG_POSTS: BlogPost[] = [
+  ...POSTS_2026_10B,
   ...POSTS_2026_10,
   {
     slug: "five-ways-to-use-practice-worksheets-effectively",
+    audience: ["teachers", "parents"],
     title: "5 Ways to Use Practice Worksheets Effectively",
     excerpt: "Worksheets work best as part of a routine, not a one-off. Here's how to get real results from them.",
     date: "2026-06-01",
@@ -33,6 +40,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "how-we-keep-every-answer-key-accurate",
+    audience: ["teachers", "parents"],
     title: "How We Keep Every Answer Key Accurate",
     excerpt: "Why we don't let an AI model guess at math answers — and what we do instead.",
     date: "2026-06-10",
@@ -45,6 +53,7 @@ export const BLOG_POSTS: BlogPost[] = [
   },
   {
     slug: "grade-by-grade-guide-to-math-topics",
+    audience: ["parents", "teachers"],
     title: "A Grade-by-Grade Guide to Math Topics",
     excerpt: "What's typically taught when — a quick reference for parents helping at home.",
     date: "2026-06-18",

@@ -90,6 +90,10 @@ export default function WorksheetGenerator() {
     seedRef.current = newSeed();
     setShowAnswers(false);
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed: seedRef.current }));
+    // On phones the worksheet renders below the long options form — bring it into view.
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setTimeout(() => printRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+    }
   }
 
   function handlePreset(preset: { subject: SubjectId; grade: number; topic: string }) {

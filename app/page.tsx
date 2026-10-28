@@ -106,6 +106,23 @@ export default function Home() {
       </section>
 
       <section className="max-w-6xl mx-auto px-6 py-12">
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Made for everyone who helps a child learn</h2>
+        <div className="mt-6 grid sm:grid-cols-3 gap-6">
+          {[
+            { href: "/teachers", t: "Teachers", d: "Differentiated worksheets, exit tickets, live quizzes and fresh re-tests — with answer keys you can trust.", cta: "See how teachers use it" },
+            { href: "/parents", t: "Parents", d: "Short practice at home that matches school, answer keys for quick checking, and family challenges with rewards.", cta: "Practice at home" },
+            { href: "/students", t: "Students", d: "Practise the topics you're stuck on, check your own answers, and follow study plans that actually work.", cta: "Start practising" },
+          ].map((a) => (
+            <Link key={a.href} href={a.href} className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 hover:border-slate-900 dark:hover:border-white">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{a.t}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">{a.d}</p>
+              <span className="inline-block mt-4 text-sm font-medium text-slate-900 dark:text-white group-hover:underline">{a.cta} →</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-12">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">How it works</h2>
         <div className="mt-6 grid sm:grid-cols-3 gap-6">
           {[

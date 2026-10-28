@@ -6,7 +6,7 @@ export default function Footer() {
 
   return (
     <footer className="print:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-20">
-      <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
+      <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-5 gap-8 text-sm">
         <div className="col-span-2 sm:col-span-1">
           <p className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <img src="/logo-mark.png" alt="" width={22} height={22} className="rounded-md" />
@@ -19,7 +19,16 @@ export default function Footer() {
           <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
             <li><Link href="/worksheets" className="hover:text-slate-900 dark:hover:text-white">Browse worksheets</Link></li>
             {!freeMode && <li><Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">Pricing</Link></li>}
-            <li><Link href="/blog" className="hover:text-slate-900 dark:hover:text-white">Blog</Link></li>
+            <li><Link href="/blog" className="hover:text-slate-900 dark:hover:text-white">Guides</Link></li>
+            <li><Link href="/play" className="hover:text-slate-900 dark:hover:text-white">Join a live quiz</Link></li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold text-slate-900 dark:text-white mb-2">Who it's for</p>
+          <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
+            <li><Link href="/teachers" className="hover:text-slate-900 dark:hover:text-white">Teachers</Link></li>
+            <li><Link href="/parents" className="hover:text-slate-900 dark:hover:text-white">Parents</Link></li>
+            <li><Link href="/students" className="hover:text-slate-900 dark:hover:text-white">Students</Link></li>
           </ul>
         </div>
         <div>

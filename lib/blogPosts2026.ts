@@ -6,6 +6,7 @@ import type { BlogPost } from "./blog";
 export const POSTS_2026_10: BlogPost[] = [
   {
     slug: "literary-devices-examples",
+    audience: ["students", "teachers"],
     title: "Literary Devices: 20 Examples Every Student Should Know",
     seoTitle: "20 Literary Devices with Examples (and How to Spot Them)",
     excerpt: "Simile, metaphor, personification, irony and more — each with a clear definition, an example, and a quick test for telling similar devices apart.",
@@ -50,6 +51,7 @@ export const POSTS_2026_10: BlogPost[] = [
   },
   {
     slug: "simple-compound-complex-sentences",
+    audience: ["students", "teachers"],
     title: "Simple, Compound, Complex and Compound-Complex Sentences Explained",
     seoTitle: "Simple, Compound & Complex Sentences: Examples and Tests",
     excerpt: "A clear way to tell the four sentence structures apart, with examples and the two-question test students can use on any sentence.",
@@ -84,6 +86,7 @@ export const POSTS_2026_10: BlogPost[] = [
   },
   {
     slug: "circulatory-system-for-kids",
+    audience: ["students", "teachers", "parents"],
     title: "How the Circulatory System Works: A Guide for Grades 5–8",
     seoTitle: "Circulatory System Explained for Grades 5–8 (Free Worksheets)",
     excerpt: "The heart, blood and blood vessels in plain language — the path blood takes, what each part does, and the questions students most often get wrong.",
@@ -123,6 +126,7 @@ export const POSTS_2026_10: BlogPost[] = [
   },
   {
     slug: "adding-and-subtracting-fractions",
+    audience: ["students", "parents", "teachers"],
     title: "Adding and Subtracting Fractions: A Step-by-Step Guide for Grades 5–6",
     seoTitle: "Adding & Subtracting Fractions: Steps, Examples, Mistakes",
     excerpt: "Like and unlike denominators, mixed numbers, and the three mistakes that cause most wrong answers — with worked examples.",
@@ -156,6 +160,7 @@ export const POSTS_2026_10: BlogPost[] = [
   },
   {
     slug: "punnett-squares-step-by-step",
+    audience: ["students", "teachers"],
     title: "Punnett Squares Step by Step (with Practice Problems)",
     seoTitle: "How to Do a Punnett Square: Steps, Ratios and Practice",
     excerpt: "How to set up a monohybrid cross, read genotype and phenotype ratios, and work backwards from offspring to parents.",
@@ -192,6 +197,7 @@ export const POSTS_2026_10: BlogPost[] = [
   },
   {
     slug: "synonyms-and-antonyms-activities",
+    audience: ["teachers", "parents"],
     title: "Synonyms and Antonyms: 6 Activities That Build Vocabulary",
     seoTitle: "Synonyms & Antonyms: 6 Classroom Activities (Grades 3–8)",
     excerpt: "Simple activities that go beyond matching lists — and why shades of meaning matter more than finding 'the' synonym.",
