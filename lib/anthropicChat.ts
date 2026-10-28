@@ -1,3 +1,4 @@
+import { describeAnthropicError } from "@/lib/aiHealth";
 const SYSTEM_PROMPT = `You are a friendly, patient homework helper for K-12 students (grades 1-12), used inside a worksheet practice app called Practice Sheet.
 
 Your job:
@@ -43,7 +44,7 @@ export async function askTutor(messages: ChatMessage[], grade?: number) {
     });
 
     if (!res.ok) {
-      console.error("Anthropic API error:", await res.text());
+      console.error("Anthropic API error:", await describeAnthropicError(res));
       return { error: "The tutor is having trouble responding right now. Please try again." };
     }
 

@@ -145,7 +145,7 @@ export default function Home() {
         <div className="mt-6 grid sm:grid-cols-3 gap-3">
           {POPULAR.map((p) => (
             <Link key={`${p.subject}-${p.grade}-${p.topic}`} href={`/worksheets/${p.subject}/${p.grade}/${p.topic}`} className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-100 hover:border-slate-900 dark:hover:border-white">
-              Grade {p.grade} {topicLabel(p.subject, p.topic)}
+              Grade {p.grade} {topicLabel(p.subject, p.topic).replace(/^The /, "")}
               <span className="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">{SUBJECTS.find((s) => s.id === p.subject)?.label} · with answers</span>
             </Link>
           ))}

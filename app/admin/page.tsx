@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import { redirect } from "next/navigation";
+import AiHealthCheck from "@/components/AiHealthCheck";
 
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
@@ -68,6 +69,8 @@ export default async function AdminDashboard() {
           <StatCard label="Canceled/past due" value={churned} />
           <StatCard label="Est. MRR" value={`$${mrrEstimate.toFixed(0)}`} />
         </div>
+
+        <div className="mb-8"><AiHealthCheck /></div>
 
         <div className="overflow-x-auto rounded-lg border border-slate-200">
           <table className="w-full text-sm">

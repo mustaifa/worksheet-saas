@@ -32,6 +32,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     difficulty: liveSession.difficulty as Difficulty,
     count: liveSession.questionCount,
     seed: liveSession.seed,
+    forTyping: true
   });
   const correctQuestion = questions[questionIndex];
   const correct = correctQuestion ? answersMatch(correctQuestion.a, answer || "") : false;

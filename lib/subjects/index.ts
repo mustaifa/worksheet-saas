@@ -58,6 +58,21 @@ export function groupTopics(topics: Topic[]): { group: string | null; topics: To
   return order.map((key) => ({ group: key, topics: buckets.get(key)! }));
 }
 
+/** Words in an answer, ignoring notes in brackets. */
+export function answerLength(a: string): number {
+  return a.replace(/\([^)]*\)/g, " ").trim().split(/\s+/).filter(Boolean).length;
+}
+
+// Retries (deterministically, from the same seeded rng) until it gets an
+// answer short enough to type and auto-mark fairly.
+function shortAnswerGen(gen: (grade: number, diff: Difficulty, rng: () => number) => Question) {
+  return (grade: number, diff: Difficulty, rng: () => number): Question => {
+    let item = gen(grade, diff, rng);
+    for (let i = 0; i < 30 && answerLength(item.a) > 5; i++) item = gen(grade, diff, rng);
+    return item;
+  };
+}
+
 export function generateWorksheet(opts: {
   subject: SubjectId;
   grade: number;
@@ -65,6 +80,9 @@ export function generateWorksheet(opts: {
   difficulty: Difficulty;
   count: number;
   seed: number;
+  /** Live Quiz / Family Challenge: skip questions whose answer is a long
+   * explanation, since those are typed and marked automatically. */
+  forTyping?: boolean;
 }): Question[] {
   const rng = mulberry32(opts.seed);
 
@@ -81,8 +99,9 @@ export function generateWorksheet(opts: {
     }));
   }
 
-  const gen = GENERATORS_BY_SUBJECT[opts.subject]?.[opts.topic];
-  if (!gen) return [];
+  const baseGen = GENERATORS_BY_SUBJECT[opts.subject]?.[opts.topic];
+  if (!baseGen) return [];
+  const gen = opts.forTyping ? shortAnswerGen(baseGen) : baseGen;
   return buildQuestionSet(gen, opts.grade, opts.difficulty, opts.count, rng);
 }
 
@@ -103,17 +122,25 @@ export function parseCommand(
   else if (/\b(science|biology|chemistry|physics)\b/.test(t)) subject = "science";
 
   let grade: number | null = null;
-  const gm = t.match(/grade\s*(\d{1,2})/) || t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s*grade\b/);
+  // "5th grade" wins over "grade N" so "5th grade 12 questions" means grade 5.
+  const gm = t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s*grade\b/) || t.match(/grade\s*(\d{1,2})/);
   if (gm) grade = Math.max(1, Math.min(12, parseInt(gm[1], 10)));
+  // character position of the grade number, so it isn't also read as a count
+  const gradeNumAt = gm ? (gm.index ?? 0) + gm[0].indexOf(gm[1]) : -1;
 
   let difficulty: Difficulty | null = null;
   if (/\b(easy|simple|basic)\b/.test(t)) difficulty = "easy";
   else if (/\b(hard|difficult|advanced|challenging)\b/.test(t)) difficulty = "hard";
   else if (/\b(medium|moderate|normal)\b/.test(t)) difficulty = "medium";
 
+  // "15 questions", "15 hard questions", "20 word problems" — but never the
+  // grade number itself ("grade 9 algebra questions").
   let count: number | null = null;
-  const cm = t.match(/(\d{1,2})\s*(questions|problems|q\b)/);
-  if (cm) count = Math.max(3, Math.min(30, parseInt(cm[1], 10)));
+  for (const cm of t.matchAll(/(\d{1,2})\s+(?:[a-z-]+\s+){0,2}?(questions?|problems?|qs?\b)/g)) {
+    if (cm.index === gradeNumAt) continue;
+    count = Math.max(3, Math.min(30, parseInt(cm[1], 10)));
+    break;
+  }
 
   const resolvedSubject = subject || current.subject;
 
