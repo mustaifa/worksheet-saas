@@ -202,7 +202,9 @@ const genFraction: Gen = (grade, diff, rng) => {
   let n1 = diff === "hard" ? randInt(1, d1 * 2) : randInt(1, d1 - 1), n2 = diff === "hard" ? randInt(1, d2 * 2) : randInt(1, d2 - 1);
   if (n1 === d1) n1 = d1 - 1 || 1; if (n2 === d2) n2 = d2 + 1;
   if (diff === "easy") { n1 = randInt(1, d1 - 1); n2 = randInt(1, d1 - 1); d2 = d1; }
-  // Grades 5–6 haven't met negative numbers yet: put the larger fraction first.
+  // Grades 5–6 haven't met negative numbers yet: put the larger fraction first,
+  // and never subtract a fraction from itself (e.g. 1/2 − 1/2).
+  if (op === "-" && n1 * d2 === n2 * d1) { if (n1 < d1 - 1) n1++; else if (n2 > 1) n2--; else d2++; }
   if (op === "-" && n1 * d2 < n2 * d1) { [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1]; }
   if (op === "+" || op === "-") { const num = op === "+" ? n1 * d2 + n2 * d1 : n1 * d2 - n2 * d1; const [sn, sd] = simplifyFrac(num, d1 * d2); return { q: `${fracStr(n1, d1)} ${op} ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) }; }
   if (op === "×") { const [sn, sd] = simplifyFrac(n1 * n2, d1 * d2); return { q: `${fracStr(n1, d1)} × ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) }; }
@@ -355,7 +357,9 @@ const genFractionsAddSub: Gen = (grade, diff, rng) => {
   let n1 = diff === "hard" ? randInt(1, d1 * 2) : randInt(1, d1 - 1), n2 = diff === "hard" ? randInt(1, d2 * 2) : randInt(1, d2 - 1);
   if (n1 === d1) n1 = d1 - 1 || 1; if (n2 === d2) n2 = d2 + 1;
   if (diff === "easy") { n1 = randInt(1, d1 - 1); n2 = randInt(1, d1 - 1); d2 = d1; }
-  // Grades 5–6 haven't met negative numbers yet: put the larger fraction first.
+  // Grades 5–6 haven't met negative numbers yet: put the larger fraction first,
+  // and never subtract a fraction from itself (e.g. 1/2 − 1/2).
+  if (op === "-" && n1 * d2 === n2 * d1) { if (n1 < d1 - 1) n1++; else if (n2 > 1) n2--; else d2++; }
   if (op === "-" && n1 * d2 < n2 * d1) { [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1]; }
   const num = op === "+" ? n1 * d2 + n2 * d1 : n1 * d2 - n2 * d1;
   const [sn, sd] = simplifyFrac(num, d1 * d2);

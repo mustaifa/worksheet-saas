@@ -142,12 +142,28 @@ export function parseCommand(
     break;
   }
 
-  const resolvedSubject = subject || current.subject;
+  let resolvedSubject: SubjectId = subject || current.subject;
 
+  // Best match = longest matching alias ("intro to fraction" beats "fraction"),
+  // with a tie-break for topics offered at the requested grade.
+  // If no subject was named, search every subject so "grade 4 water cycle"
+  // lands in Science even when Math is currently selected.
   let topicId: string | null = null;
-  for (const top of TOPICS_BY_SUBJECT[resolvedSubject]) {
-    if (top.aliases.some((alias) => t.includes(alias))) { topicId = top.id; break; }
+  let best = 0;
+  let bestSubject: SubjectId = resolvedSubject;
+  const searchIn: SubjectId[] = subject ? [subject] : [resolvedSubject, ...SUBJECTS.map((x) => x.id).filter((x) => x !== resolvedSubject)];
+  for (const subj of searchIn) {
+    for (const top of TOPICS_BY_SUBJECT[subj]) {
+      const names = [...top.aliases, top.label.toLowerCase()];
+      for (const alias of names) {
+        if (alias.length < 3 || !t.includes(alias)) continue;
+        // small bonus for the current subject and for topics offered at the requested grade
+        const score = alias.length * 10 + (grade && top.grades.includes(grade) ? 5 : 0) + (subj === resolvedSubject ? 1 : 0);
+        if (score > best) { best = score; topicId = top.id; bestSubject = subj; }
+      }
+    }
   }
+  if (topicId) resolvedSubject = bestSubject;
 
   if (topicId && grade) {
     const top = TOPICS_BY_SUBJECT[resolvedSubject].find((x) => x.id === topicId)!;
