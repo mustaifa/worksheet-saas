@@ -36,15 +36,15 @@ html.dark[data-grade] .grade-theme-bar { background: linear-gradient(110deg, col
   html[data-grade] body { background-color: var(--grade-bg); background-image: var(--grade-pattern); background-size: 130px 130px; }
   html.dark[data-grade] body { background-color: var(--grade-dark); background-image: radial-gradient(ellipse at top, color-mix(in srgb, var(--grade-accent) 18%, transparent), transparent 65%); }
   html[data-grade] header { border-color: color-mix(in srgb, var(--grade-accent) 20%, #e2e8f0); }
-  html[data-grade] :is(.bg-white, .bg-slate-50, .bg-slate-100):not(#worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-soft) 38%, white); }
-  html[data-grade] .bg-slate-100:not(#worksheet-print-area, #worksheet-print-area *) { background-color: var(--grade-soft); }
+  html:not(.dark)[data-grade] :is(.bg-white, .bg-slate-50, .bg-slate-100):not(#worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-soft) 38%, white); }
+  html:not(.dark)[data-grade] .bg-slate-100:not(#worksheet-print-area, #worksheet-print-area *) { background-color: var(--grade-soft); }
   html[data-grade] :is(.border-slate-200, .border-slate-300):not(#worksheet-print-area, #worksheet-print-area *) { border-color: color-mix(in srgb, var(--grade-accent) 22%, #e2e8f0); }
   html[data-grade] :is(a,button).bg-slate-900:not(#worksheet-print-area *) { background-color: var(--grade-accent); border-color: var(--grade-accent); color: white; }
   html[data-grade] :is(a,button).bg-slate-900:not(#worksheet-print-area *):hover { background-color: color-mix(in srgb, var(--grade-accent) 85%, black); }
   html[data-grade] :is(a,button).bg-indigo-700 { background-color: var(--grade-accent); }
   html[data-grade] :is(.text-indigo-700, .text-blue-600):not(#worksheet-print-area, #worksheet-print-area *) { color: var(--grade-accent); }
   html[data-grade] :is(a,button,select,input,textarea):focus-visible { outline-color: var(--grade-accent); }
-  html.dark[data-grade] :is(.dark\:bg-slate-800, .dark\:bg-slate-900, .dark\:bg-slate-950):not(#worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-dark) 88%, white); }
+  html.dark[data-grade] :is(.dark\:bg-slate-800, .dark\:bg-slate-900, .dark\:bg-slate-950):not(body, #worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-dark) 88%, white); }
   html.dark[data-grade] :is(.border-slate-200, .border-slate-300, .dark\:border-slate-700, .dark\:border-slate-800):not(#worksheet-print-area, #worksheet-print-area *) { border-color: color-mix(in srgb, var(--grade-bright) 22%, var(--grade-dark)); }
   html.dark[data-grade] :is(a,button).bg-slate-900:not(#worksheet-print-area *) { background-color: var(--grade-accent); color: white; }
   html.dark[data-grade] :is(.text-indigo-700, .text-blue-600):not(#worksheet-print-area, #worksheet-print-area *) { color: var(--grade-bright); }
