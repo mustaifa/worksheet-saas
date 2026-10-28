@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { headingId } from "@/lib/blogPresentation";
 
 // Renders blog content written as an array of lightweight-markdown blocks:
 //   "## Heading", "### Subheading", "- list item" (consecutive items group),
@@ -34,7 +35,7 @@ export default function BlogBody({ blocks }: { blocks: string[] }) {
     if (b.startsWith("- ")) { list.push(b.slice(2)); return; }
     flush(k);
     if (b.startsWith("### ")) nodes.push(<h3 key={k} className="text-lg font-semibold text-slate-900 dark:text-white pt-2">{inline(b.slice(4), `h3-${k}`)}</h3>);
-    else if (b.startsWith("## ")) nodes.push(<h2 key={k} className="text-2xl font-bold text-slate-900 dark:text-white pt-4">{inline(b.slice(3), `h2-${k}`)}</h2>);
+    else if (b.startsWith("## ")) nodes.push(<h2 id={headingId(b.slice(3), k)} key={k} className="scroll-mt-24 text-2xl font-bold text-slate-900 dark:text-white pt-4">{inline(b.slice(3), `h2-${k}`)}</h2>);
     else if (b.startsWith("> ")) nodes.push(<p key={k} className="border-l-4 border-amber-400 bg-amber-50 dark:bg-slate-900 px-4 py-3 rounded-r-lg">{inline(b.slice(2), `q-${k}`)}</p>);
     else nodes.push(<p key={k}>{inline(b, `p-${k}`)}</p>);
   });
