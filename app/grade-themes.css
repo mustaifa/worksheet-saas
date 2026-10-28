@@ -1,0 +1,65 @@
+/* Grade tokens are independent of the existing light/dark preference. */
+:root { --grade-accent: #4338ca; --grade-bright: #a5b4fc; --grade-bg: #f8fafc; --grade-soft: #eef2ff; --grade-dark: #151b2b; }
+html[data-grade="1"] { --grade-accent: #a63e10; --grade-bright: #fdba74; --grade-bg: #fff8eb; --grade-soft: #fff0d6; --grade-dark: #21180f; --grade-pattern: url("/grade-themes/pattern-1.svg"); }
+html[data-grade="2"] { --grade-accent: #0e6580; --grade-bright: #67e8f9; --grade-bg: #effcfd; --grade-soft: #dff6fa; --grade-dark: #0d2029; --grade-pattern: url("/grade-themes/pattern-2.svg"); }
+html[data-grade="3"] { --grade-accent: #28643d; --grade-bright: #86efac; --grade-bg: #f1faef; --grade-soft: #e2f2dd; --grade-dark: #122218; --grade-pattern: url("/grade-themes/pattern-3.svg"); }
+html[data-grade="4"] { --grade-accent: #7042a5; --grade-bright: #d8b4fe; --grade-bg: #f8f3ff; --grade-soft: #efe4ff; --grade-dark: #21162f; --grade-pattern: url("/grade-themes/pattern-4.svg"); }
+html[data-grade="5"] { --grade-accent: #934a23; --grade-bright: #fdba74; --grade-bg: #fff7ef; --grade-soft: #f9e8d5; --grade-dark: #261b15; --grade-pattern: url("/grade-themes/pattern-5.svg"); }
+html[data-grade="6"] { --grade-accent: #096b66; --grade-bright: #5eead4; --grade-bg: #effaf8; --grade-soft: #d9f0ec; --grade-dark: #102524; --grade-pattern: url("/grade-themes/pattern-6.svg"); }
+html[data-grade="7"] { --grade-accent: #a33062; --grade-bright: #f9a8d4; --grade-bg: #fff4f8; --grade-soft: #fce4ee; --grade-dark: #291824; --grade-pattern: url("/grade-themes/pattern-7.svg"); }
+html[data-grade="8"] { --grade-accent: #255b9d; --grade-bright: #93c5fd; --grade-bg: #f0f6ff; --grade-soft: #e0ecfc; --grade-dark: #142032; --grade-pattern: url("/grade-themes/pattern-8.svg"); }
+html[data-grade="9"] { --grade-accent: #3546a0; --grade-bright: #a5b4fc; --grade-bg: #f3f5ff; --grade-soft: #e5e9fc; --grade-dark: #171d32; --grade-pattern: url("/grade-themes/pattern-9.svg"); }
+html[data-grade="10"] { --grade-accent: #176949; --grade-bright: #6ee7b7; --grade-bg: #f0faf5; --grade-soft: #ddf3e7; --grade-dark: #10251e; --grade-pattern: url("/grade-themes/pattern-10.svg"); }
+html[data-grade="11"] { --grade-accent: #5149a4; --grade-bright: #c4b5fd; --grade-bg: #f6f4fe; --grade-soft: #eae5fa; --grade-dark: #1b192f; --grade-pattern: url("/grade-themes/pattern-11.svg"); }
+html[data-grade="12"] { --grade-accent: #76551b; --grade-bright: #fcd34d; --grade-bg: #fbf8f0; --grade-soft: #f2ead7; --grade-dark: #232015; --grade-pattern: url("/grade-themes/pattern-12.svg"); }
+.grade-theme-bar { border-bottom: 1px solid #e2e8f0; background: linear-gradient(110deg, #eef2ff, #f8fafc); }
+.grade-theme-bar-inner { max-width: 80rem; min-height: 150px; margin: auto; padding: 22px 24px; display: flex; align-items: center; gap: 24px; position: relative; overflow: hidden; }
+.grade-theme-copy { position: relative; z-index: 1; flex: 1; }
+.grade-theme-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .16em; color: var(--grade-accent); }
+.grade-theme-name { font-size: clamp(22px, 2.5vw, 30px); line-height: 1.2; font-weight: 750; letter-spacing: -.025em; margin-top: 6px; color: #0f172a; }
+.grade-theme-description { margin-top: 7px; font-size: 13px; color: #475569; }
+.grade-theme-control { position: relative; z-index: 1; margin-right: 230px; }
+.grade-theme-control label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 6px; color: #475569; }
+.grade-theme-control select { width: 235px; max-width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 32px 10px 12px; font-size: 13px; min-height: 44px; }
+.grade-theme-control select:focus-visible { outline: 3px solid var(--grade-accent); outline-offset: 3px; }
+.grade-theme-art { position: absolute; right: 8px; width: 240px; height: 135px; pointer-events: none; }
+html[data-grade] .grade-theme-bar { background: linear-gradient(110deg, var(--grade-soft), var(--grade-bg)); border-color: color-mix(in srgb, var(--grade-accent) 22%, transparent); }
+html.dark .grade-theme-bar { background: #111827; border-color: #334155; }
+html.dark .grade-theme-name { color: #f8fafc; }
+html.dark .grade-theme-description, html.dark .grade-theme-control label { color: #cbd5e1; }
+html.dark .grade-theme-eyebrow { color: var(--grade-bright); }
+html.dark[data-grade] .grade-theme-bar { background: linear-gradient(110deg, color-mix(in srgb, var(--grade-accent) 15%, var(--grade-dark)), var(--grade-dark)); }
+
+/* Theme application is screen-only: worksheets retain their print/PDF styling.
+   Do not recolour semantic success/warning colours or subject identification. */
+@media screen {
+  html[data-grade] body { background-color: var(--grade-bg); background-image: var(--grade-pattern); background-size: 130px 130px; }
+  html.dark[data-grade] body { background-color: var(--grade-dark); background-image: radial-gradient(ellipse at top, color-mix(in srgb, var(--grade-accent) 18%, transparent), transparent 65%); }
+  html[data-grade] header { border-color: color-mix(in srgb, var(--grade-accent) 20%, #e2e8f0); }
+  html[data-grade] :is(.bg-white, .bg-slate-50, .bg-slate-100):not(#worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-soft) 38%, white); }
+  html[data-grade] .bg-slate-100:not(#worksheet-print-area, #worksheet-print-area *) { background-color: var(--grade-soft); }
+  html[data-grade] :is(.border-slate-200, .border-slate-300):not(#worksheet-print-area, #worksheet-print-area *) { border-color: color-mix(in srgb, var(--grade-accent) 22%, #e2e8f0); }
+  html[data-grade] :is(a,button).bg-slate-900:not(#worksheet-print-area *) { background-color: var(--grade-accent); border-color: var(--grade-accent); color: white; }
+  html[data-grade] :is(a,button).bg-slate-900:not(#worksheet-print-area *):hover { background-color: color-mix(in srgb, var(--grade-accent) 85%, black); }
+  html[data-grade] :is(a,button).bg-indigo-700 { background-color: var(--grade-accent); }
+  html[data-grade] :is(.text-indigo-700, .text-blue-600):not(#worksheet-print-area, #worksheet-print-area *) { color: var(--grade-accent); }
+  html[data-grade] :is(a,button,select,input,textarea):focus-visible { outline-color: var(--grade-accent); }
+  html.dark[data-grade] :is(.bg-white, .bg-slate-50, .bg-slate-100, .dark\:bg-slate-900, .dark\:bg-slate-950):not(#worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-dark) 88%, white); }
+  html.dark[data-grade] :is(.border-slate-200, .border-slate-300, .dark\:border-slate-700, .dark\:border-slate-800):not(#worksheet-print-area, #worksheet-print-area *) { border-color: color-mix(in srgb, var(--grade-bright) 22%, var(--grade-dark)); }
+  html.dark[data-grade] :is(a,button).bg-slate-900:not(#worksheet-print-area *) { background-color: var(--grade-accent); color: white; }
+  html.dark[data-grade] :is(.text-indigo-700, .text-blue-600):not(#worksheet-print-area, #worksheet-print-area *) { color: var(--grade-bright); }
+}
+@media (max-width: 900px) {
+  .grade-theme-control { margin-right: 0; }
+  .grade-theme-art { right: 250px; opacity: .18; }
+  .grade-theme-copy { max-width: 430px; }
+}
+@media (max-width: 540px) {
+  .grade-theme-bar-inner { padding: 20px 16px; display: block; }
+  .grade-theme-copy { padding-right: 55px; }
+  .grade-theme-name { font-size: 24px; }
+  .grade-theme-control { margin-top: 16px; }
+  .grade-theme-control select { width: 100%; }
+  .grade-theme-art { width: 140px; height: 80px; right: -35px; top: 10px; opacity: .4; }
+}
+@media (prefers-reduced-motion: reduce) { html[data-grade] body { transition: none; } }

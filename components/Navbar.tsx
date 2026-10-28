@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import ThemeToggle from "./ThemeToggle";
+import GradeThemeBar from "./GradeThemeBar";
 import { isFreeMode } from "@/lib/access";
 
 type NavItem = { href: string; label: string; desc?: string };
@@ -162,6 +163,7 @@ export default function Navbar() {
         </div>
       </nav>
     </header>
+    <GradeThemeBar />
 
       {/* Mobile menu panel — outside <header>: its backdrop blur would otherwise
           become the containing block for this fixed panel and clip it. */}

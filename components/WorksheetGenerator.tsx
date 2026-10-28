@@ -10,6 +10,8 @@ import { subjectStyle } from "@/components/subjectStyles";
 import { DocIcon } from "@/components/Icons";
 import { brandedFilename, BRAND } from "@/lib/brand";
 
+import { useGradeTheme } from "@/components/GradeThemeProvider";
+
 function newSeed() {
   return Math.floor(Math.random() * 2147483647);
 }
@@ -27,7 +29,8 @@ const QUICK_START_PRESETS: { label: string; subject: SubjectId; grade: number; t
 
 export default function WorksheetGenerator() {
   const [subject, setSubject] = useState<SubjectId>("math");
-  const [grade, setGrade] = useState(6);
+  const { grade: selectedGrade, setGrade } = useGradeTheme();
+  const grade = selectedGrade ?? 6;
   const [topic, setTopic] = useState("fractions");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [count, setCount] = useState(10);
@@ -38,6 +41,14 @@ export default function WorksheetGenerator() {
   const [toastMsg, setToastMsg] = useState("");
   const seedRef = useRef<number>(newSeed());
   const printRef = useRef<HTMLDivElement>(null);
+
+  const generatedGradeRef = useRef(grade);
+
+  // A grade chosen in the global selector must also update available topics.
+  useEffect(() => {
+    setTopic(current => pickFirstValidTopic(subject, grade, current));
+    if (generatedGradeRef.current !== grade) { setQuestions([]); setShowAnswers(false); }
+  }, [grade, subject]);
 
   const availableTopics = useMemo(() => topicsForGrade(subject, grade), [subject, grade]);
 
@@ -60,6 +71,7 @@ export default function WorksheetGenerator() {
     setDifficulty(d);
     setCount(c);
     seedRef.current = seed;
+    generatedGradeRef.current = g;
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -91,6 +103,7 @@ export default function WorksheetGenerator() {
     const t = overrides?.topic ?? topic;
     const d = overrides?.difficulty ?? difficulty;
     const c = overrides?.count ?? count;
+    generatedGradeRef.current = g;
     seedRef.current = newSeed();
     setShowAnswers(false);
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed: seedRef.current }));
@@ -198,6 +211,8 @@ export default function WorksheetGenerator() {
               <button
                 key={g}
                 onClick={() => handleGradeChange(g)}
+                aria-pressed={grade === g}
+                aria-label={`Grade ${g}`}
                 className={`aspect-square rounded-md text-sm font-semibold border ${
                   grade === g ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
