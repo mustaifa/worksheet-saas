@@ -21,6 +21,7 @@ export default function Footer() {
             {!freeMode && <li><Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">Pricing</Link></li>}
             <li><Link href="/blog" className="hover:text-slate-900 dark:hover:text-white">Guides</Link></li>
             <li><Link href="/play" className="hover:text-slate-900 dark:hover:text-white">Join a live quiz</Link></li>
+            <li><Link href="/worksheets#request" className="hover:text-slate-900 dark:hover:text-white">Request a topic</Link></li>
           </ul>
         </div>
         <div>

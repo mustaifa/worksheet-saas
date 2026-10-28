@@ -27,6 +27,11 @@ async function sendEmail(to: string, subject: string, html: string) {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+/** Visitor-typed text must never be inserted into email HTML as-is. */
+export function escapeHtml(s: string): string {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+
 function wrapper(bodyHtml: string) {
   return `
     <div style="font-family: -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
@@ -82,10 +87,25 @@ export async function sendContactFormEmail(fromName: string, fromEmail: string, 
   const to = process.env.CONTACT_EMAIL_TO || process.env.EMAIL_FROM || "";
   const html = wrapper(`
     <h2 style="color: #0f172a;">New contact form message</h2>
-    <p style="color: #334155;"><strong>From:</strong> ${fromName} (${fromEmail})</p>
-    <p style="color: #334155; white-space: pre-wrap; border-left: 3px solid #e2e8f0; padding-left: 12px; margin-top: 12px;">${message}</p>
+    <p style="color: #334155;"><strong>From:</strong> ${escapeHtml(fromName)} (${escapeHtml(fromEmail)})</p>
+    <p style="color: #334155; white-space: pre-wrap; border-left: 3px solid #e2e8f0; padding-left: 12px; margin-top: 12px;">${escapeHtml(message)}</p>
   `);
-  return sendEmail(to, `Contact form: ${fromName}`, html);
+  return sendEmail(to, `Contact form: ${fromName.replace(/[\r\n]/g, " ").slice(0, 80)}`, html);
+}
+
+export async function sendTopicRequestEmail(r: { topic: string; subject: string; grade: string; role: string; email?: string; page?: string }) {
+  const to = process.env.CONTACT_EMAIL_TO || process.env.EMAIL_FROM || "";
+  const row = (k: string, v: string) => `<p style="color: #334155; margin: 4px 0;"><strong>${k}:</strong> ${escapeHtml(v)}</p>`;
+  const html = wrapper(`
+    <h2 style="color: #0f172a;">New worksheet topic request</h2>
+    <p style="color: #0f172a; font-size: 16px; border-left: 3px solid #f59e0b; padding-left: 12px; margin: 12px 0;">${escapeHtml(r.topic)}</p>
+    ${row("Subject", r.subject || "not specified")}
+    ${row("Grade", r.grade || "not specified")}
+    ${row("Requested by", r.role || "not specified")}
+    ${r.email ? row("Reply to", r.email) : ""}
+    ${r.page ? row("Sent from page", r.page) : ""}
+  `);
+  return sendEmail(to, `Topic request: ${r.topic.replace(/[\r\n]/g, " ").slice(0, 60)}`, html);
 }
 
 export async function sendCustomWorksheetEmail(to: string, teacherName: string | null, title: string, shareUrl: string) {
