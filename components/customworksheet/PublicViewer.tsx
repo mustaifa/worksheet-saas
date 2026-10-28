@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { brandedFilename } from "@/lib/brand";
 import { exportPagesToPdf } from "@/components/customworksheet/pdfExport";
 
 type WorksheetPage = { id: string; snapshot: string | null };
@@ -29,7 +30,7 @@ export default function PublicWorksheetViewer({ code }: { code: string }) {
     if (!ws) return;
     setExporting(true);
     try {
-      await exportPagesToPdf(ws.pages, `${ws.title.replace(/[^a-z0-9]/gi, "-")}.pdf`);
+      await exportPagesToPdf(ws.pages, brandedFilename([ws.title], "pdf"));
     } finally {
       setExporting(false);
     }

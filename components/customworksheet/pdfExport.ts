@@ -1,3 +1,5 @@
+import { BRAND } from "@/lib/brand";
+
 const CANVAS_ASPECT = 1200 / 675; // must match the drawing canvas's actual width/height ratio
 
 export async function exportPagesToPdf(pages: { snapshot: string | null }[], filename: string) {
@@ -6,7 +8,7 @@ export async function exportPagesToPdf(pages: { snapshot: string | null }[], fil
   const pageW = 297, pageH = 210;
   const margin = 8;
   const maxW = pageW - margin * 2;
-  const maxH = pageH - margin * 2;
+  const maxH = pageH - margin * 2 - 6; // keep a strip at the bottom for the footer
 
   // fit the image within the page while preserving its actual proportions —
   // this is what was missing before, causing the stretched/distorted look
@@ -25,6 +27,15 @@ export async function exportPagesToPdf(pages: { snapshot: string | null }[], fil
   }
   if (!addedAny) {
     pdf.text("This worksheet doesn't have any content yet.", margin, margin + 10);
+  }
+  pdf.setProperties({ author: BRAND.name, creator: `${BRAND.name} — ${BRAND.domain}` });
+  const n = pdf.getNumberOfPages();
+  for (let i = 1; i <= n; i++) {
+    pdf.setPage(i);
+    pdf.setFontSize(8);
+    pdf.setTextColor(148, 163, 184);
+    pdf.text(`Made with ${BRAND.name} - ${BRAND.domain}`, margin, pageH - 5);
+    if (n > 1) pdf.text(`Page ${i} of ${n}`, pageW - margin, pageH - 5, { align: "right" });
   }
   pdf.save(filename);
 }

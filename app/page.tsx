@@ -49,7 +49,7 @@ export default function Home() {
     },
     {
       q: "Can I print the worksheets or save them as PDFs?",
-      a: "Yes. Every worksheet has a Print / Save as PDF button that prints just the worksheet, with the answer key on a separate page.",
+      a: "Yes. Every worksheet has a Download PDF button (with the answer key on the last page) and a Print button that prints just the worksheet and its key.",
     },
     {
       q: "Which grades and subjects do you cover?",

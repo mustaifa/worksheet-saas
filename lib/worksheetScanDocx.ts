@@ -1,7 +1,8 @@
 import {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-  HeadingLevel, WidthType, BorderStyle, AlignmentType, ShadingType,
+  HeadingLevel, WidthType, BorderStyle, AlignmentType, ShadingType, Footer,
 } from "docx";
+import { BRAND } from "./brand";
 import { ExtractedWorksheet } from "./worksheetScanTypes";
 
 const CELL_BORDER = { style: BorderStyle.SINGLE, size: 2, color: "94A3B8" };
@@ -106,6 +107,18 @@ export async function generateWorksheetDocxBuffer(data: ExtractedWorksheet): Pro
     }
   }
 
-  const doc = new Document({ sections: [{ children }] });
+  const doc = new Document({
+    creator: BRAND.name,
+    title: data.title,
+    description: `Made with ${BRAND.name} — ${BRAND.domain}`,
+    sections: [{
+      footers: {
+        default: new Footer({
+          children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Made with ${BRAND.name} · ${BRAND.domain}`, size: 16, color: "94A3B8" })] })],
+        }),
+      },
+      children,
+    }],
+  });
   return Packer.toBuffer(doc);
 }

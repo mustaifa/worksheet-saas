@@ -5,6 +5,8 @@ import {
   topicsForGrade, topicLabel, generateWorksheet, parseCommand, allGrades, allTopics,
 } from "@/lib/subjects";
 import TopicPicker from "@/components/TopicPicker";
+import { downloadWorksheetPdf } from "@/lib/brandedPdf";
+import { brandedFilename, BRAND } from "@/lib/brand";
 
 function newSeed() {
   return Math.floor(Math.random() * 2147483647);
@@ -121,19 +123,20 @@ export default function WorksheetGenerator() {
   }
 
   async function handleDownload() {
-    if (!printRef.current) return;
+    if (!questions.length) return;
     toast("Preparing PDF…");
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const { jsPDF } = await import("jspdf");
-      const canvas = await html2canvas(printRef.current, { scale: 2, backgroundColor: "#ffffff" });
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageW = 210;
-      const imgW = pageW - 20;
-      const imgH = (canvas.height * imgW) / canvas.width;
-      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, imgW, Math.min(imgH, 297 - 20));
-      pdf.save(`${subject}-${topic}-grade${grade}-worksheet.pdf`);
-      toast("Downloaded.");
+      const subjectLabel = SUBJECTS.find((x) => x.id === subject)?.label || subject;
+      const title = topicLabel(subject, topic);
+      await downloadWorksheetPdf({
+        title,
+        meta: `Grade ${grade} · ${subjectLabel} · ${difficulty[0].toUpperCase()}${difficulty.slice(1)} · ${questions.length} questions`,
+        questions,
+        passage: questions[0]?.passage ? { title: questions[0].passageTitle, text: questions[0].passage } : null,
+        includeAnswerKey: true,
+        filename: brandedFilename([`Grade ${grade}`, subjectLabel, title.replace(/^The /, "")], "pdf"),
+      });
+      toast("Downloaded — the answer key is on the last page.");
     } catch {
       toast("Could not generate the PDF — try Print instead.");
     }
@@ -315,6 +318,10 @@ export default function WorksheetGenerator() {
         ) : (
           <div className="w-full max-w-xl">
             <div id="worksheet-print-area" ref={printRef} className="bg-white text-slate-900 rounded-lg shadow-lg p-8">
+              <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
+                <span className="flex items-center gap-1.5 font-semibold text-slate-700"><img src={BRAND.logoPath} alt="" width={16} height={16} className="rounded" />{BRAND.name}</span>
+                <span>{BRAND.domain}</span>
+              </div>
               <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-2">
                 <h2 className="text-2xl font-bold">{topicLabel(subject, topic)}</h2>
                 <div className="text-right text-xs text-slate-500 uppercase tracking-wide">
@@ -346,6 +353,7 @@ export default function WorksheetGenerator() {
                   </li>
                 ))}
               </ul>
+              <p className="mt-6 pt-3 border-t border-slate-200 text-[11px] text-slate-400">{BRAND.tagline} · {BRAND.domain}</p>
             </div>
 
             <div className="flex flex-wrap gap-2 mt-4">

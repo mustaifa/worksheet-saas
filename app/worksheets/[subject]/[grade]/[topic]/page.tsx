@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PrintButton from "@/components/PrintButton";
+import DownloadPdfButton from "@/components/DownloadPdfButton";
+import { BRAND, brandedFilename } from "@/lib/brand";
 import SignupCta from "@/components/SignupCta";
 import TopicRequestBox from "@/components/TopicRequestBox";
 import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
@@ -100,7 +102,7 @@ export default function TopicPage({ params }: { params: Params }) {
     },
     {
       q: "How do I print it or save it as a PDF?",
-      a: `Click "Print / Save as PDF". Your browser's print window opens with just the worksheet and answer key. Choose your printer, or pick "Save as PDF" as the destination to download a PDF.`,
+      a: `Click "Download PDF" to save a ready-to-print PDF with the answer key on the last page, or click "Print" to send the worksheet and answer key straight to your printer.`,
     },
     {
       q: `Can I get a different ${name} worksheet?`,
@@ -160,7 +162,14 @@ export default function TopicPage({ params }: { params: Params }) {
         </p>
 
         <div className="print:hidden mt-6 flex flex-wrap items-center gap-3">
-          <PrintButton />
+          <PrintButton label="Print" />
+          <DownloadPdfButton
+            title={topic.label}
+            meta={`Grade ${grade} · ${subject.label} · ${questions.length} questions`}
+            filename={brandedFilename([`Grade ${grade}`, subject.label, name], "pdf")}
+            questions={questions.map(({ q, a }) => ({ q, a }))}
+            passage={passage ? { title: passage.title, text: passage.text! } : null}
+          />
           <a href="#answer-key" className="px-5 py-2.5 rounded-lg font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">
             Jump to answer key
           </a>
@@ -168,6 +177,10 @@ export default function TopicPage({ params }: { params: Params }) {
 
         {/* Everything inside this element (and only this) is printed — see globals.css */}
         <div id="worksheet-print-area" className="mt-8 print:mt-0 bg-white text-slate-900 rounded-lg shadow-lg p-8 border border-slate-200">
+          <div className="hidden print:flex items-center justify-between text-xs text-slate-500 mb-4">
+            <span className="flex items-center gap-1.5 font-semibold text-slate-700"><img src={BRAND.logoPath} alt="" width={16} height={16} className="rounded" />{BRAND.name}</span>
+            <span>{BRAND.domain}</span>
+          </div>
           <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4">
             <div>
               <h2 className="text-xl font-bold">{topic.label}</h2>
@@ -192,7 +205,7 @@ export default function TopicPage({ params }: { params: Params }) {
               </li>
             ))}
           </ol>
-          <p className="mt-6 text-[11px] text-slate-400">{SITE_NAME} · {absoluteUrl(path).replace(/^https?:\/\//, "")}</p>
+          <p className="mt-6 pt-3 border-t border-slate-200 text-[11px] text-slate-400">{BRAND.tagline} · {absoluteUrl(path).replace(/^https?:\/\//, "")}</p>
 
           {/* Printed answer key: always on its own page in print, hidden on screen
               (the on-screen version is the expandable block below). */}

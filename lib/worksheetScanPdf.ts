@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import { ExtractedWorksheet, ExtractedSection } from "./worksheetScanTypes";
+import { BRAND } from "./brand";
 
 const PAGE_W = 210, PAGE_H = 297;
 const MARGIN = 18;
@@ -81,6 +82,19 @@ export function generateWorksheetPdfBuffer(data: ExtractedWorksheet): Buffer {
 
     y += 6;
   }
+
+  // subtle "Made with" footer + page numbers on every page
+  doc.setProperties({ title: data.title, author: BRAND.name, creator: `${BRAND.name} — ${BRAND.domain}` });
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Made with ${BRAND.name} - ${BRAND.domain}`, MARGIN, PAGE_H - 8);
+    if (pages > 1) doc.text(`Page ${i} of ${pages}`, PAGE_W - MARGIN, PAGE_H - 8, { align: "right" });
+  }
+  doc.setTextColor(0, 0, 0);
 
   const arrayBuffer = doc.output("arraybuffer");
   return Buffer.from(arrayBuffer);
