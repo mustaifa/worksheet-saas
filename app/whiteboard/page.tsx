@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import JoinBoardForm from "@/components/whiteboard/JoinBoardForm";
 
-export const metadata = { title: "Join a Whiteboard | Practice Sheet" };
+export const metadata = { title: "Join a Whiteboard" };
 
 export default function WhiteboardJoinPage() {
   return (

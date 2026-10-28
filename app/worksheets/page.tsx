@@ -1,10 +1,18 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import { SUBJECTS } from "@/lib/subjects";
+import Footer from "@/components/Footer";
+import { SUBJECTS, allGrades, topicsForGrade } from "@/lib/subjects";
 
 export const metadata = {
-  title: "Free Worksheets — Math, English & Science, Grades 1–12 | Practice Sheet",
-  description: "Browse printable, self-checking worksheets for every grade from 1 to 12, across Math, English, and Science.",
+  title: "Free Printable Worksheets with Answers, Grades 1–12",
+  description: "Browse free printable Math, English and Science worksheets for every grade from 1 to 12. Each one comes with a full answer key and prints or saves as a PDF.",
+  alternates: { canonical: "/worksheets" },
+};
+
+const SUBJECT_BLURBS: Record<string, string> = {
+  math: "Number sense, fractions, decimals, percentages, algebra, geometry, statistics and trigonometry.",
+  english: "Phonics, spelling, punctuation, grammar, parts of speech, vocabulary, literary devices and reading comprehension.",
+  science: "Living things, the human body, the solar system, matter, forces, earth science, chemistry and genetics.",
 };
 
 export default function WorksheetsHub() {
@@ -12,8 +20,11 @@ export default function WorksheetsHub() {
     <main>
       <Navbar />
       <section className="max-w-4xl mx-auto px-6 py-16">
-        <h1 className="text-3xl font-bold">Browse worksheets by subject</h1>
-        <p className="text-slate-600 mt-2">Every worksheet is generated with verified answers — pick a subject to start.</p>
+        <h1 className="text-3xl font-bold">Free printable worksheets with answer keys</h1>
+        <p className="text-slate-600 dark:text-slate-300 mt-2">
+          Hundreds of free Math, English and Science worksheets for grades 1–12. Every worksheet comes with a full answer key
+          that is checked by code, never guessed, and you can print it or save it as a PDF. Pick a subject to start.
+        </p>
         <div className="grid sm:grid-cols-3 gap-4 mt-8">
           {SUBJECTS.map((s) => (
             <Link
@@ -21,12 +32,16 @@ export default function WorksheetsHub() {
               href={`/worksheets/${s.id}`}
               className="rounded-xl border border-slate-200 p-6 text-center hover:border-slate-900 hover:shadow-md transition-all"
             >
-              <p className="text-lg font-semibold">{s.label}</p>
-              <p className="text-xs text-slate-500 mt-1">Grades 1–12</p>
+              <p className="text-lg font-semibold">{s.label} worksheets</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Grades 1–12 · {allGrades().reduce((n, g) => n + topicsForGrade(s.id, g).length, 0)} worksheets
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">{SUBJECT_BLURBS[s.id]}</p>
             </Link>
           ))}
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

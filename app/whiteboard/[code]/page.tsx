@@ -1,7 +1,7 @@
 import Link from "next/link";
 import ViewerBoard from "@/components/whiteboard/ViewerBoard";
 
-export const metadata = { title: "Whiteboard | Practice Sheet" };
+export const metadata = { title: "Whiteboard" };
 
 export default function WhiteboardViewPage({ params }: { params: { code: string } }) {
   return (

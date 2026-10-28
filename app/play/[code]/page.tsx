@@ -1,7 +1,7 @@
 import Link from "next/link";
 import PlayerView from "@/components/live/PlayerView";
 
-export const metadata = { title: "Live Quiz | Practice Sheet" };
+export const metadata = { title: "Live Quiz" };
 
 export default function PlayCodePage({ params }: { params: { code: string } }) {
   return (

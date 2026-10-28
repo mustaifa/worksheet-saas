@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export const metadata = { title: "Privacy Policy | Practice Sheet" };
+export const metadata = { title: "Privacy Policy" };
 
 export default function Privacy() {
   return (

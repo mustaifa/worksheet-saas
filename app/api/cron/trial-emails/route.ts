@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendTrialReminderEmail, sendTrialEndedEmail } from "@/lib/email";
+import { isFreeMode } from "@/lib/access";
+
+// Must run on every request. Without this, Next.js treats the GET handler as
+// static, executes it once at build time and serves that cached response —
+// so the daily Vercel cron never actually ran.
+export const dynamic = "force-dynamic";
 
 // Vercel Cron automatically sends this header when CRON_SECRET is set in project env vars.
 function isAuthorized(req: Request) {
@@ -11,6 +17,12 @@ function isAuthorized(req: Request) {
 export async function GET(req: Request) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // During the free launch nobody's access ends, so "trial ending/ended"
+  // emails would be wrong. Skip until paid plans are switched back on.
+  if (isFreeMode()) {
+    return NextResponse.json({ remindersSent: 0, endedEmailsSent: 0, skipped: "free mode" });
   }
 
   const now = new Date();
