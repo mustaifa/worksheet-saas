@@ -5,7 +5,7 @@ export default function Footer() {
   const freeMode = isFreeMode();
 
   return (
-    <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-20">
+    <footer className="print:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 mt-20">
       <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
         <div className="col-span-2 sm:col-span-1">
           <p className="font-bold text-slate-900 dark:text-white flex items-center gap-2">

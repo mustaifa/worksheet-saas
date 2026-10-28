@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BLOG_POSTS, getPostBySlug } from "@/lib/blog";
+import { OG_IMAGE } from "@/lib/site";
 
 export function generateStaticParams() {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));
@@ -11,7 +12,7 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { slug: string } }) {
   const post = getPostBySlug(params.slug);
   if (!post) return {};
-  return { title: `${post.title} | Practice Sheet Blog`, description: post.excerpt };
+  return { title: { absolute: `${post.title} | Practice Sheet Blog` }, description: post.excerpt, alternates: { canonical: `/blog/${post.slug}` }, openGraph: { title: post.title, description: post.excerpt, type: "article", url: `/blog/${post.slug}`, images: [OG_IMAGE] } };
 }
 
 export default function BlogPost({ params }: { params: { slug: string } }) {

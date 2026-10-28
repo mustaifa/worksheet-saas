@@ -176,6 +176,8 @@ const genFraction: Gen = (grade, diff, rng) => {
   const op = pick(ops);
   let d1 = pick(dens), d2 = pick(dens), n1 = randInt(1, d1 * 2), n2 = randInt(1, d2 * 2);
   if (diff === "easy") { n1 = randInt(1, d1 - 1); n2 = randInt(1, d1 - 1); d2 = d1; }
+  // Grades 5–6 haven't met negative numbers yet: put the larger fraction first.
+  if (op === "-" && n1 * d2 < n2 * d1) { [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1]; }
   if (op === "+" || op === "-") { const num = op === "+" ? n1 * d2 + n2 * d1 : n1 * d2 - n2 * d1; const [sn, sd] = simplifyFrac(num, d1 * d2); return { q: `${fracStr(n1, d1)} ${op} ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) }; }
   if (op === "×") { const [sn, sd] = simplifyFrac(n1 * n2, d1 * d2); return { q: `${fracStr(n1, d1)} × ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) }; }
   const [sn, sd] = simplifyFrac(n1 * d2, d1 * n2);
@@ -313,6 +315,8 @@ const genFractionsAddSub: Gen = (grade, diff, rng) => {
   const op = pick(["+", "-"]);
   let d1 = pick(dens), d2 = pick(dens), n1 = randInt(1, d1 * 2), n2 = randInt(1, d2 * 2);
   if (diff === "easy") { n1 = randInt(1, d1 - 1); n2 = randInt(1, d1 - 1); d2 = d1; }
+  // Grades 5–6 haven't met negative numbers yet: put the larger fraction first.
+  if (op === "-" && n1 * d2 < n2 * d1) { [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1]; }
   const num = op === "+" ? n1 * d2 + n2 * d1 : n1 * d2 - n2 * d1;
   const [sn, sd] = simplifyFrac(num, d1 * d2);
   return { q: `${fracStr(n1, d1)} ${op} ${fracStr(n2, d2)} = ?`, a: mixedStr(sn, sd) };

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import JoinForm from "@/components/live/JoinForm";
 
-export const metadata = { title: "Join a Live Quiz | Practice Sheet" };
+export const metadata = { title: "Join a Live Quiz" };
 
 export default function PlayPage() {
   return (

@@ -9,12 +9,12 @@ export default function Navbar() {
   const freeMode = isFreeMode();
 
   return (
-    <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-      <Link href="/" className="flex items-center gap-2 font-bold text-lg text-slate-900 dark:text-white">
+    <nav className="print:hidden flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
+      <Link href="/" className="flex items-center gap-2 font-bold text-lg text-slate-900 dark:text-white shrink-0">
         <img src="/logo-mark.png" alt="" width={28} height={28} className="rounded-md" />
         Practice Sheet
       </Link>
-      <div className="flex items-center gap-5 text-sm">
+      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 sm:gap-x-5 text-sm">
         <Link href="/worksheets" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Worksheets</Link>
         <Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Blog</Link>
         {!freeMode && <Link href="/pricing" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Pricing</Link>}

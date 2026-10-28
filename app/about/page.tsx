@@ -2,7 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "About | Practice Sheet",
+  title: "About",
   description: "Why Practice Sheet exists and how it generates verified worksheets for grades 1-12.",
 };
 

@@ -3,7 +3,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BLOG_POSTS } from "@/lib/blog";
 
-export const metadata = { title: "Blog | Practice Sheet" };
+export const metadata = { title: "Blog" };
 
 export default function BlogIndex() {
   const posts = [...BLOG_POSTS].sort((a, b) => (a.date < b.date ? 1 : -1));

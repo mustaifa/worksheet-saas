@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export const metadata = { title: "Terms of Service | Practice Sheet" };
+export const metadata = { title: "Terms of Service" };
 
 export default function Terms() {
   return (

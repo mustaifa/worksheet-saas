@@ -128,7 +128,7 @@ const BODY_CIRCULATORY: [string, string][] = [
   ["Which organ pumps blood through the body?", "the heart"],
   ["What are the tubes that carry blood away from the heart called?", "arteries"],
   ["What are the tubes that carry blood back to the heart called?", "veins"],
-  ["What red blood cells carry oxygen around the body?", "red blood cells (they carry hemoglobin)"],
+  ["Which blood cells carry oxygen around the body?", "red blood cells (they carry hemoglobin)"],
   ["How many chambers does the human heart have?", "4"],
   ["What liquid part of blood carries blood cells around the body?", "plasma"],
   ["What do we call the system of the heart, blood, and blood vessels together?", "the circulatory system"],

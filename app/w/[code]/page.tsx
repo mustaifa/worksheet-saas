@@ -1,7 +1,7 @@
 import Link from "next/link";
 import PublicWorksheetViewer from "@/components/customworksheet/PublicViewer";
 
-export const metadata = { title: "Shared Worksheet | Practice Sheet" };
+export const metadata = { title: "Shared Worksheet" };
 
 export default function SharedWorksheetPage({ params }: { params: { code: string } }) {
   return (
