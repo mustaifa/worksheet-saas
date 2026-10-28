@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { isFreeMode } from "@/lib/access";
+import CookieSettingsLink from "./CookieSettingsLink";
 
 export default function Footer() {
   const freeMode = isFreeMode();
@@ -46,6 +47,7 @@ export default function Footer() {
           <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
             <li><Link href="/terms" className="hover:text-slate-900 dark:hover:text-white">Terms of Service</Link></li>
             <li><Link href="/privacy" className="hover:text-slate-900 dark:hover:text-white">Privacy Policy</Link></li>
+            <li><CookieSettingsLink className="hover:text-slate-900 dark:hover:text-white" /></li>
           </ul>
         </div>
       </div>

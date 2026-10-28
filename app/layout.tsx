@@ -3,6 +3,7 @@ import Providers from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import JsonLd from "@/components/seo/JsonLd";
+import GoogleAnalytics from "@/components/Analytics";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const DEFAULT_DESCRIPTION =
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <Providers>{children}</Providers>
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   );

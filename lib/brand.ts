@@ -15,6 +15,8 @@ export const BRAND = {
   },
   // Honest, verifiable reach: countries with Google Search clicks, Jul–Oct 2026.
   countriesReached: "90+",
+  // Google Analytics 4 measurement ID (public by design — it appears in page source).
+  gaMeasurementId: process.env.NEXT_PUBLIC_GA_ID || "G-Y363NS1X0L",
 };
 
 /** "Practice-Sheet_Grade-6_Math_Adding-Subtracting-Fractions.pdf" */

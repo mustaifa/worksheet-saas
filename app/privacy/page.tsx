@@ -34,7 +34,14 @@ const SECTIONS: { h: string; p: (string | JSX.Element)[] }[] = [
   {
     h: "Service providers",
     p: [
-      "We use a small number of providers to run Practice Sheet, each under its own privacy terms: Vercel (hosting and privacy-friendly, cookie-free page-visit analytics), Neon (database), Stripe (payments — we never see card details), Resend (email), Google (optional sign-in), and Anthropic (AI used by the homework helper and worksheet scanner — the text or image you submit is sent to Anthropic to produce a response, so please don't include personal information).",
+      "We use a small number of providers to run Practice Sheet, each under its own privacy terms: Vercel (hosting and privacy-friendly, cookie-free page-visit counts), Google Analytics (only if you accept analytics cookies — see below), Neon (database), Stripe (payments — we never see card details), Resend (email), Google (optional sign-in), and Anthropic (AI used by the homework helper and worksheet scanner — the text or image you submit is sent to Anthropic to produce a response, so please don't include personal information).",
+    ],
+  },
+  {
+    h: "Cookies and analytics",
+    p: [
+      "We only use Google Analytics if you click \"Accept\" on our cookie notice. It then sets cookies to measure which pages and worksheets are used, so we can improve them. We switch off Google's advertising features and Google Signals, we never use Google Analytics on children's screens (live-quiz player, family challenges, shared student pages), and you can change your choice any time with \"Cookie settings\" at the bottom of every page. If you decline, no Google Analytics code is loaded.",
+      "We also use Vercel's cookie-free visit counts, and a few strictly necessary items: a sign-in cookie for account holders, and your browser's local storage to remember your light/dark theme and cookie choice.",
     ],
   },
   {
