@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import JsonLd, { breadcrumbLd } from "@/components/seo/JsonLd";
 import { absoluteUrl } from "@/lib/site";
+import { gradeEquivalents } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, allGrades, topicsForGrade } from "@/lib/subjects";
 
 export const dynamicParams = false;
@@ -39,10 +40,10 @@ export default function SubjectPage({ params }: { params: { subject: string } })
         <p className="text-sm text-slate-500"><Link href="/worksheets" className="hover:underline">Worksheets</Link> / {subject.label}</p>
         <h1 className="text-3xl font-bold mt-2">Free {subject.label} Worksheets by Grade</h1>
         <p className="text-slate-600 dark:text-slate-300 mt-2">
-          Choose a grade to see every {subject.label.toLowerCase()} topic we cover. Each worksheet is free to print, comes with a full
+          Choose a grade to see every {subject.label.toLowerCase()} topic we cover (UK Year and India Class shown under each grade). Each worksheet is free to print, comes with a full
           answer key, and can be saved as a PDF.
         </p>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mt-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mt-8">
           {grades.map((g) => (
             <Link
               key={g}
@@ -51,6 +52,7 @@ export default function SubjectPage({ params }: { params: { subject: string } })
             >
               <p className="text-xl font-bold">Grade {g}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{topicsForGrade(subject.id as SubjectId, g).length} topics</p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Year {gradeEquivalents(g).ukYear} · Class {g}</p>
             </Link>
           ))}
         </div>

@@ -8,7 +8,7 @@ import SignupCta from "@/components/SignupCta";
 import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
-import { topicDescription, gradeBand, howToUse } from "@/lib/topicContent";
+import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet } from "@/lib/subjects";
 
 // Number of questions on the free public worksheet (reading comprehension
@@ -150,6 +150,9 @@ export default function TopicPage({ params }: { params: Params }) {
           <Link href={`/worksheets/${subject.id}/${grade}`} className="hover:underline">Grade {grade}</Link> / {topic.label}
         </nav>
         <h1 className="print:hidden text-3xl font-bold mt-2 text-slate-900 dark:text-white">Grade {grade} {name} Worksheet with Answers</h1>
+        <p className="print:hidden mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+          Grade {grade} (US) · Year {gradeEquivalents(grade).ukYear} (UK) · Class {grade} (India) · {subject.label}
+        </p>
         <p className="print:hidden text-slate-600 dark:text-slate-300 mt-3">
           {description ? `${description} ` : ""}
           This free {gradeBand(grade)} worksheet has {questions.length} questions and a full answer key. Print it or save it as a PDF — every answer is checked by code, not guessed.

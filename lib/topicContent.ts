@@ -68,6 +68,9 @@ const TOPIC_DESCRIPTIONS: Record<SubjectId, Record<string, string>> = {
     sequences: "Arithmetic and geometric sequences: finding terms, the common difference or ratio, and sums.",
     trig_ratios: "Using sine, cosine and tangent to find missing sides and angles in right triangles.",
     polynomials: "Adding, subtracting, multiplying and factoring polynomials.",
+    area_perimeter: "Finding the area and perimeter of rectangles and squares, missing side lengths, L-shaped rooms and real-life problems like fencing a garden.",
+    surface_area: "Finding the surface area of cubes, rectangular prisms and triangular prisms by adding the areas of all their faces.",
+    volume_prisms_cylinders: "Finding the volume of rectangular and triangular prisms and cylinders, and working backwards to find a missing dimension.",
     probability: "Finding the probability of simple and compound events and writing it as a fraction, decimal or percent.",
   },
   english: {
@@ -108,6 +111,10 @@ const TOPIC_DESCRIPTIONS: Record<SubjectId, Record<string, string>> = {
     body_digestive: "How food is broken down as it passes through the mouth, oesophagus, stomach and intestines.",
     body_respiratory: "How we breathe: the lungs, trachea and diaphragm, and the exchange of oxygen and carbon dioxide.",
     body_skeletal_muscular: "Bones, joints and muscles, and how they work together to support and move the body.",
+    body_nervous: "The brain, spinal cord and nerves — how messages travel through the body, the parts of the brain, neurons and reflexes.",
+    electricity: "Circuits, conductors and insulators, series and parallel circuits, units of current and voltage, and Ohm's law for older grades.",
+    light_sound: "How light travels, reflects and refracts, transparent and opaque materials, shadows, and how vibrations make sounds of different pitch and volume.",
+    magnetism: "Magnetic poles, attraction and repulsion, magnetic materials, compasses and electromagnets.",
     cell_biology: "Cell structure and the jobs of organelles such as the nucleus, cell membrane and mitochondria, plus plant vs animal cells.",
     ecosystems: "A mixed set on the roles living things play in an ecosystem, biomes and symbiosis.",
     ecosystem_roles: "Producers, consumers and decomposers, and how energy and nutrients flow through an ecosystem.",
@@ -172,4 +179,36 @@ export function howToUse(grade: number): string[] {
     "Students can self-mark with the answer key and note which question types they got wrong.",
     "Generate several versions of the same topic for spaced practice in the weeks before an exam.",
   ];
+}
+
+/** "Grade 7 (US) · Year 8 (UK) · Class 7 (India) · ages 12–13" — helps UK and
+ * Indian visitors, who search by Year and Class, find the right grade. */
+export function gradeEquivalents(grade: number) {
+  return { ukYear: grade + 1, indiaClass: grade, ages: `${grade + 5}–${grade + 6}` };
+}
+
+/** What a typical grade band practises in each subject (shown on grade pages). */
+export function gradeOverview(subject: "math" | "english" | "science", grade: number): string {
+  const band = grade <= 2 ? 0 : grade <= 5 ? 1 : grade <= 8 ? 2 : 3;
+  const text: Record<string, string[]> = {
+    math: [
+      "Early grades build number sense: counting, comparing numbers, adding and subtracting, and recognizing shapes. Short, frequent practice matters more than long sessions at this age.",
+      "Upper elementary math moves from whole numbers to multiplication and division, place value, fractions and decimals, area and perimeter, and multi-step word problems.",
+      "Middle school math bridges arithmetic and algebra: ratios, percentages, negative numbers, expressions and equations, geometry with area, surface area and volume, and statistics.",
+      "High school math covers algebra and beyond: linear and quadratic equations, exponents and radicals, geometry and the Pythagorean theorem, trigonometry, sequences, logarithms and probability.",
+    ],
+    english: [
+      "Early grades focus on phonics, sight words, spelling simple words, and telling nouns from verbs — the building blocks of confident reading and writing.",
+      "Upper elementary English develops spelling, punctuation, verb tenses, synonyms and antonyms, parts of speech, and understanding what a passage says.",
+      "Middle school English deepens grammar and vocabulary: parts of speech, sentence structure, idioms, analogies, and reading for inference as well as detail.",
+      "High school English is about precision and analysis: advanced grammar and usage, academic vocabulary, sentence variety, literary devices and close reading.",
+    ],
+    science: [
+      "Early science is about noticing the world: living and non-living things, the five senses, animals and their habitats, and plants.",
+      "Upper elementary science explores plants, states of matter, the water cycle, food chains, simple machines, light, sound, magnets and the solar system.",
+      "Middle school science covers human body systems, cells, ecosystems, forces and motion, electricity, earth science and the periodic table.",
+      "High school science goes deeper into chemistry, physics formulas, genetics and Punnett squares, photosynthesis and respiration, and cell division.",
+    ],
+  };
+  return text[subject][band];
 }
