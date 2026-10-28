@@ -94,14 +94,18 @@ export default function Navbar() {
   }, [menuOpen]);
 
   const primary = signedIn ? APP_LINKS : PUBLIC_LINKS;
+  const loading = status === "loading";
 
   return (
     <>
     <header className="print:hidden sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur">
       <nav className="max-w-7xl mx-auto flex items-center justify-between gap-3 px-4 sm:px-6 h-16" aria-label="Main">
         <Link href={signedIn ? "/dashboard" : "/"} className="flex items-center gap-2 font-bold text-lg text-slate-900 dark:text-white shrink-0">
-          <img src="/logo-mark.png" alt="" width={28} height={28} className="rounded-md" />
-          Practice Sheet
+          <img src="/logo-mark.png" alt="" width={30} height={30} className="rounded-md" />
+          <span className="leading-tight">
+            Practice Sheet
+            <span className="block text-[10px] font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">by Aethel Systems</span>
+          </span>
         </Link>
 
         {/* Desktop */}
@@ -132,7 +136,7 @@ export default function Navbar() {
                 {isAdmin && <Link href="/admin" className="block rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-900">Admin</Link>}
                 <button onClick={() => signOut({ callbackUrl: "/" })} className="block w-full text-left rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-900">Sign out</button>
               </Dropdown>
-            ) : status !== "loading" ? (
+            ) : !loading ? (
               <>
                 <Link href="/login" className={linkCls(false)}>Log in</Link>
                 <Link href="/signup" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-700 dark:hover:bg-slate-200">

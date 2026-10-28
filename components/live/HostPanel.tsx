@@ -99,7 +99,7 @@ export default function HostPanel({ code }: { code: string }) {
           onClick={() => hostAction("start")} disabled={actionLoading || state.participants.length === 0}
           className="bg-amber-400 text-amber-950 font-semibold px-8 py-3 rounded-lg hover:bg-amber-300 disabled:opacity-50"
         >
-          {state.participants.length === 0 ? "Waiting for players…" : "Start Quiz 🚀"}
+          {state.participants.length === 0 ? "Waiting for players…" : "Start quiz"}
         </button>
       </div>
     );

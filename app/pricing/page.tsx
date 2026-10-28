@@ -52,7 +52,7 @@ export default function Pricing() {
       <section className="max-w-3xl mx-auto px-6 py-16">
         {freeMode ? (
           <>
-            <h1 className="text-3xl font-bold text-center">Free to use right now 🎉</h1>
+            <h1 className="text-3xl font-bold text-center">Free to use right now</h1>
             <p className="text-center text-slate-600 mt-2 max-w-lg mx-auto">
               We're in an early launch period — every feature is completely free, no card, no catch.
               Paid plans will return later, but nothing changes for accounts already using it for free.

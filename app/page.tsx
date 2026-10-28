@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SignupCta from "@/components/SignupCta";
+import TrustStrip from "@/components/TrustStrip";
+import WorksheetThumb from "@/components/WorksheetThumb";
+import { subjectStyle } from "@/components/subjectStyles";
+import { BRAND } from "@/lib/brand";
 import JsonLd, { faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
 import { SUBJECTS, allGrades, topicsForGrade, topicLabel, generateWorksheet, SubjectId } from "@/lib/subjects";
@@ -33,7 +37,14 @@ const SUBJECT_BLURBS: Record<SubjectId, string> = {
 
 export default function Home() {
   const freeMode = isFreeMode();
+  const thumbLines = (subject: SubjectId, grade: number, topic: string) =>
+    generateWorksheet({ subject, grade, topic, difficulty: "medium", count: 5, seed: 20260501 }).map((x) => x.q);
   const sample = generateWorksheet({ subject: "math", grade: 5, topic: "fractions_add_sub", difficulty: "medium", count: 5, seed: 20260501 });
+  const thumbs = {
+    math: thumbLines("math", 5, "fractions_add_sub"),
+    english: thumbLines("english", 7, "synonyms_antonyms"),
+    science: thumbLines("science", 6, "body_circulatory"),
+  };
   const worksheetCount = SUBJECTS.reduce((n, s) => n + allGrades().reduce((m, g) => m + topicsForGrade(s.id, g).length, 0), 0);
 
   const faqs = [
@@ -66,43 +77,71 @@ export default function Home() {
       <Navbar />
       <JsonLd data={faqLd(faqs)} />
 
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-12 grid lg:grid-cols-2 gap-12 items-center">
-        <div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Free printable worksheets with answer keys, grades{"\u00a0"}1–12
-          </h1>
-          <p className="mt-5 text-lg text-slate-600 dark:text-slate-300">
-            Math, English and Science worksheets in seconds. Every answer is checked by code, never guessed, so the
-            answer key is always right. Print one now, or sign up to generate unlimited fresh versions.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Link href="/worksheets" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg font-medium hover:bg-slate-700 dark:hover:bg-slate-200">
-              Browse free worksheets
-            </Link>
-            <Link href="/signup" className="px-6 py-3 rounded-lg font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">
-              {freeMode ? "Sign up free" : `Start your ${process.env.NEXT_PUBLIC_TRIAL_DAYS || "7"}-day free trial`}
-            </Link>
+      <section className="relative overflow-hidden">
+        {/* soft colour wash behind the hero */}
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-b from-amber-50 via-white to-transparent dark:from-slate-900 dark:via-slate-950" />
+        <div aria-hidden="true" className="absolute -top-24 -right-24 -z-10 w-96 h-96 rounded-full bg-blue-100/60 dark:bg-blue-900/20 blur-3xl" />
+        <div className="max-w-6xl mx-auto px-6 pt-16 pb-12 grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-300">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" /> Used in 90+ countries · No ads · Free to print
+            </p>
+            <h1 className="mt-5 text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Free printable worksheets with answer keys, <span className="whitespace-nowrap">grades 1–12</span>
+            </h1>
+            <p className="mt-5 text-lg text-slate-600 dark:text-slate-300">
+              Math, English and Science worksheets in seconds. Every answer is checked by code, never guessed, so the
+              answer key is always right. Print one now, or sign up to generate unlimited fresh versions.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link href="/worksheets" className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg font-medium hover:bg-slate-700 dark:hover:bg-slate-200">
+                Browse free worksheets
+              </Link>
+              <Link href="/signup" className="px-6 py-3 rounded-lg font-medium border border-slate-300 dark:border-slate-700 bg-white dark:bg-transparent text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">
+                {freeMode ? "Sign up free" : `Start your ${process.env.NEXT_PUBLIC_TRIAL_DAYS || "7"}-day free trial`}
+              </Link>
+            </div>
+            <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+              Every worksheet is free to print — always. {freeMode ? "Accounts are free during our launch, no card needed." : "Accounts start with a free trial, no card needed."}
+            </p>
           </div>
-          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-            {freeMode ? "Free during our launch — no card needed." : "No card required to start."}
-          </p>
-        </div>
 
-        <Link href="/worksheets/math/5/fractions_add_sub" className="block bg-white text-slate-900 rounded-xl shadow-xl border border-slate-200 p-7 rotate-1 hover:rotate-0 transition-transform" aria-label="Open the Grade 5 Adding & Subtracting Fractions worksheet">
-          <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-3">
-            <p className="text-lg font-bold">{topicLabel("math", "fractions_add_sub")}</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Grade 5 · Math</p>
+          {/* a readable worksheet in front, with English and Science sheets stacked behind */}
+          <div className="relative w-full max-w-md mx-auto lg:mr-0">
+            <div className="absolute inset-0 -rotate-6 -translate-x-4 translate-y-3" aria-hidden="true">
+              <WorksheetThumb subject="english" title="Synonyms & Antonyms" meta="Grade 7 · English" lines={thumbs.english} className="h-full" />
+            </div>
+            <div className="absolute inset-0 rotate-6 translate-x-4 translate-y-4" aria-hidden="true">
+              <WorksheetThumb subject="science" title="Circulatory System" meta="Grade 6 · Science" lines={thumbs.science} className="h-full" />
+            </div>
+            <Link href="/worksheets/math/5/fractions_add_sub" aria-label="Open the Grade 5 Adding & Subtracting Fractions worksheet"
+              className="relative block bg-white text-slate-900 rounded-xl shadow-2xl border border-slate-200 overflow-hidden hover:-translate-y-1 transition-transform">
+              <div className={`h-2 ${subjectStyle("math").stripe}`} />
+              <div className="p-6">
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <span className="flex items-center gap-1.5 font-semibold text-slate-600"><img src={BRAND.logoPath} alt="" width={16} height={16} className="rounded" />{BRAND.name}</span>
+                  <span>{BRAND.domain}</span>
+                </div>
+                <div className="flex justify-between items-end border-b-2 border-slate-900 pb-3 mt-3 mb-2">
+                  <p className="text-lg font-bold">{topicLabel("math", "fractions_add_sub")}</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wide">Grade 5 · Math</p>
+                </div>
+                <ol>
+                  {sample.map((item, i) => (
+                    <li key={i} className="flex justify-between gap-3 py-2 border-b border-dotted border-slate-200 last:border-0 text-sm">
+                      <span><span className="text-slate-400 font-mono mr-2">{i + 1}.</span>{item.q}</span>
+                      <span className="text-emerald-700 font-medium shrink-0">{item.a}</span>
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-3 text-xs text-slate-500">Answer key included · print or download as PDF</p>
+              </div>
+            </Link>
           </div>
-          <ol>
-            {sample.map((item, i) => (
-              <li key={i} className="flex justify-between gap-3 py-2 border-b border-dotted border-slate-200 last:border-0 text-sm">
-                <span><span className="text-slate-400 font-mono mr-2">{i + 1}.</span>{item.q}</span>
-                <span className="text-emerald-700 font-medium shrink-0">{item.a}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-3 text-xs text-slate-500">Answer key included · prints on A4 or Letter</p>
-        </Link>
+        </div>
+        <div className="max-w-6xl mx-auto px-6 pb-6">
+          <TrustStrip />
+        </div>
       </section>
 
       <section className="max-w-6xl mx-auto px-6 py-12">
@@ -142,12 +181,13 @@ export default function Home() {
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Worksheets by subject</h2>
         <div className="mt-6 grid sm:grid-cols-3 gap-6">
           {SUBJECTS.map((s) => (
-            <div key={s.id} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-              <Link href={`/worksheets/${s.id}`} className="text-lg font-semibold text-slate-900 dark:text-white hover:underline">{s.label} worksheets</Link>
+            <div key={s.id} className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 pt-7">
+              <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1.5 ${subjectStyle(s.id).stripe}`} />
+              <Link href={`/worksheets/${s.id}`} className={`text-lg font-semibold hover:underline ${subjectStyle(s.id).text}`}>{s.label} worksheets</Link>
               <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">{SUBJECT_BLURBS[s.id]}</p>
               <div className="flex flex-wrap gap-1.5 mt-4">
                 {allGrades().filter((g) => topicsForGrade(s.id, g).length > 0).map((g) => (
-                  <Link key={g} href={`/worksheets/${s.id}/${g}`} className="text-xs px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-slate-900 dark:hover:border-white">
+                  <Link key={g} href={`/worksheets/${s.id}/${g}`} className={`text-xs px-2.5 py-1 rounded-full ${subjectStyle(s.id).chip} hover:opacity-80`}>
                     Grade {g}
                   </Link>
                 ))}
@@ -166,6 +206,23 @@ export default function Home() {
               <span className="block text-xs font-normal text-slate-500 dark:text-slate-400 mt-0.5">{SUBJECTS.find((s) => s.id === p.subject)?.label} · with answers</span>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 py-12">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8 grid sm:grid-cols-[auto_1fr_auto] gap-6 items-center">
+          <div className="w-14 h-14 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center text-lg font-bold" aria-hidden="true">GM</div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Who's behind Practice Sheet</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
+              Built by {BRAND.founder.name}, a software engineer with around 20 years of experience building systems for
+              banking and lending, where every number has to be right. Practice Sheet is a product of {BRAND.company}.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/about" className="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800">Our story</Link>
+            <Link href="/safety" className="px-4 py-2 rounded-lg text-sm font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800">Safety & privacy</Link>
+          </div>
         </div>
       </section>
 

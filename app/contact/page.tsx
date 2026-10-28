@@ -44,8 +44,13 @@ export default function Contact() {
     <main>
       <Navbar />
       <section className="max-w-lg mx-auto px-6 py-16">
-        <h1 className="text-3xl font-bold">Contact us</h1>
-        <p className="text-slate-600 mt-2">Questions, bug reports, feature requests — happy to hear them.</p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Contact us</h1>
+        <p className="text-slate-600 dark:text-slate-300 mt-2">Questions, bug reports, feature requests — happy to hear them.</p>
+        <p className="text-slate-600 dark:text-slate-300 mt-2">
+          Prefer email? Write to{" "}
+          <a href="mailto:aethelsystems@gmail.com" className="underline underline-offset-2 text-slate-900 dark:text-white">aethelsystems@gmail.com</a>.
+          {" "}Practice Sheet is a product of Aethel Systems.
+        </p>
 
         {status === "sent" ? (
           <div className="mt-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-4 text-sm">

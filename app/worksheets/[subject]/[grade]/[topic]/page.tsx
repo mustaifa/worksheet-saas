@@ -8,6 +8,7 @@ import DownloadPdfButton from "@/components/DownloadPdfButton";
 import { BRAND, brandedFilename } from "@/lib/brand";
 import SignupCta from "@/components/SignupCta";
 import TopicRequestBox from "@/components/TopicRequestBox";
+import TrustStrip from "@/components/TrustStrip";
 import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
@@ -174,6 +175,8 @@ export default function TopicPage({ params }: { params: Params }) {
             Jump to answer key
           </a>
         </div>
+
+        <div className="mt-5"><TrustStrip compact /></div>
 
         {/* Everything inside this element (and only this) is printed — see globals.css */}
         <div id="worksheet-print-area" className="mt-8 print:mt-0 bg-white text-slate-900 rounded-lg shadow-lg p-8 border border-slate-200">
