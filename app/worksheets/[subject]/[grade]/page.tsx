@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SignupCta from "@/components/SignupCta";
+import TopicRequestBox from "@/components/TopicRequestBox";
 import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { absoluteUrl, OG_IMAGE } from "@/lib/site";
 import { isFreeMode } from "@/lib/access";
@@ -163,6 +164,10 @@ export default function GradePage({ params }: { params: { subject: string; grade
             Generate unlimited fresh worksheets at easy, medium or hard difficulty. {freeMode ? "Free during our launch — no card needed." : "Start with a free trial."}
           </p>
           <SignupCta label={freeMode ? "Create a free account" : "Start your free trial"} className="mt-4" />
+        </div>
+
+        <div id="request" className="mt-12 max-w-3xl">
+          <TopicRequestBox subject={sid} grade={grade} />
         </div>
 
         <div className="mt-12 max-w-3xl">

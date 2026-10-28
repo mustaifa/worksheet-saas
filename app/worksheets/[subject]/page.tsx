@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import TopicRequestBox from "@/components/TopicRequestBox";
 import Footer from "@/components/Footer";
 import JsonLd, { breadcrumbLd } from "@/components/seo/JsonLd";
 import { absoluteUrl } from "@/lib/site";
@@ -55,6 +56,9 @@ export default function SubjectPage({ params }: { params: { subject: string } })
               <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Year {gradeEquivalents(g).ukYear} · Class {g}</p>
             </Link>
           ))}
+        </div>
+        <div id="request" className="mt-12">
+          <TopicRequestBox subject={subject.id} compact />
         </div>
       </section>
       <Footer />

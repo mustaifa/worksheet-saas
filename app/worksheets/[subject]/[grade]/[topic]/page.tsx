@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PrintButton from "@/components/PrintButton";
 import SignupCta from "@/components/SignupCta";
+import TopicRequestBox from "@/components/TopicRequestBox";
 import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
@@ -267,6 +268,10 @@ export default function TopicPage({ params }: { params: Params }) {
             )}
           </div>
         )}
+
+        <div className="mt-12">
+          <TopicRequestBox subject={subject.id} grade={grade} compact />
+        </div>
 
         <div className="print:hidden mt-12">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Frequently asked questions</h2>

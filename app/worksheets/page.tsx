@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import TopicRequestBox from "@/components/TopicRequestBox";
 import Footer from "@/components/Footer";
 import { SUBJECTS, allGrades, topicsForGrade } from "@/lib/subjects";
 
@@ -39,6 +40,9 @@ export default function WorksheetsHub() {
               <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">{SUBJECT_BLURBS[s.id]}</p>
             </Link>
           ))}
+        </div>
+        <div id="request" className="mt-12">
+          <TopicRequestBox compact />
         </div>
       </section>
       <Footer />
