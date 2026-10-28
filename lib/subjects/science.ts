@@ -40,6 +40,10 @@ export const SCIENCE_TOPICS: Topic[] = [
   { id: "genetics_punnett", label: "Punnett Squares & Crosses", grades: [9, 10, 11, 12], aliases: ["punnett square", "genetic cross"], group: "Genetics" },
   { id: "biology_advanced", label: "Advanced Biology (Mixed)", grades: [10, 11, 12], aliases: ["biology"], group: "Advanced Biology" },
   { id: "bio_photosynthesis_respiration", label: "Photosynthesis & Respiration", grades: [10, 11, 12], aliases: ["photosynthesis", "cellular respiration"], group: "Advanced Biology" },
+  { id: "body_nervous", label: "Nervous System", grades: [5, 6, 7, 8], aliases: ["nervous system", "brain", "neuron", "reflex"], group: "Human Body" },
+  { id: "electricity", label: "Electricity & Circuits", grades: [4, 5, 6, 7, 8], aliases: ["electricity", "circuit", "conductor", "insulator"] },
+  { id: "light_sound", label: "Light & Sound", grades: [3, 4, 5, 6], aliases: ["light and sound", "light", "sound", "shadow", "reflection"] },
+  { id: "magnetism", label: "Magnets & Magnetism", grades: [3, 4, 5], aliases: ["magnet", "magnetism", "magnetic"] },
   { id: "bio_cell_division", label: "Mitosis & Meiosis", grades: [10, 11, 12], aliases: ["mitosis", "meiosis", "cell division"], group: "Advanced Biology" },
 ];
 
@@ -221,7 +225,7 @@ export const SCIENCE_GENERATORS: Record<string, Gen> = {
   solar_system: tieredBankGen(B.SOLAR_SYSTEM_PLANETS, B.SOLAR_SYSTEM_EARTH_MOON),
   solar_system_planets: tieredBankGen(B.SOLAR_SYSTEM_PLANETS),
   solar_system_earth_moon: tieredBankGen(B.SOLAR_SYSTEM_EARTH_MOON),
-  human_body_systems: tieredBankGen(B.BODY_CIRCULATORY, B.BODY_DIGESTIVE, B.BODY_RESPIRATORY, B.BODY_SKELETAL_MUSCULAR),
+  human_body_systems: tieredBankGen(B.BODY_CIRCULATORY, B.BODY_DIGESTIVE, B.BODY_RESPIRATORY, B.BODY_SKELETAL_MUSCULAR, B.NERVOUS_SYSTEM),
   body_circulatory: tieredBankGen(B.BODY_CIRCULATORY),
   body_digestive: tieredBankGen(B.BODY_DIGESTIVE),
   body_respiratory: tieredBankGen(B.BODY_RESPIRATORY),
@@ -248,4 +252,20 @@ export const SCIENCE_GENERATORS: Record<string, Gen> = {
   genetics_basics: genGeneticsBasics,
   genetics_vocabulary: tieredBankGen(B.GENETICS_VOCAB),
   genetics_punnett: genGeneticsPunnett,
+  body_nervous: tieredBankGen(B.NERVOUS_SYSTEM),
+  electricity: (grade, diff, rng) => {
+    // grade 7+ hard: Ohm's law problems, computed
+    if (grade >= 7 && diff === "hard" && rng() < 0.4) {
+      const { randInt, pick } = makeHelpers(rng);
+      const I = randInt(1, 6), R = randInt(2, 12), V = I * R;
+      return pick([
+        { q: `Using V = IR, find the voltage when a current of ${I} A flows through a ${R} Ω resistor.`, a: `${V} V` },
+        { q: `Using V = IR, find the current when ${V} V is applied across a ${R} Ω resistor.`, a: `${I} A` },
+        { q: `Using V = IR, find the resistance when ${V} V drives a current of ${I} A.`, a: `${R} Ω` },
+      ]);
+    }
+    return tieredBankGen(B.ELECTRICITY)(grade, diff, rng);
+  },
+  light_sound: tieredBankGen(B.LIGHT_SOUND),
+  magnetism: tieredBankGen(B.MAGNETISM),
 };

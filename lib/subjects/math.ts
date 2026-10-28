@@ -26,6 +26,9 @@ export const MATH_TOPICS: Topic[] = [
   { id: "geometry_area_rect", label: "Area: Rectangles & Parallelograms", grades: [4, 5, 6, 7, 8], aliases: ["area of rectangle", "area of parallelogram"], group: "Geometry" },
   { id: "geometry_area_triangle", label: "Area: Triangles", grades: [4, 5, 6, 7, 8], aliases: ["area of triangle", "triangle area"], group: "Geometry" },
   { id: "geometry_volume", label: "Volume: Rectangular Prisms", grades: [5, 6, 7, 8], aliases: ["volume", "rectangular prism"], group: "Geometry" },
+  { id: "area_perimeter", label: "Area & Perimeter", grades: [3, 4, 5], aliases: ["area and perimeter", "perimeter", "area of a rectangle", "area of square"], group: "Geometry" },
+  { id: "surface_area", label: "Surface Area of Prisms", grades: [6, 7, 8], aliases: ["surface area", "nets of"], group: "Geometry" },
+  { id: "volume_prisms_cylinders", label: "Volume: Prisms & Cylinders", grades: [7, 8], aliases: ["volume of triangular prism", "triangular prism", "volume of cylinder", "cylinder"], group: "Geometry" },
 
   { id: "stats", label: "Statistics (Mixed Practice)", grades: [5, 6, 7, 8, 11], aliases: ["statistic"], group: "Statistics" },
   { id: "stats_central_tendency", label: "Mean, Median & Mode", grades: [5, 6, 7, 8, 11], aliases: ["mean", "median", "mode", "average"], group: "Statistics" },
@@ -449,7 +452,75 @@ const genGeometryVolume: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);
   const max = diff === "hard" ? 15 : diff === "medium" ? 10 : 6;
   const l = randInt(2, max), w = randInt(2, max), h = randInt(2, max);
+  if (diff === "easy" && rng() < 0.3) { const e = randInt(2, 9); return { q: `Find the volume of a cube with edges of ${e} cm.`, a: `${e * e * e} cm³` }; }
+  if (diff === "hard" && rng() < 0.4) return { q: `A rectangular prism has volume ${l * w * h} cm³, length ${l} cm and width ${w} cm. What is its height?`, a: `${h} cm` };
+  if (diff !== "easy" && rng() < 0.3) return { q: `A fish tank is ${l * 5} cm long, ${w * 5} cm wide and ${h * 5} cm tall. What is its volume?`, a: `${125 * l * w * h} cm³` };
   return { q: `Find the volume of a rectangular prism with length ${l} cm, width ${w} cm, and height ${h} cm.`, a: `${l * w * h} cm³` };
+};
+
+const genAreaPerimeter: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const unit = pick(["cm", "m", "in", "ft"]);
+  const max = diff === "easy" ? 10 : diff === "medium" ? 15 : 20;
+  const l = randInt(2, max), w = randInt(2, max);
+  const kinds = diff === "easy" ? ["area", "perim", "square"] : diff === "medium" ? ["area", "perim", "missingP", "missingA", "word"] : ["missingP", "missingA", "lshape", "word", "compare"];
+  const kind = pick(kinds);
+  if (kind === "area") return { q: `Find the area of a rectangle ${l} ${unit} long and ${w} ${unit} wide.`, a: `${l * w} ${unit}²` };
+  if (kind === "perim") return { q: `Find the perimeter of a rectangle ${l} ${unit} long and ${w} ${unit} wide.`, a: `${2 * (l + w)} ${unit}` };
+  if (kind === "square") { const s = randInt(2, 12); return pick([{ q: `A square has sides of ${s} ${unit}. What is its perimeter?`, a: `${4 * s} ${unit}` }, { q: `A square has sides of ${s} ${unit}. What is its area?`, a: `${s * s} ${unit}²` }]); }
+  if (kind === "missingP") return { q: `A rectangle has a perimeter of ${2 * (l + w)} ${unit}. Its length is ${l} ${unit}. What is its width?`, a: `${w} ${unit}` };
+  if (kind === "missingA") return { q: `A rectangle has an area of ${l * w} ${unit}². Its length is ${l} ${unit}. What is its width?`, a: `${w} ${unit}` };
+  if (kind === "word") {
+    return pick([
+      { q: `A garden is ${l} m long and ${w} m wide. How many meters of fence are needed to go all the way around it?`, a: `${2 * (l + w)} m` },
+      { q: `A floor is ${l} ft by ${w} ft. How many square feet of carpet are needed to cover it?`, a: `${l * w} ft²` },
+    ]);
+  }
+  if (kind === "compare") {
+    const a2 = randInt(2, max), b2 = randInt(2, max);
+    const A1 = l * w, A2 = a2 * b2;
+    return { q: `Rectangle A is ${l} × ${w} ${unit}. Rectangle B is ${a2} × ${b2} ${unit}. Which has the greater area, and by how much?`, a: A1 === A2 ? "they are equal" : `${A1 > A2 ? "A" : "B"}, by ${Math.abs(A1 - A2)} ${unit}²` };
+  }
+  // L-shape made of two rectangles: a big rectangle with a corner rectangle cut out
+  const W = randInt(6, 14), H = randInt(6, 14), cw = randInt(2, W - 3), ch = randInt(2, H - 3);
+  return { q: `An L-shaped room is a ${W} m × ${H} m rectangle with a ${cw} m × ${ch} m corner cut out. What is its area?`, a: `${W * H - cw * ch} m²` };
+};
+
+const genSurfaceArea: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const unit = pick(["cm", "m", "in"]);
+  const kind = pick(diff === "easy" ? ["cube", "rect"] : diff === "medium" ? ["rect", "rect", "cube", "word"] : ["tri", "rect", "missing", "word"]);
+  if (kind === "cube") { const s = randInt(2, 12); return { q: `Find the surface area of a cube with edges of ${s} ${unit}.`, a: `${6 * s * s} ${unit}²` }; }
+  const l = randInt(2, diff === "easy" ? 8 : 15), w = randInt(2, diff === "easy" ? 8 : 12), h = randInt(2, diff === "easy" ? 8 : 12);
+  const sa = 2 * (l * w + l * h + w * h);
+  if (kind === "rect") return { q: `Find the surface area of a rectangular prism ${l} ${unit} long, ${w} ${unit} wide and ${h} ${unit} high.`, a: `${sa} ${unit}²` };
+  if (kind === "word") return { q: `A gift box is ${l} cm × ${w} cm × ${h} cm. How much wrapping paper is needed to cover it exactly (no overlap)?`, a: `${sa} cm²` };
+  if (kind === "missing") {
+    // SA known, find height: SA = 2lw + 2h(l + w)
+    return { q: `A rectangular prism has length ${l} ${unit}, width ${w} ${unit} and surface area ${sa} ${unit}². What is its height?`, a: `${h} ${unit}` };
+  }
+  // right-triangular prism using a Pythagorean triple: two triangles + three rectangles
+  const [a, b, c] = pick([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), len = randInt(4, 15);
+  return { q: `A triangular prism has a right-triangle base with sides ${a}, ${b} and ${c} ${unit}, and a length of ${len} ${unit}. Find its surface area.`, a: `${a * b + (a + b + c) * len} ${unit}²` };
+};
+
+const genVolumePrismsCylinders: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const unit = pick(["cm", "m", "in"]);
+  const kind = pick(diff === "easy" ? ["rect", "tri"] : diff === "medium" ? ["tri", "cyl", "rect"] : ["tri", "cyl", "cylMissing", "triMissing"]);
+  const round2 = (x: number) => Math.round(x * 100) / 100;
+  if (kind === "rect") { const l = randInt(2, 12), w = randInt(2, 12), h = randInt(2, 12); return { q: `Find the volume of a rectangular prism ${l} × ${w} × ${h} ${unit}.`, a: `${l * w * h} ${unit}³` }; }
+  if (kind === "tri") {
+    const b = randInt(1, 6) * 2, h = randInt(2, 12), len = randInt(2, 15); // even base keeps ½bh whole
+    return { q: `A triangular prism has a triangular face with base ${b} ${unit} and height ${h} ${unit}. The prism is ${len} ${unit} long. Find its volume.`, a: `${(b * h / 2) * len} ${unit}³` };
+  }
+  if (kind === "triMissing") {
+    const b = randInt(1, 6) * 2, h = randInt(2, 12), len = randInt(2, 15);
+    return { q: `A triangular prism has volume ${(b * h / 2) * len} ${unit}³. Its triangular face has base ${b} ${unit} and height ${h} ${unit}. How long is the prism?`, a: `${len} ${unit}` };
+  }
+  const r = randInt(1, diff === "hard" ? 10 : 6), h = randInt(2, 15);
+  if (kind === "cyl") return { q: `Find the volume of a cylinder with radius ${r} ${unit} and height ${h} ${unit}. (Use π ≈ 3.14, round to 2 decimals)`, a: `${round2(3.14 * r * r * h)} ${unit}³` };
+  return { q: `A cylinder has volume ${round2(3.14 * r * r * h)} ${unit}³ and radius ${r} ${unit}. Using π ≈ 3.14, what is its height?`, a: `${h} ${unit}` };
 };
 
 const genIntegersAddSub: Gen = (grade, diff, rng) => {
@@ -760,6 +831,7 @@ export const MATH_GENERATORS: Record<string, Gen> = {
   decimals_add_sub: genDecimalsAddSub, decimals_mul_div: genDecimalsMulDiv,
   decimals_round: genDecimalsRound, decimals_compare: genDecimalsCompare,
   geometry_area_rect: genGeometryAreaRect, geometry_area_triangle: genGeometryAreaTriangle, geometry_volume: genGeometryVolume,
+  area_perimeter: genAreaPerimeter, surface_area: genSurfaceArea, volume_prisms_cylinders: genVolumePrismsCylinders,
   stats_central_tendency: genStatsCentralTendency, stats_range: genStatsRange,
   ratios_simplify: genRatiosSimplify, ratios_equivalent: genRatiosEquivalent, ratios_unit_rate: genRatiosUnitRate,
   percent_find: genPercentFind, percent_convert: genPercentConvert, percent_word_problems: genPercentWordProblems,
