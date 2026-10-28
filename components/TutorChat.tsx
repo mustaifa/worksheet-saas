@@ -1,12 +1,15 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 
+import { useGradeTheme } from "./GradeThemeProvider";
+
 type Msg = { role: "user" | "assistant"; content: string };
 
 export default function TutorChat() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
-  const [grade, setGrade] = useState(6);
+  const { grade: selectedGrade, setGrade } = useGradeTheme();
+  const grade = selectedGrade ?? 6;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [remaining, setRemaining] = useState<number | null>(null);
@@ -56,6 +59,7 @@ export default function TutorChat() {
           <p className="text-xs text-slate-500 dark:text-slate-400">Share a specific problem you're stuck on.</p>
         </div>
         <select
+          aria-label="Tutor grade"
           value={grade}
           onChange={(e) => setGrade(parseInt(e.target.value, 10))}
           className="text-sm border border-slate-300 rounded-lg px-2 py-1 dark:border-slate-700"

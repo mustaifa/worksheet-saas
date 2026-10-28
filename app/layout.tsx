@@ -1,9 +1,11 @@
 import "./globals.css";
+import "./grade-themes.css";
 import Providers from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import JsonLd from "@/components/seo/JsonLd";
 import GoogleAnalytics from "@/components/Analytics";
+import { GRADE_THEME_KEY } from "@/lib/gradeThemes";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const DEFAULT_DESCRIPTION =
@@ -36,6 +38,9 @@ export const metadata: Metadata = {
 const themeInitScript = `
 (function() {
   try {
+    var gradeMatch = window.location.pathname.match(/^\\/worksheets\\/(?:math|english|science)\\/(\\d+)(?:\\/|$)/);
+    var savedGrade = gradeMatch ? gradeMatch[1] : localStorage.getItem('${GRADE_THEME_KEY}');
+    if (/^(?:[1-9]|1[0-2])$/.test(savedGrade || '')) document.documentElement.dataset.grade = savedGrade;
     var theme = localStorage.getItem('theme');
     var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (theme === 'dark' || (!theme && prefersDark)) {
