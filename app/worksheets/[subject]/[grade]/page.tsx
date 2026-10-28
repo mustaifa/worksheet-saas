@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SignupCta from "@/components/SignupCta";
 import TopicRequestBox from "@/components/TopicRequestBox";
+import TrustStrip from "@/components/TrustStrip";
 import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { absoluteUrl, OG_IMAGE } from "@/lib/site";
 import { isFreeMode } from "@/lib/access";
@@ -105,6 +106,7 @@ export default function GradePage({ params }: { params: { subject: string; grade
           {topics.length} printable Grade {grade} {lower} worksheets, each with a full answer key. Open a topic to print it or save it as a PDF.{" "}
           {gradeOverview(sid, grade)}
         </p>
+        <div className="mt-5"><TrustStrip compact /></div>
 
         <div className="mt-10 space-y-10">
           {groupTopics(topics).map(({ group, topics: groupedTopics }) => (

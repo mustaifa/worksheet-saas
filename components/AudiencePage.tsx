@@ -2,6 +2,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SignupCta from "@/components/SignupCta";
+import TrustStrip from "@/components/TrustStrip";
 import JsonLd, { faqLd } from "@/components/seo/JsonLd";
 import { BLOG_POSTS, type Audience } from "@/lib/blog";
 import { isFreeMode } from "@/lib/access";
@@ -36,6 +37,10 @@ export default function AudiencePage({ c }: { c: AudienceConfig }) {
           <Link href={c.primaryCta.href} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-lg font-medium hover:bg-slate-700 dark:hover:bg-slate-200">{c.primaryCta.label}</Link>
           <Link href={c.secondaryCta.href} className="px-6 py-3 rounded-lg font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">{c.secondaryCta.label}</Link>
         </div>
+      </section>
+
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-4">
+        <TrustStrip />
       </section>
 
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10">

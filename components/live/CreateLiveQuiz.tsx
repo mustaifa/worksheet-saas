@@ -89,7 +89,7 @@ export default function CreateLiveQuiz() {
         onClick={createSession} disabled={loading || !currentTopic}
         className="w-full bg-amber-400 text-amber-950 font-semibold py-3 rounded-lg hover:bg-amber-300 disabled:opacity-50"
       >
-        {loading ? "Creating…" : "Create Live Quiz 🎮"}
+        {loading ? "Creating…" : "Create live quiz"}
       </button>
     </div>
   );

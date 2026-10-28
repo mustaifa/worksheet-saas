@@ -6,6 +6,8 @@ import {
 } from "@/lib/subjects";
 import TopicPicker from "@/components/TopicPicker";
 import { downloadWorksheetPdf } from "@/lib/brandedPdf";
+import { subjectStyle } from "@/components/subjectStyles";
+import { DocIcon } from "@/components/Icons";
 import { brandedFilename, BRAND } from "@/lib/brand";
 
 function newSeed() {
@@ -254,7 +256,7 @@ export default function WorksheetGenerator() {
           disabled={!topic}
           className="w-full bg-amber-400 text-amber-950 font-semibold py-3 rounded-lg hover:bg-amber-300 disabled:opacity-50"
         >
-          ✎ Generate Worksheet
+          Generate worksheet
         </button>
 
         <div>
@@ -269,7 +271,7 @@ export default function WorksheetGenerator() {
             onClick={handleCommandGo}
             className="w-full mt-2 border border-dashed border-amber-500 dark:border-amber-400 text-amber-700 dark:text-amber-400 text-xs font-semibold py-2 rounded-lg hover:bg-amber-50"
           >
-            ⌨ Generate from request
+            Generate from request
           </button>
           {feedback && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{feedback}</p>}
         </div>
@@ -280,7 +282,7 @@ export default function WorksheetGenerator() {
         {questions.length === 0 ? (
           <div className="w-full max-w-2xl py-6">
             <div className="text-center mb-8">
-              <div className="text-4xl mb-3">📝</div>
+              <div className="mx-auto mb-3 w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center"><DocIcon size={24} /></div>
               <h2 className="text-xl font-bold text-slate-900 dark:text-white">Ready when you are</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                 Pick a subject and grade on the left, or jump straight into one of these:
@@ -294,7 +296,7 @@ export default function WorksheetGenerator() {
                   onClick={() => handlePreset(preset)}
                   className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-center hover:border-slate-900 dark:hover:border-white hover:shadow-md transition-all"
                 >
-                  <span className="text-2xl">{preset.icon}</span>
+                  <span className={`text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full ${subjectStyle(preset.subject).chip}`}>{SUBJECTS.find((x) => x.id === preset.subject)?.label}</span>
                   <span className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-snug">{preset.label}</span>
                 </button>
               ))}

@@ -76,7 +76,7 @@ export default function WorksheetScanUpload() {
                 onClick={convert} disabled={uploading}
                 className="flex-1 bg-amber-400 text-amber-950 font-semibold py-3 rounded-lg hover:bg-amber-300 disabled:opacity-50"
               >
-                {uploading ? "Reading worksheet…" : "✨ Convert to digital worksheet"}
+                {uploading ? "Reading worksheet…" : "Convert to digital worksheet"}
               </button>
               <button
                 onClick={() => { setPreviewUrl(null); setError(""); }}

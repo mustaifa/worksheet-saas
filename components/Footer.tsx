@@ -12,7 +12,8 @@ export default function Footer() {
             <img src="/logo-mark.png" alt="" width={22} height={22} className="rounded-md" />
             Practice Sheet
           </p>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">Worksheets for Math, English & Science, grades 1–12.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">Worksheets for Math, English & Science, grades 1–12. A product of Aethel Systems.</p>
+          <a href="mailto:aethelsystems@gmail.com" className="inline-block mt-3 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white underline underline-offset-2">aethelsystems@gmail.com</a>
         </div>
         <div>
           <p className="font-semibold text-slate-900 dark:text-white mb-2">Product</p>
@@ -37,6 +38,7 @@ export default function Footer() {
           <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
             <li><Link href="/about" className="hover:text-slate-900 dark:hover:text-white">About</Link></li>
             <li><Link href="/contact" className="hover:text-slate-900 dark:hover:text-white">Contact</Link></li>
+            <li><Link href="/safety" className="hover:text-slate-900 dark:hover:text-white">Safety & privacy</Link></li>
           </ul>
         </div>
         <div>
@@ -48,7 +50,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-slate-100 dark:border-slate-800 py-4 text-center text-xs text-slate-400 dark:text-slate-500">
-        © {new Date().getFullYear()} Practice Sheet. All rights reserved.
+        © {new Date().getFullYear()} Aethel Systems. Practice Sheet is a product of Aethel Systems. No ads, ever.
       </div>
     </footer>
   );
