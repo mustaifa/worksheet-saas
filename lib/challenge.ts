@@ -10,6 +10,8 @@ const CONTRACTIONS: [RegExp, string][] = [
 function normalizeAnswer(s: string): string {
   let out = s.trim().toLowerCase();
   for (const [pattern, replacement] of CONTRACTIONS) out = out.replace(pattern, replacement);
+  // "3 : 1" and "3:1", "1 / 2" and "1/2" should compare equal
+  out = out.replace(/\s*([:/])\s*/g, "$1");
   return out.replace(/[.,!?;:"']/g, "").replace(/\s+/g, " ").trim();
 }
 
@@ -19,10 +21,39 @@ function normalizeAnswer(s: string): string {
  * if most of the correct answer's words are present — so "I will climb
  * every day" and "I'll climb every day" both count, instead of requiring a
  * character-perfect match. */
+const stripArticles = (s: string) => s.replace(/^(the|a|an) /, "");
+
+/**
+ * Acceptable short forms of a stored answer, so students aren't marked wrong
+ * for leaving out a note in brackets or picking one of several listed options:
+ *   "the Arctic (cold, icy areas)"            → "arctic"
+ *   "runoff / collection"                     → "runoff", "collection"
+ *   "wind, water or animals (any two)"        → each option counts
+ *   "4 (2 hydrogen, 1 oxygen)"                → "4"
+ */
+function acceptedForms(correct: string): { forms: string[]; anyOf: string[] } {
+  const anyOne = /\(any (one|two)\)/i.test(correct);
+  const core = correct.replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+  const forms = new Set<string>([stripArticles(normalizeAnswer(core))]);
+  for (const part of core.split(/\s+\/\s+|;\s+/)) forms.add(stripArticles(normalizeAnswer(part)));
+  // "X or Y" for short answers (e.g. "herbivore or plant-eater")
+  if (core.split(" ").length <= 6) for (const part of core.split(/\s+or\s+/)) forms.add(stripArticles(normalizeAnswer(part)));
+  const anyOf = anyOne
+    ? core.split(/,\s*|\s+or\s+/).map((p) => stripArticles(normalizeAnswer(p))).filter(Boolean)
+    : [];
+  return { forms: [...forms].filter(Boolean), anyOf };
+}
+
 export function answersMatch(correct: string, submitted: string): boolean {
   const a = normalizeAnswer(correct);
   const b = normalizeAnswer(submitted);
   if (a === b) return true;
+  if (!b) return false;
+
+  const { forms, anyOf } = acceptedForms(correct);
+  const bCore = stripArticles(b);
+  if (forms.includes(bCore)) return true;
+  if (anyOf.length && anyOf.some((opt) => opt && (bCore === opt || bCore.split(/,\s*| and | or /).map((x) => stripArticles(x.trim())).includes(opt)))) return true;
 
   const numA = parseFloat(a.replace(/[^0-9.\-]/g, ""));
   const numB = parseFloat(b.replace(/[^0-9.\-]/g, ""));
@@ -31,8 +62,10 @@ export function answersMatch(correct: string, submitted: string): boolean {
   }
 
   // lenient word-overlap match for sentence-style answers (3+ words)
+  // (4+ words only: for short answers one different word changes the meaning,
+  // e.g. "white blood cells" vs "red blood cells")
   const wordsA = a.split(" ").filter(Boolean);
-  if (wordsA.length >= 3) {
+  if (wordsA.length >= 4) {
     const wordsB = new Set(b.split(" ").filter(Boolean));
     const matched = wordsA.filter((w) => wordsB.has(w)).length;
     if (matched / wordsA.length >= 0.65) return true;

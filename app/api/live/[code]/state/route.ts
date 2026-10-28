@@ -16,6 +16,7 @@ export async function GET(req: Request, { params }: { params: { code: string } }
     difficulty: liveSession.difficulty as Difficulty,
     count: liveSession.questionCount,
     seed: liveSession.seed,
+    forTyping: true
   });
 
   const current = questions[liveSession.currentIndex];

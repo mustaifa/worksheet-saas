@@ -1,3 +1,4 @@
+import { describeAnthropicError } from "@/lib/aiHealth";
 import { ExtractedWorksheet } from "./worksheetScanTypes";
 
 const SYSTEM_PROMPT = `You are a precise document transcription assistant. The user will send a photo of a worksheet they personally authored (their own original teaching material) that they want converted into a clean digital format.
@@ -58,7 +59,7 @@ export async function extractWorksheetFromImage(
     });
 
     if (!res.ok) {
-      console.error("Anthropic vision API error:", await res.text());
+      console.error("Anthropic vision API error:", await describeAnthropicError(res));
       return { error: "Could not read the image right now. Please try again." };
     }
 

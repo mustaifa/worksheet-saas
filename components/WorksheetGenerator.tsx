@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   SUBJECTS, SubjectId, Difficulty, Question,
-  topicsForGrade, topicLabel, generateWorksheet, parseCommand, allGrades,
+  topicsForGrade, topicLabel, generateWorksheet, parseCommand, allGrades, allTopics,
 } from "@/lib/subjects";
 import TopicPicker from "@/components/TopicPicker";
 
@@ -295,7 +295,7 @@ export default function WorksheetGenerator() {
 
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div className="rounded-lg bg-slate-50 dark:bg-slate-900 p-4">
-                <p className="text-lg font-bold text-slate-900 dark:text-white">64+</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-white">{SUBJECTS.reduce((n, s) => n + allTopics(s.id).length, 0)}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">topics across Math, English & Science</p>
               </div>
               <div className="rounded-lg bg-slate-50 dark:bg-slate-900 p-4">

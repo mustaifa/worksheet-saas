@@ -3,10 +3,20 @@ export type BlogPost = {
   title: string;
   excerpt: string;
   date: string; // ISO
-  content: string[]; // paragraphs
+  updated?: string;
+  /** Overrides the <title> tag (keyword-first, under ~65 characters). */
+  seoTitle?: string;
+  readMinutes?: number;
+  /** Blocks: paragraphs, "## heading", "### subheading", "- list item", "> tip"; inline [text](/path) and **bold**. */
+  content: string[];
+  /** Worksheet pages to link at the end of the post. */
+  worksheets?: { label: string; href: string }[];
 };
 
+import { POSTS_2026_10 } from "./blogPosts2026";
+
 export const BLOG_POSTS: BlogPost[] = [
+  ...POSTS_2026_10,
   {
     slug: "five-ways-to-use-practice-worksheets-effectively",
     title: "5 Ways to Use Practice Worksheets Effectively",

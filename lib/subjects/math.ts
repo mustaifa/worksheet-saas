@@ -113,13 +113,32 @@ const genComparing: Gen = (grade, diff, rng) => {
 };
 const genShapes: Gen = (grade, diff, rng) => {
   const { pick } = makeHelpers(rng);
-  const facts = [
-    { name: "triangle", sides: 3, corners: 3 }, { name: "square", sides: 4, corners: 4 },
-    { name: "rectangle", sides: 4, corners: 4 }, { name: "pentagon", sides: 5, corners: 5 },
-    { name: "hexagon", sides: 6, corners: 6 }, { name: "octagon", sides: 8, corners: 8 },
+  const flat = [
+    { name: "triangle", sides: 3 }, { name: "square", sides: 4 }, { name: "rectangle", sides: 4 },
+    { name: "pentagon", sides: 5 }, { name: "hexagon", sides: 6 }, { name: "octagon", sides: 8 },
+    { name: "heptagon", sides: 7 }, { name: "rhombus", sides: 4 }, { name: "trapezoid", sides: 4 },
+    { name: "parallelogram", sides: 4 }, { name: "decagon", sides: 10 },
   ];
-  const s = pick(facts);
-  return rng() < 0.5 ? { q: `How many sides does a ${s.name} have?`, a: `${s.sides}` } : { q: `How many corners (vertices) does a ${s.name} have?`, a: `${s.corners}` };
+  const solids = [
+    { name: "cube", faces: 6, edges: 12, vertices: 8 }, { name: "rectangular prism", faces: 6, edges: 12, vertices: 8 },
+    { name: "square pyramid", faces: 5, edges: 8, vertices: 5 }, { name: "triangular prism", faces: 5, edges: 9, vertices: 6 },
+    { name: "triangular pyramid", faces: 4, edges: 6, vertices: 4 },
+  ];
+  const easyFlat = flat.slice(0, 6);
+  const kind = pick(diff === "easy" ? ["sides", "corners"] : diff === "medium" ? ["sides", "corners", "name", "faces"] : ["faces", "edges", "vertices", "name", "total"]);
+  const f = pick(diff === "easy" ? easyFlat : flat);
+  if (kind === "sides") return { q: `How many sides does a ${f.name} have?`, a: `${f.sides}` };
+  if (kind === "corners") return { q: `How many corners (vertices) does a ${f.name} have?`, a: `${f.sides}` };
+  if (kind === "name") {
+    const g = pick(flat.filter((x) => !["square", "rectangle", "rhombus", "trapezoid", "parallelogram"].includes(x.name)));
+    return { q: `What do we call a flat shape with ${g.sides} straight sides?`, a: g.name };
+  }
+  const sld = pick(solids);
+  if (kind === "faces") return { q: `How many faces does a ${sld.name} have?`, a: `${sld.faces}` };
+  if (kind === "edges") return { q: `How many edges does a ${sld.name} have?`, a: `${sld.edges}` };
+  if (kind === "vertices") return { q: `How many vertices (corners) does a ${sld.name} have?`, a: `${sld.vertices}` };
+  const two = [pick(easyFlat), pick(easyFlat)];
+  return { q: `How many sides do a ${two[0].name} and a ${two[1].name} have altogether?`, a: `${two[0].sides + two[1].sides}` };
 };
 const genPlaceValue: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
@@ -146,8 +165,12 @@ const genFractionsIntro: Gen = (grade, diff, rng) => {
   const d = pick(diff === "easy" ? [2, 4] : diff === "medium" ? [3, 4, 5, 6] : [4, 5, 6, 8, 10]);
   const n = randInt(1, d - 1);
   if (rng() < 0.5) { const item = pick(["pizza", "chocolate bar", "garden", "cake"]); return { q: `A ${item} is cut into ${d} equal pieces. If you have ${n} piece(s), what fraction is that?`, a: `${n}/${d}` }; }
-  let n2 = randInt(1, d - 1); while (n2 === n) n2 = randInt(1, d - 1);
-  return { q: `Compare: ${n}/${d} ___ ${n2}/${d}  (use <, >, or =)`, a: n > n2 ? ">" : n < n2 ? "<" : "=" };
+  // Comparing needs two different numerators. With halves there is only 1/2,
+  // which used to loop forever (froze the page on Easy) — use quarters instead.
+  const cd = d < 3 ? 4 : d;
+  const cn = Math.min(n, cd - 1);
+  let n2 = randInt(1, cd - 1); while (n2 === cn) n2 = randInt(1, cd - 1);
+  return { q: `Compare: ${cn}/${cd} ___ ${n2}/${cd}  (use <, >, or =)`, a: cn > n2 ? ">" : cn < n2 ? "<" : "=" };
 };
 const genDecimalsIntro: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);
@@ -174,7 +197,10 @@ const genFraction: Gen = (grade, diff, rng) => {
   const dens = dr(diff, { easy: [2, 3, 4, 5, 6], medium: [2, 3, 4, 5, 6, 8, 9, 10, 12], hard: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12] });
   const ops = dr(diff, { easy: ["+", "-"], medium: ["+", "-", "×"], hard: ["+", "-", "×", "÷"] });
   const op = pick(ops);
-  let d1 = pick(dens), d2 = pick(dens), n1 = randInt(1, d1 * 2), n2 = randInt(1, d2 * 2);
+  let d1 = pick(dens), d2 = pick(dens);
+  // proper fractions (e.g. 3/8) on easy/medium; improper ones (e.g. 13/8) only on hard
+  let n1 = diff === "hard" ? randInt(1, d1 * 2) : randInt(1, d1 - 1), n2 = diff === "hard" ? randInt(1, d2 * 2) : randInt(1, d2 - 1);
+  if (n1 === d1) n1 = d1 - 1 || 1; if (n2 === d2) n2 = d2 + 1;
   if (diff === "easy") { n1 = randInt(1, d1 - 1); n2 = randInt(1, d1 - 1); d2 = d1; }
   // Grades 5–6 haven't met negative numbers yet: put the larger fraction first.
   if (op === "-" && n1 * d2 < n2 * d1) { [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1]; }
@@ -284,9 +310,20 @@ const genOrderOfOps: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);
   const n1 = randInt(2, 9), n2 = randInt(2, 9), n3 = randInt(2, 9), n4 = randInt(1, 5);
   if (diff === "easy") return { q: `${n1} + ${n2} × ${n3} = ?`, a: `${n1 + n2 * n3}` };
-  if (diff === "medium") return { q: `(${n1} + ${n2}) × ${n3} - ${n4} = ?`, a: `${(n1 + n2) * n3 - n4}` };
+  if (diff === "medium") {
+    // keep answers non-negative: n4 ≤ 5 < (n1 + n2) × n3
+    return { q: `(${n1} + ${n2}) × ${n3} - ${n4} = ?`, a: `${(n1 + n2) * n3 - n4}` };
+  }
   const n5 = randInt(2, 6);
-  return { q: `${n1} × (${n2} + ${n3}) - ${n4} × ${n5} = ?`, a: `${n1 * (n2 + n3) - n4 * n5}` };
+  if (grade >= 6 && rng() < 0.5) {
+    // exponents and division, with clean integer division
+    const sq = randInt(2, 5), d = randInt(2, 6), mult = d * randInt(1, 6);
+    return { q: `${sq}² + ${mult} ÷ ${d} × ${n3} - ${n4} = ?`, a: `${sq * sq + (mult / d) * n3 - n4}` };
+  }
+  const value = n1 * (n2 + n3) - n4 * n5;
+  // Grades 5 and below haven't met negative numbers: add instead of subtract
+  if (value < 0 && grade < 6) return { q: `${n1} × (${n2} + ${n3}) + ${n4} × ${n5} = ?`, a: `${n1 * (n2 + n3) + n4 * n5}` };
+  return { q: `${n1} × (${n2} + ${n3}) - ${n4} × ${n5} = ?`, a: `${value}` };
 };
 const genExpression: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
@@ -313,7 +350,10 @@ const genFractionsAddSub: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
   const dens = dr(diff, { easy: [2, 3, 4, 5, 6], medium: [2, 3, 4, 5, 6, 8, 9, 10, 12], hard: [2, 3, 4, 5, 6, 7, 8, 9, 10, 12] });
   const op = pick(["+", "-"]);
-  let d1 = pick(dens), d2 = pick(dens), n1 = randInt(1, d1 * 2), n2 = randInt(1, d2 * 2);
+  let d1 = pick(dens), d2 = pick(dens);
+  // proper fractions (e.g. 3/8) on easy/medium; improper ones (e.g. 13/8) only on hard
+  let n1 = diff === "hard" ? randInt(1, d1 * 2) : randInt(1, d1 - 1), n2 = diff === "hard" ? randInt(1, d2 * 2) : randInt(1, d2 - 1);
+  if (n1 === d1) n1 = d1 - 1 || 1; if (n2 === d2) n2 = d2 + 1;
   if (diff === "easy") { n1 = randInt(1, d1 - 1); n2 = randInt(1, d1 - 1); d2 = d1; }
   // Grades 5–6 haven't met negative numbers yet: put the larger fraction first.
   if (op === "-" && n1 * d2 < n2 * d1) { [n1, n2] = [n2, n1]; [d1, d2] = [d2, d1]; }
@@ -473,11 +513,31 @@ const genLinear: Gen = (grade, diff, rng) => {
   return { q: `Solve for x: ${coeff}x ${add >= 0 ? `+ ${add}` : `- ${Math.abs(add)}`} = ${total}`, a: `x = ${x}` };
 };
 const genExponents: Gen = (grade, diff, rng) => {
-  const { randInt } = makeHelpers(rng);
-  const base = randInt(2, diff === "hard" ? 6 : 5), exp = diff === "easy" ? 2 : randInt(2, 3);
-  return { q: `Evaluate: ${base}^${exp}`, a: `${Math.pow(base, exp)}` };
+  const { randInt, pick } = makeHelpers(rng);
+  const kinds = diff === "easy" ? ["eval"] : diff === "medium" ? ["eval", "product", "quotient", "power", "zero"] : ["product", "quotient", "power", "negative", "sci", "mixed"];
+  const kind = pick(kinds);
+  const v = pick(["x", "y", "a", "n"]);
+  if (kind === "eval") {
+    const exp = diff === "easy" ? randInt(2, 3) : randInt(2, 4);
+    const base = randInt(2, exp === 2 ? 12 : diff === "easy" ? 5 : 9);
+    return { q: `Evaluate: ${base}^${exp}`, a: `${Math.pow(base, exp)}` };
+  }
+  if (kind === "product") { const m = randInt(2, 9), n = randInt(2, 9); return { q: `Simplify: ${v}^${m} × ${v}^${n}`, a: `${v}^${m + n}` }; }
+  if (kind === "quotient") { const n = randInt(2, 6), m = n + randInt(1, 7); return { q: `Simplify: ${v}^${m} ÷ ${v}^${n}`, a: `${v}^${m - n}` }; }
+  if (kind === "power") { const m = randInt(2, 5), n = randInt(2, 4); return { q: `Simplify: (${v}^${m})^${n}`, a: `${v}^${m * n}` }; }
+  if (kind === "zero") { const b = randInt(2, 99); return { q: `Evaluate: ${b}^0`, a: "1" }; }
+  if (kind === "negative") {
+    const b = pick([2, 3, 4, 5, 10]), e = randInt(1, b === 10 ? 3 : 3);
+    return { q: `Write as a fraction: ${b}^-${e}`, a: `1/${Math.pow(b, e)}` };
+  }
+  if (kind === "sci") {
+    const mant = randInt(11, 99) / 10, e = randInt(3, 7);
+    const n = Math.round(mant * Math.pow(10, e));
+    return { q: `Write ${n.toLocaleString("en-US")} in scientific notation.`, a: `${mant} × 10^${e}` };
+  }
+  const c = randInt(2, 5), m = randInt(2, 5), n = randInt(1, 4);
+  return { q: `Simplify: (${c}${v}^${m})^2 × ${v}^${n}`, a: `${c * c}${v}^${2 * m + n}` };
 };
-
 // ---------- grades 9-12 (new) ----------
 const genAlgebraBasics: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
@@ -537,12 +597,23 @@ const genRadicals: Gen = (grade, diff, rng) => {
   return { q: `Simplify: √${n}`, a: `${outside}√${inside}` };
 };
 const genPythagorean: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const triples = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [7, 24, 25], [9, 12, 15]];
-  const [a, b, c] = pick(triples);
-  const askHyp = rng() < 0.6;
-  if (askHyp) return { q: `A right triangle has legs of ${a} cm and ${b} cm. Find the hypotenuse.`, a: `${c} cm` };
-  return { q: `A right triangle has a hypotenuse of ${c} cm and one leg of ${a} cm. Find the other leg.`, a: `${b} cm` };
+  const { pick, randInt } = makeHelpers(rng);
+  const base = [[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25], [20, 21, 29], [9, 40, 41]];
+  const unit = pick(["cm", "m", "in", "ft"]);
+  const k = diff === "easy" ? 1 : randInt(1, diff === "hard" ? 4 : 3);
+  const [a, b, c] = pick(diff === "easy" ? base.slice(0, 2) : base).map((x) => x * k);
+  const kind = pick(diff === "hard" ? ["leg", "decimal", "check", "ladder"] : diff === "medium" ? ["hyp", "leg", "ladder"] : ["hyp", "hyp", "leg"]);
+  if (kind === "hyp") return { q: `A right triangle has legs of ${a} ${unit} and ${b} ${unit}. Find the hypotenuse.`, a: `${c} ${unit}` };
+  if (kind === "leg") return { q: `A right triangle has a hypotenuse of ${c} ${unit} and one leg of ${a} ${unit}. Find the other leg.`, a: `${b} ${unit}` };
+  if (kind === "ladder") return { q: `A ${c} ${unit} ladder leans against a wall with its foot ${a} ${unit} from the wall. How high up the wall does it reach?`, a: `${b} ${unit}` };
+  if (kind === "check") {
+    const right = rng() < 0.5;
+    const sides = right ? [a, b, c] : [a, b, c + randInt(1, 3)];
+    return { q: `Is a triangle with sides ${sides.join(", ")} a right triangle?`, a: right ? `yes (${a}² + ${b}² = ${c}²)` : `no (${sides[0]}² + ${sides[1]}² ≠ ${sides[2]}²)` };
+  }
+  const x = randInt(2, 9), y = randInt(2, 9);
+  const h = Math.round(Math.sqrt(x * x + y * y) * 10) / 10;
+  return { q: `A right triangle has legs of ${x} ${unit} and ${y} ${unit}. Find the hypotenuse to 1 decimal place.`, a: Number.isInteger(Math.sqrt(x * x + y * y)) ? `${Math.sqrt(x * x + y * y)} ${unit}` : `${h} ${unit}` };
 };
 const genCircleGeo: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
@@ -562,15 +633,34 @@ const genCoordinateGeo: Gen = (grade, diff, rng) => {
   return { q: `Find the distance between (${x1}, ${y1}) and (${x2}, ${y2}).`, a: `${Math.sqrt(a * a + b * b)}` };
 };
 const genQuadraticFormula: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  // curated set with clean discriminants
-  const items: [number, number, number, string][] = [
-    [1, -3, 2, "x = 1 or x = 2"], [1, -5, 6, "x = 2 or x = 3"], [1, 1, -6, "x = 2 or x = -3"],
-    [1, -1, -12, "x = 4 or x = -3"], [2, -3, -2, "x = 2 or x = -0.5"], [1, 2, -8, "x = 2 or x = -4"],
-  ];
-  const [a, b, c, ans] = pick(items);
-  const bStr = b >= 0 ? `+ ${b}x` : `- ${Math.abs(b)}x`, cStr = c >= 0 ? `+ ${c}` : `- ${Math.abs(c)}`;
-  return { q: `Use the quadratic formula to solve: ${a}x² ${bStr} ${cStr} = 0`, a: ans };
+  const { randInt, pick } = makeHelpers(rng);
+  const term = (coef: number, sym: string, first = false) => {
+    if (coef === 0) return "";
+    const abs = Math.abs(coef), c = abs === 1 && sym ? "" : `${abs}`;
+    if (first) return `${coef < 0 ? "-" : ""}${c}${sym}`;
+    return ` ${coef < 0 ? "-" : "+"} ${c}${sym}`;
+  };
+  if (diff !== "easy" && rng() < 0.35) {
+    // vertex of y = ax² + bx + c built from a(x - h)² + k
+    const a = pick(diff === "hard" ? [1, 2, -1, 3] : [1, 1, 2]), h = randInt(-5, 5), k = randInt(-9, 9);
+    const b = -2 * a * h, c = a * h * h + k;
+    return { q: `Find the vertex of y = ${term(a, "x²", true)}${term(b, "x")}${term(c, "")}`, a: `(${h}, ${k})` };
+  }
+  // roots chosen first, so the discriminant is always a perfect square
+  const r1 = randInt(-7, 7);
+  let r2 = randInt(-7, 7); if (r2 === r1) r2 = r1 + 1;
+  if (diff === "hard") {
+    // a = 2: one root is a half, e.g. (2x - p)(x - q)
+    const p = pick([1, 3, 5, -1, -3, -5]), q = randInt(-6, 6);
+    const A = 2, B = -(p + 2 * q), C = p * q;
+    const roots = [p / 2, q].sort((x, y) => x - y);
+    const fmt = (x: number) => (Number.isInteger(x) ? `${x}` : `${x < 0 ? "-" : ""}${Math.abs(p)}/2`);
+    return { q: `Use the quadratic formula to solve: ${term(A, "x²", true)}${term(B, "x")}${term(C, "")} = 0`, a: roots[0] === roots[1] ? `x = ${fmt(roots[0])}` : `x = ${fmt(roots[0])} or x = ${fmt(roots[1])}` };
+  }
+  const a = diff === "easy" ? 1 : pick([1, 1, 2, 3]);
+  const B = -a * (r1 + r2), C = a * r1 * r2;
+  const [lo, hi] = [r1, r2].sort((x, y) => x - y);
+  return { q: `Use the quadratic formula to solve: ${term(a, "x²", true)}${term(B, "x")}${term(C, "")} = 0`, a: `x = ${lo} or x = ${hi}` };
 };
 const genExponential: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
@@ -604,14 +694,32 @@ const genSequences: Gen = (grade, diff, rng) => {
   return { q: `Find the ${Math.min(n, 6)}th term: ${first}, ${first * r}, ${first * r * r}, ...`, a: `${first * Math.pow(r, Math.min(n, 6) - 1)}` };
 };
 const genTrigRatios: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  // 3-4-5 / 5-12-13 style triples with clean ratios, plus common angle facts
-  const items: [string, string][] = [
-    ["sin(30°)", "0.5"], ["cos(60°)", "0.5"], ["sin(90°)", "1"], ["cos(0°)", "1"],
-    ["sin(0°)", "0"], ["cos(90°)", "0"], ["tan(45°)", "1"], ["sin(45°)", "√2/2"], ["cos(45°)", "√2/2"],
+  const { pick, randInt } = makeHelpers(rng);
+  const special: [string, string][] = [
+    ["sin(30°)", "1/2"], ["cos(60°)", "1/2"], ["sin(90°)", "1"], ["cos(0°)", "1"], ["sin(0°)", "0"],
+    ["cos(90°)", "0"], ["tan(45°)", "1"], ["sin(45°)", "√2/2"], ["cos(45°)", "√2/2"],
+    ["sin(60°)", "√3/2"], ["cos(30°)", "√3/2"], ["tan(30°)", "√3/3"], ["tan(60°)", "√3"],
   ];
-  const [q, a] = pick(items);
-  return { q: `Evaluate: ${q}`, a };
+  const kind = pick(diff === "easy" ? ["special", "ratio"] : diff === "medium" ? ["ratio", "ratio", "special", "side"] : ["side", "side", "angle", "ratio"]);
+  if (kind === "special") { const [q, a] = pick(special); return { q: `Evaluate exactly: ${q}`, a }; }
+  const [p, qq, h] = pick([[3, 4, 5], [5, 12, 13], [8, 15, 17], [7, 24, 25]]);
+  if (kind === "ratio") {
+    // angle A is opposite side p
+    const fn = pick(["sin", "cos", "tan"]);
+    const val = fn === "sin" ? `${p}/${h}` : fn === "cos" ? `${qq}/${h}` : `${p}/${qq}`;
+    return { q: `In right triangle ABC (right angle at C), the side opposite angle A is ${p}, the side adjacent to A is ${qq}, and the hypotenuse is ${h}. Find ${fn}(A).`, a: val };
+  }
+  if (kind === "side") {
+    const hyp = randInt(2, 12) * 2;
+    const which = pick(["opp30", "adj60", "opp90"]);
+    if (which === "opp30") return { q: `A right triangle has a hypotenuse of ${hyp} cm and an angle of 30°. How long is the side opposite the 30° angle?`, a: `${hyp / 2} cm` };
+    if (which === "adj60") return { q: `A right triangle has a hypotenuse of ${hyp} cm and an angle of 60°. How long is the side adjacent to the 60° angle?`, a: `${hyp / 2} cm` };
+    const leg = randInt(2, 15);
+    return { q: `In a right triangle, one angle is 45° and one leg is ${leg} cm. How long is the other leg?`, a: `${leg} cm` };
+  }
+  const deg = pick([30, 45, 60]);
+  const val = deg === 30 ? "1/2" : deg === 45 ? "√2/2" : "√3/2";
+  return { q: `An acute angle θ has sin(θ) = ${val}. What is θ?`, a: `${deg}°` };
 };
 const genPolynomials: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);

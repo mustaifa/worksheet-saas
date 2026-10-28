@@ -1,4 +1,6 @@
 import { Topic, Gen, makeHelpers } from "./types";
+import * as B from "./scienceBanks";
+import type { BankItem } from "./scienceBanks";
 
 export const SCIENCE_TOPICS: Topic[] = [
   { id: "living_nonliving", label: "Living vs Non-living", grades: [1, 2], aliases: ["living", "nonliving", "non-living"] },
@@ -41,397 +43,209 @@ export const SCIENCE_TOPICS: Topic[] = [
   { id: "bio_cell_division", label: "Mitosis & Meiosis", grades: [10, 11, 12], aliases: ["mitosis", "meiosis", "cell division"], group: "Advanced Biology" },
 ];
 
-// ---------- curated fact banks: [question, answer] ----------
-const LIVING_NONLIVING: [string, string][] = [
-  ["Is a tree living or non-living?", "living"], ["Is a rock living or non-living?", "non-living"],
-  ["Is a butterfly living or non-living?", "living"], ["Is water living or non-living?", "non-living"],
-  ["Is a mushroom living or non-living?", "living"], ["Is the sun living or non-living?", "non-living"],
-  ["Name one thing all living things need to survive.", "food, water, air, or shelter (any one)"],
-];
-const FIVE_SENSES: [string, string][] = [
-  ["Which sense organ do we use to see?", "eyes"], ["Which sense organ do we use to hear?", "ears"],
-  ["Which sense organ do we use to smell?", "nose"], ["Which sense organ do we use to taste?", "tongue"],
-  ["Which sense do we use to feel if something is hot?", "touch"],
-  ["Name the five senses.", "sight, hearing, smell, taste, touch"],
-];
-const ANIMAL_HABITATS: [string, string][] = [
-  ["Where does a fish live?", "in water / ocean or river"], ["Where does a polar bear live?", "the Arctic / cold, icy areas"],
-  ["Where does a camel live?", "the desert"], ["Where does a monkey usually live?", "the rainforest / jungle"],
-  ["Where does a penguin live?", "Antarctica / cold coastal areas"], ["What do we call an animal's natural home?", "habitat"],
-];
-const PLANT_PARTS: [string, string][] = [
-  ["Which part of the plant absorbs water from the soil?", "roots"], ["Which part of the plant makes food using sunlight?", "leaves"],
-  ["Which part of the plant supports it and carries water up?", "stem"], ["Which part of the plant attracts pollinators?", "flower"],
-  ["What process do plants use to make their own food?", "photosynthesis"], ["Which part of the plant becomes fruit after pollination?", "the flower/ovary"],
-];
-const STATES_OF_MATTER: [string, string][] = [
-  ["Is ice a solid, liquid, or gas?", "solid"], ["Is water vapor a solid, liquid, or gas?", "gas"],
-  ["Is milk a solid, liquid, or gas?", "liquid"], ["What is it called when a solid turns into a liquid?", "melting"],
-  ["What is it called when a liquid turns into a gas?", "evaporation"], ["What is it called when a gas turns into a liquid?", "condensation"],
-  ["What is it called when a liquid turns into a solid?", "freezing"],
-];
-const WATER_CYCLE: [string, string][] = [
-  ["What is the process where water turns into vapor and rises?", "evaporation"], ["What is the process where water vapor turns back into liquid droplets?", "condensation"],
-  ["What is falling rain, snow, or hail called?", "precipitation"], ["What is it called when water flows over land back to rivers/oceans?", "runoff / collection"],
-  ["What powers the water cycle?", "the sun (heat energy)"],
-];
-const SIMPLE_MACHINES: [string, string][] = [
-  ["Name a simple machine that helps lift heavy objects using a bar and fulcrum.", "lever"],
-  ["What simple machine is a wheel with a groove that holds a rope?", "pulley"],
-  ["What simple machine is a sloped surface used to raise objects?", "inclined plane"],
-  ["What simple machine is used to hold objects together, like a screw?", "screw"],
-  ["What simple machine splits things apart, like an axe head?", "wedge"],
-  ["What simple machine is a rod and wheel that rotate together, like a doorknob?", "wheel and axle"],
-];
-const FOOD_CHAIN: [string, string][] = [
-  ["What do we call an organism that makes its own food, like a plant?", "producer"],
-  ["What do we call an animal that eats only plants?", "herbivore"],
-  ["What do we call an animal that eats only meat?", "carnivore"],
-  ["What do we call an animal that eats both plants and meat?", "omnivore"],
-  ["What is an organism that breaks down dead material called?", "decomposer"],
-  ["In a food chain, where does energy originally come from?", "the sun"],
-];
-const SOLAR_SYSTEM: [string, string][] = [
-  ["Which planet is closest to the sun?", "Mercury"], ["Which planet is known as the Red Planet?", "Mars"],
-  ["Which planet has the most well-known ring system?", "Saturn"], ["Which planet do we live on?", "Earth"],
-  ["What is the name of the star at the center of our solar system?", "the Sun"],
-  ["Which planet is the largest in our solar system?", "Jupiter"],
-  ["What natural satellite orbits the Earth?", "the Moon"],
-  ["How many planets are in our solar system?", "8"],
-];
-const SOLAR_SYSTEM_PLANETS: [string, string][] = [
-  ["Which planet is closest to the sun?", "Mercury"], ["Which planet is known as the Red Planet?", "Mars"],
-  ["Which planet has the most well-known ring system?", "Saturn"],
-  ["Which planet is the largest in our solar system?", "Jupiter"],
-  ["Which planet is the smallest in our solar system?", "Mercury"],
-  ["How many planets are in our solar system?", "8"],
-  ["Which planet is known for being tilted on its side?", "Uranus"],
-  ["Which two planets are closest in size to Earth?", "Venus and Mars"],
-  ["Which planet is farthest from the sun?", "Neptune"],
-];
-const SOLAR_SYSTEM_EARTH_MOON: [string, string][] = [
-  ["What natural satellite orbits the Earth?", "the Moon"],
-  ["What is the name of the star at the center of our solar system?", "the Sun"],
-  ["What causes day and night on Earth?", "Earth rotating on its axis"],
-  ["About how long does it take Earth to orbit the Sun once?", "one year (about 365 days)"],
-  ["About how long does it take the Moon to orbit the Earth once?", "about 27-29 days (about a month)"],
-  ["What causes the different phases of the Moon?", "how much of its sunlit side we can see as it orbits Earth"],
-  ["What causes the four seasons on Earth?", "Earth's tilt as it orbits the Sun"],
-];
-const HUMAN_BODY_SYSTEMS: [string, string][] = [
-  ["Which organ pumps blood through the body?", "the heart"], ["Which system helps you breathe?", "the respiratory system"],
-  ["Which organ digests food?", "the stomach"], ["Which system carries blood through the body?", "the circulatory system"],
-  ["Which organ controls the whole body?", "the brain"], ["Which system helps your body move and gives it structure?", "the skeletal system (and muscular system)"],
-  ["What is the largest organ of the human body?", "the skin"],
-];
-const BODY_CIRCULATORY: [string, string][] = [
-  ["Which organ pumps blood through the body?", "the heart"],
-  ["What are the tubes that carry blood away from the heart called?", "arteries"],
-  ["What are the tubes that carry blood back to the heart called?", "veins"],
-  ["Which blood cells carry oxygen around the body?", "red blood cells (they carry hemoglobin)"],
-  ["How many chambers does the human heart have?", "4"],
-  ["What liquid part of blood carries blood cells around the body?", "plasma"],
-  ["What do we call the system of the heart, blood, and blood vessels together?", "the circulatory system"],
-];
-const BODY_DIGESTIVE: [string, string][] = [
-  ["Which organ first breaks down food using acid?", "the stomach"],
-  ["Where does most nutrient absorption happen?", "the small intestine"],
-  ["What organ produces bile to help digest fat?", "the liver"],
-  ["What is the long tube that carries food from your mouth to your stomach called?", "the esophagus"],
-  ["What do we call the process of breaking food into nutrients the body can use?", "digestion"],
-  ["What organ absorbs water and forms solid waste?", "the large intestine"],
-];
-const BODY_RESPIRATORY: [string, string][] = [
-  ["Which organs do you use to breathe?", "the lungs"],
-  ["What gas do we breathe in that our body needs?", "oxygen"],
-  ["What gas do we breathe out as waste?", "carbon dioxide"],
-  ["What muscle below the lungs helps you breathe in and out?", "the diaphragm"],
-  ["What is the tube that carries air from your throat to your lungs called?", "the trachea (windpipe)"],
-  ["What tiny air sacs in the lungs is where oxygen enters the blood?", "alveoli"],
-];
-const BODY_SKELETAL_MUSCULAR: [string, string][] = [
-  ["About how many bones does an adult human body have?", "206"],
-  ["What is the hardest, outer layer of bone called?", "compact bone"],
-  ["What connects muscle to bone?", "a tendon"],
-  ["What connects bone to bone at a joint?", "a ligament"],
-  ["What system gives your body its shape and protects your organs?", "the skeletal system"],
-  ["What do muscles do when they contract (get shorter)?", "pull on bones to create movement"],
-  ["What is the largest bone in the human body?", "the femur (thigh bone)"],
-];
-const CELL_BIOLOGY: [string, string][] = [
-  ["What is the basic unit of life?", "the cell"], ["Which part of the cell controls its activities and holds DNA?", "the nucleus"],
-  ["Which part of the cell produces energy?", "the mitochondria"], ["What structure surrounds and protects a plant cell (that animal cells lack)?", "the cell wall"],
-  ["Which green structures in plant cells carry out photosynthesis?", "chloroplasts"],
-  ["What thin layer controls what enters and exits a cell?", "the cell membrane"],
-];
-const ECOSYSTEMS: [string, string][] = [
-  ["What do we call a community of living things and their environment?", "an ecosystem"],
-  ["What is it called when two organisms live closely together, and both benefit?", "mutualism"],
-  ["What is it called when one organism benefits and the other is harmed?", "parasitism"],
-  ["What do we call all the populations of different species living in one area?", "a community"],
-  ["What is a large area with a distinct climate and organisms called, like a desert or rainforest?", "a biome"],
-];
-const ECOSYSTEM_ROLES: [string, string][] = [
-  ["What do we call an organism that makes its own food, like a plant?", "a producer"],
-  ["What do we call an animal that eats only plants?", "an herbivore (a type of consumer)"],
-  ["What do we call an animal that eats only meat?", "a carnivore (a type of consumer)"],
-  ["What do we call an organism that breaks down dead material for nutrients?", "a decomposer"],
-  ["What do we call the path energy takes from one organism to the next when eaten?", "a food chain"],
-  ["What do we call a diagram showing many connected food chains in one ecosystem?", "a food web"],
-  ["Where does the energy in almost every food chain originally come from?", "the sun"],
-];
-const ECOSYSTEM_RELATIONSHIPS: [string, string][] = [
-  ["What is a large area with a distinct climate and organisms called, like a desert or rainforest?", "a biome"],
-  ["What is it called when two organisms live closely together and both benefit?", "mutualism"],
-  ["What is it called when one organism benefits and the other is harmed?", "parasitism"],
-  ["What is it called when one organism benefits and the other is unaffected?", "commensalism"],
-  ["What do we call all the populations of different species living in one area?", "a community"],
-  ["What do we call the specific role an organism plays in its habitat?", "its niche"],
-];
-const PERIODIC_TABLE: [string, string][] = [
-  ["What is the chemical symbol for Oxygen?", "O"], ["What is the chemical symbol for Hydrogen?", "H"],
-  ["What is the chemical symbol for Gold?", "Au"], ["What is the chemical symbol for Sodium?", "Na"],
-  ["What is the chemical symbol for Iron?", "Fe"], ["What is the chemical symbol for Carbon?", "C"],
-  ["What number on the periodic table tells you the number of protons in an atom?", "the atomic number"],
-  ["What is the chemical symbol for Helium?", "He"],
-];
-const EARTH_SCIENCE: [string, string][] = [
-  ["What are the three main types of rock?", "igneous, sedimentary, and metamorphic"],
-  ["What is it called when the Earth's plates shift and cause shaking?", "an earthquake"],
-  ["What layer of the Earth do we live on?", "the crust"],
-  ["What causes weather patterns like wind?", "differences in air pressure/temperature"],
-  ["What is molten rock below the Earth's surface called?", "magma"],
-  ["What do we call molten rock once it reaches the surface?", "lava"],
-];
-const EARTH_ROCKS_TECTONICS: [string, string][] = [
-  ["What are the three main types of rock?", "igneous, sedimentary, and metamorphic"],
-  ["What is it called when the Earth's plates shift and cause shaking?", "an earthquake"],
-  ["What layer of the Earth do we live on?", "the crust"],
-  ["What is molten rock below the Earth's surface called?", "magma"],
-  ["What do we call molten rock once it reaches the surface?", "lava"],
-  ["What do we call the giant pieces the Earth's crust is broken into?", "tectonic plates"],
-  ["What type of rock forms when melted rock cools and hardens?", "igneous rock"],
-  ["What type of rock forms from layers of sediment pressed together over time?", "sedimentary rock"],
-];
-const EARTH_WEATHER: [string, string][] = [
-  ["What causes weather patterns like wind?", "differences in air pressure/temperature"],
-  ["What is the process where water turns into vapor and rises?", "evaporation"],
-  ["What is the process where water vapor turns back into liquid droplets?", "condensation"],
-  ["What is falling rain, snow, or hail called?", "precipitation"],
-  ["What instrument measures air pressure?", "a barometer"],
-  ["What instrument measures temperature?", "a thermometer"],
-  ["What powers the water cycle?", "the sun (heat energy)"],
-];
-const CHEMISTRY_BASICS: [string, string][] = [
-  ["What do we call a substance made of two or more elements chemically bonded?", "a compound"],
-  ["What is the smallest unit of an element that retains its properties?", "an atom"],
-  ["What is the chemical formula for water?", "H₂O"],
-  ["What is the chemical formula for table salt?", "NaCl"],
-  ["What do we call a reaction that releases heat?", "exothermic"],
-  ["What do we call a reaction that absorbs heat?", "endothermic"],
-  ["What are the three main particles found in an atom?", "protons, neutrons, and electrons"],
-];
-const CHEMISTRY_ATOMS: [string, string][] = [
-  ["What is the smallest unit of an element that retains its properties?", "an atom"],
-  ["What are the three main particles found in an atom?", "protons, neutrons, and electrons"],
-  ["Which particle in an atom has a positive charge?", "the proton"],
-  ["Which particle in an atom has a negative charge?", "the electron"],
-  ["Which particle in an atom has no charge?", "the neutron"],
-  ["Where are protons and neutrons located in an atom?", "in the nucleus"],
-  ["What number on the periodic table tells you the number of protons?", "the atomic number"],
-];
-const CHEMISTRY_COMPOUNDS: [string, string][] = [
-  ["What do we call a substance made of two or more elements chemically bonded?", "a compound"],
-  ["What is the chemical formula for water?", "H₂O"],
-  ["What is the chemical formula for table salt?", "NaCl"],
-  ["What is the chemical formula for carbon dioxide?", "CO₂"],
-  ["What do we call the smallest unit of a compound that keeps its properties?", "a molecule"],
-  ["What is a substance made of only one type of atom called?", "an element"],
-];
-const CHEMISTRY_REACTIONS: [string, string][] = [
-  ["What do we call a reaction that releases heat?", "exothermic"],
-  ["What do we call a reaction that absorbs heat?", "endothermic"],
-  ["What do we call the starting substances in a chemical reaction?", "reactants"],
-  ["What do we call the new substances formed by a chemical reaction?", "products"],
-  ["What law says matter can't be created or destroyed in a reaction?", "the law of conservation of mass"],
-  ["Name one common sign that a chemical reaction has happened.", "bubbles, color change, temperature change, or a new smell (any one)"],
-];
-const BIOLOGY_ADVANCED: [string, string][] = [
-  ["Write the general word equation for photosynthesis.", "carbon dioxide + water (+ light) → glucose + oxygen"],
-  ["What is the process of cell division that produces two identical cells called?", "mitosis"],
-  ["What is the process of cell division that produces sex cells (with half the chromosomes) called?", "meiosis"],
-  ["What molecule carries genetic information in cells?", "DNA"],
-  ["What is the term for an organism's observable traits?", "phenotype"],
-  ["What is the term for an organism's genetic makeup?", "genotype"],
-];
-const BIO_PHOTOSYNTHESIS_RESPIRATION: [string, string][] = [
-  ["Write the general word equation for photosynthesis.", "carbon dioxide + water (+ light) → glucose + oxygen"],
-  ["Where in a plant cell does photosynthesis take place?", "the chloroplasts"],
-  ["What gas do plants take in for photosynthesis?", "carbon dioxide"],
-  ["What gas do plants release as a byproduct of photosynthesis?", "oxygen"],
-  ["Write the general word equation for cellular respiration.", "glucose + oxygen → carbon dioxide + water (+ energy)"],
-  ["Which organelle is the site of cellular respiration in a cell?", "the mitochondria"],
-  ["In what way are photosynthesis and cellular respiration opposites?", "photosynthesis stores energy from sunlight, respiration releases that stored energy"],
-];
-const BIO_CELL_DIVISION: [string, string][] = [
-  ["What is the process of cell division that produces two identical cells called?", "mitosis"],
-  ["What is the process of cell division that produces sex cells (with half the chromosomes) called?", "meiosis"],
-  ["How many daughter cells does mitosis produce?", "2"],
-  ["How many daughter cells does meiosis produce?", "4"],
-  ["Are the cells produced by mitosis genetically identical or different from the parent?", "identical"],
-  ["Why does meiosis produce cells with half the chromosomes?", "so that when two sex cells combine during reproduction, the full number is restored"],
-];
+// ---------- curated fact banks (see scienceBanks.ts) ----------
+// Which levels each difficulty draws from, with weights. Hard still mixes in
+// some medium questions so small banks can fill a worksheet without repeats.
+const LEVEL_WEIGHTS = {
+  easy: { 1: 3, 2: 1, 3: 0 },
+  medium: { 1: 1, 2: 3, 3: 1 },
+  hard: { 1: 0, 2: 1, 3: 3 },
+} as const;
 
-function randomFrom<T>(rng: () => number, arr: T[]): T {
-  const { pick } = makeHelpers(rng);
-  return pick(arr);
-}
-
-function bankGen(bank: [string, string][]): Gen {
+function tieredBankGen(...banks: BankItem[][]): Gen {
+  const all = banks.flat();
   return (grade, diff, rng) => {
-    const [q, a] = randomFrom(rng, bank);
+    const w = LEVEL_WEIGHTS[diff];
+    // Younger grades lean easier; older grades lean harder within a topic.
+    const pool = all.filter(([, , lvl]) => w[lvl] > 0);
+    const weighted: BankItem[] = [];
+    for (const item of pool) for (let i = 0; i < w[item[2]]; i++) weighted.push(item);
+    const [q, a] = weighted[Math.floor(rng() * weighted.length)];
     return { q, a };
   };
 }
 
 // ---------- computed generators ----------
-const genForcesMotion: Gen = (grade, diff, rng) => {
+const genForcesSpeed: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
-  const kind = pick(diff === "easy" ? ["speed"] : ["speed", "speed", "define"]);
-  if (kind === "define") {
-    const facts: [string, string][] = [
-      ["What is the SI unit of force?", "Newton (N)"],
-      ["What is Newton's First Law about?", "an object stays at rest or in motion unless acted on by a force (inertia)"],
-      ["What is the formula for speed?", "speed = distance ÷ time"],
-    ];
-    return pick(facts.map(([q, a]) => ({ q, a })));
-  }
-  const distance = randInt(2, 20) * (diff === "hard" ? 5 : 10);
+  const kinds = diff === "easy" ? ["speed"] : diff === "medium" ? ["speed", "distance", "time"] : ["distance", "time", "kmh", "average"];
+  const kind = pick(kinds);
   const time = randInt(2, 10);
-  // ensure clean division
-  const cleanDistance = time * randInt(2, diff === "hard" ? 30 : 15);
-  return { q: `An object travels ${cleanDistance} meters in ${time} seconds. What is its speed?`, a: `${cleanDistance / time} m/s` };
+  const speed = randInt(2, diff === "hard" ? 30 : 15);
+  const distance = speed * time;
+  if (kind === "speed") return { q: `An object travels ${distance} meters in ${time} seconds. What is its speed?`, a: `${speed} m/s` };
+  if (kind === "distance") return { q: `A cyclist rides at ${speed} m/s for ${time} seconds. How far does she travel?`, a: `${distance} m` };
+  if (kind === "time") return { q: `A runner covers ${distance} meters at a steady ${speed} m/s. How many seconds does it take?`, a: `${time} s` };
+  if (kind === "kmh") {
+    const h = randInt(2, 5), v = randInt(4, 12) * 10;
+    return { q: `A train travels ${v * h} km in ${h} hours. What is its average speed in km/h?`, a: `${v} km/h` };
+  }
+  // average speed over two legs
+  const t1 = randInt(2, 5), t2 = randInt(2, 5), v1 = randInt(3, 9) * 10, total = v1 * t1 + randInt(3, 9) * 10 * t2;
+  const avg = total / (t1 + t2);
+  if (!Number.isInteger(avg)) return { q: `A bus travels ${v1 * t1} km in ${t1} hours. What is its average speed?`, a: `${v1} km/h` };
+  return { q: `A car travels ${total} km in total over ${t1 + t2} hours. What is its average speed?`, a: `${avg} km/h` };
 };
 
-const genForcesSpeed: Gen = (grade, diff, rng) => {
-  const { randInt } = makeHelpers(rng);
-  const time = randInt(2, 10);
-  const cleanDistance = time * randInt(2, diff === "hard" ? 30 : 15);
-  return { q: `An object travels ${cleanDistance} meters in ${time} seconds. What is its speed?`, a: `${cleanDistance / time} m/s` };
+const genForcesNewton: Gen = (grade, diff, rng) => {
+  const { randInt, pick } = makeHelpers(rng);
+  const m = randInt(2, 25), acc = randInt(2, 10), f = m * acc;
+  const kind = pick(diff === "hard" ? ["m", "a", "weight"] : ["f", "f", "weight"]);
+  if (kind === "f") return { q: `Using F = ma, find the force on a ${m} kg object accelerating at ${acc} m/s².`, a: `${f} N` };
+  if (kind === "m") return { q: `A force of ${f} N gives an object an acceleration of ${acc} m/s². What is its mass? (F = ma)`, a: `${m} kg` };
+  if (kind === "a") return { q: `A force of ${f} N acts on a ${m} kg object. What is its acceleration? (F = ma)`, a: `${acc} m/s²` };
+  return { q: `Taking g = 10 N/kg, what is the weight of a ${m} kg object on Earth?`, a: `${m * 10} N` };
 };
-const FORCES_LAWS: [string, string][] = [
-  ["What is the SI unit of force?", "Newton (N)"],
-  ["What is Newton's First Law about?", "an object stays at rest or in motion unless acted on by a force (inertia)"],
-  ["What is Newton's Second Law formula?", "Force = mass × acceleration (F = ma)"],
-  ["What is Newton's Third Law about?", "for every action, there is an equal and opposite reaction"],
-  ["What force pulls objects toward the Earth?", "gravity"],
-  ["What force acts against motion between two surfaces touching each other?", "friction"],
-];
-const genForcesLaws: Gen = (grade, diff, rng) => {
-  const [q, a] = randomFrom(rng, FORCES_LAWS);
-  return { q, a };
+
+const genForcesMotion: Gen = (grade, diff, rng) => {
+  const r = rng();
+  if (r < 0.4) return genForcesSpeed(grade, diff, rng);
+  if (r < 0.6 && diff !== "easy") return genForcesNewton(grade, diff, rng);
+  return tieredBankGen(B.FORCES_LAWS)(grade, diff, rng);
 };
 
 const genPhysicsFormulas: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
-  const kind = pick(["speed", "force", "density"]);
+  const kinds = diff === "easy" ? ["speed", "force", "density"] : diff === "medium"
+    ? ["speed", "force", "density", "work", "power", "accel"]
+    : ["work", "power", "accel", "ke", "gpe", "density_inv", "fact"];
+  const kind = pick(kinds);
   if (kind === "speed") {
-    const time = randInt(2, 10);
-    const speed = randInt(2, diff === "hard" ? 40 : 20);
+    const time = randInt(2, 10), speed = randInt(2, 30);
     return { q: `A car travels at ${speed} m/s for ${time} seconds. How far does it travel?`, a: `${speed * time} m` };
   }
   if (kind === "force") {
-    const mass = randInt(2, 20);
-    const accel = randInt(2, 10);
+    const mass = randInt(2, 20), accel = randInt(2, 10);
     return { q: `Using F = ma, find the force on an object with mass ${mass} kg accelerating at ${accel} m/s².`, a: `${mass * accel} N` };
   }
-  const mass = randInt(4, 50);
-  const volume = randInt(2, 10);
-  const cleanMass = volume * randInt(2, diff === "hard" ? 15 : 8);
-  return { q: `Using density = mass ÷ volume, find the density of an object with mass ${cleanMass} g and volume ${volume} cm³.`, a: `${cleanMass / volume} g/cm³` };
+  if (kind === "density") {
+    const volume = randInt(2, 10), d = randInt(2, 12);
+    return { q: `Using density = mass ÷ volume, find the density of an object with mass ${volume * d} g and volume ${volume} cm³.`, a: `${d} g/cm³` };
+  }
+  if (kind === "density_inv") {
+    const volume = randInt(2, 20), d = randInt(2, 9);
+    return { q: `A metal has a density of ${d} g/cm³. What is the mass of ${volume} cm³ of it?`, a: `${d * volume} g` };
+  }
+  if (kind === "work") {
+    const f = randInt(5, 60), dist = randInt(2, 15);
+    return { q: `A ${f} N force pushes a box ${dist} m in the direction of the force. How much work is done? (W = F × d)`, a: `${f * dist} J` };
+  }
+  if (kind === "power") {
+    const t = randInt(2, 10), p = randInt(5, 60) * 5;
+    return { q: `A motor does ${p * t} J of work in ${t} seconds. What is its power? (P = W ÷ t)`, a: `${p} W` };
+  }
+  if (kind === "accel") {
+    const t = randInt(2, 8), a = randInt(1, 6), u = randInt(0, 10);
+    return { q: `A car speeds up from ${u} m/s to ${u + a * t} m/s in ${t} seconds. What is its acceleration? (a = Δv ÷ t)`, a: `${a} m/s²` };
+  }
+  if (kind === "ke") {
+    const m = pick([2, 4, 6, 8, 10, 20, 50]), v = randInt(2, 12);
+    return { q: `Find the kinetic energy of a ${m} kg object moving at ${v} m/s. (KE = ½mv²)`, a: `${(m * v * v) / 2} J` };
+  }
+  if (kind === "gpe") {
+    const m = randInt(2, 30), h = randInt(2, 20);
+    return { q: `Taking g = 10 N/kg, find the gravitational potential energy gained by a ${m} kg object lifted ${h} m. (GPE = mgh)`, a: `${m * 10 * h} J` };
+  }
+  return tieredBankGen(B.ENERGY_FACTS, B.FORCES_LAWS)(grade, diff, rng);
 };
 
-const genGeneticsBasics: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const kind = pick(["facts", "cross"]);
-  if (kind === "facts") {
-    const facts: [string, string][] = [
-      ["In genetics, what do we call a trait that shows up even with only one copy of the gene?", "dominant"],
-      ["In genetics, what do we call a trait that only shows up with two copies of the gene?", "recessive"],
-      ["What tool shows the possible gene combinations of offspring?", "a Punnett square"],
-      ["What are the different forms of a gene called?", "alleles"],
-    ];
-    return pick(facts.map(([q, a]) => ({ q, a })));
+// Punnett crosses are computed, so every question and ratio is checked by code.
+const GENOTYPES = ["AA", "Aa", "aa"] as const;
+function crossResult(p1: string, p2: string) {
+  const counts = { AA: 0, Aa: 0, aa: 0 } as Record<string, number>;
+  for (const x of p1) for (const y of p2) {
+    const g = [x, y].sort().join(""); // uppercase sorts first → "Aa"
+    counts[g]++;
   }
-  // Aa x Aa cross -> classic 1:2:1 genotype, 3:1 phenotype ratio
+  const dominant = counts.AA + counts.Aa;
+  return { counts, dominant, recessive: counts.aa };
+}
+function describe(g: string) {
+  return g === "AA" ? "homozygous dominant (AA)" : g === "Aa" ? "heterozygous (Aa)" : "homozygous recessive (aa)";
+}
+const TRAITS: [string, string, string, string][] = [
+  ["T", "tall", "short", "pea plants"],
+  ["P", "purple flowers", "white flowers", "pea plants"],
+  ["B", "brown fur", "white fur", "rabbits"],
+  ["R", "round seeds", "wrinkled seeds", "pea plants"],
+  ["Y", "yellow seeds", "green seeds", "pea plants"],
+  ["W", "wire-haired coat", "smooth coat", "dogs"],
+];
+const genGeneticsPunnett: Gen = (grade, diff, rng) => {
+  const { pick } = makeHelpers(rng);
+  const p1 = pick([...GENOTYPES]), p2 = pick([...GENOTYPES]);
+  const { counts, dominant, recessive } = crossResult(p1, p2);
+  const [L, dom, rec, org] = pick(TRAITS);
+  const fmt = (g: string) => g.replace(/A/g, L).replace(/a/g, L.toLowerCase());
+  const pct = (n: number) => `${(n / 4) * 100}%`;
+  const kind = pick(diff === "easy" ? ["pct", "basic"] : diff === "medium" ? ["pct", "ratio", "genotype"] : ["genotype", "ratio", "word", "backcross"]);
+  if (kind === "basic") {
+    return { q: `In ${org}, the allele for ${dom} (${L}) is dominant over the allele for ${rec} (${L.toLowerCase()}). What trait does a ${fmt("Aa")} ${org.replace(/s$/, "")} show?`, a: dom };
+  }
+  if (kind === "pct") {
+    return { q: `Cross ${fmt(p1)} × ${fmt(p2)}. What percentage of offspring are expected to show the dominant trait?`, a: pct(dominant) };
+  }
+  if (kind === "ratio") {
+    const ratio = recessive === 0 ? "all dominant (4 : 0)" : dominant === 0 ? "all recessive (0 : 4)" : `${dominant} : ${recessive}`;
+    return { q: `Cross ${fmt(p1)} × ${fmt(p2)}. What is the expected ratio of dominant to recessive phenotypes?`, a: ratio };
+  }
+  if (kind === "genotype") {
+    const parts = (["AA", "Aa", "aa"] as const).filter((g) => counts[g] > 0).map((g) => `${counts[g]} ${fmt(g)}`);
+    return { q: `Use a Punnett square to cross ${fmt(p1)} × ${fmt(p2)}. What is the expected genotype ratio (out of 4)?`, a: parts.join(" : ") };
+  }
+  if (kind === "word") {
+    return {
+      q: `In ${org}, the allele for ${dom} (${L}) is dominant over the allele for ${rec} (${L.toLowerCase()}). A ${describe(p1).replace(/\(.*\)/, "").trim()} parent is crossed with a ${describe(p2).replace(/\(.*\)/, "").trim()} parent. What percentage of offspring are expected to have ${rec}?`,
+      a: pct(recessive),
+    };
+  }
+  // test cross: unknown dominant × aa
   return {
-    q: "In a cross between two heterozygous parents (Aa × Aa), what is the phenotype ratio of dominant to recessive offspring?",
-    a: "3 : 1",
+    q: `A ${org.replace(/s$/, "")} with ${dom} is crossed with one with ${rec}. Half the offspring have ${rec}. What is the genotype of the parent with ${dom}?`,
+    a: `${fmt("Aa")} (heterozygous)`,
   };
 };
 
-const GENETICS_VOCAB: [string, string][] = [
-  ["In genetics, what do we call a trait that shows up even with only one copy of the gene?", "dominant"],
-  ["In genetics, what do we call a trait that only shows up with two copies of the gene?", "recessive"],
-  ["What are the different forms of a gene called?", "alleles"],
-  ["What molecule carries genetic information in cells?", "DNA"],
-  ["What is the term for an organism's observable traits?", "phenotype"],
-  ["What is the term for an organism's genetic makeup?", "genotype"],
-  ["What do we call an organism with two identical alleles for a trait?", "homozygous"],
-  ["What do we call an organism with two different alleles for a trait?", "heterozygous"],
-];
-const genGeneticsVocabulary: Gen = (grade, diff, rng) => {
-  const [q, a] = randomFrom(rng, GENETICS_VOCAB);
-  return { q, a };
-};
-const genGeneticsPunnett: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const crosses: [string, string][] = [
-    ["In a cross between two heterozygous parents (Aa × Aa), what is the phenotype ratio of dominant to recessive offspring?", "3 : 1"],
-    ["In a cross between a homozygous dominant parent (AA) and a homozygous recessive parent (aa), what fraction of offspring will show the dominant trait?", "all of them (100%)"],
-    ["In a cross between a heterozygous parent (Aa) and a homozygous recessive parent (aa), what is the expected ratio of dominant to recessive offspring?", "1 : 1"],
-    ["What tool is used to predict the possible gene combinations of offspring from a cross?", "a Punnett square"],
-  ];
-  return pick(crosses.map(([q, a]) => ({ q, a })));
-};
+const genGeneticsBasics: Gen = (grade, diff, rng) =>
+  rng() < 0.5 ? genGeneticsPunnett(grade, diff, rng) : tieredBankGen(B.GENETICS_VOCAB)(grade, diff, rng);
 
 export const SCIENCE_GENERATORS: Record<string, Gen> = {
-  living_nonliving: bankGen(LIVING_NONLIVING),
-  five_senses: bankGen(FIVE_SENSES),
-  animal_habitats: bankGen(ANIMAL_HABITATS),
-  plant_parts: bankGen(PLANT_PARTS),
-  states_of_matter: bankGen(STATES_OF_MATTER),
-  water_cycle: bankGen(WATER_CYCLE),
-  simple_machines: bankGen(SIMPLE_MACHINES),
-  food_chain: bankGen(FOOD_CHAIN),
-  solar_system: bankGen(SOLAR_SYSTEM),
-  solar_system_planets: bankGen(SOLAR_SYSTEM_PLANETS),
-  solar_system_earth_moon: bankGen(SOLAR_SYSTEM_EARTH_MOON),
-  human_body_systems: bankGen(HUMAN_BODY_SYSTEMS),
-  body_circulatory: bankGen(BODY_CIRCULATORY),
-  body_digestive: bankGen(BODY_DIGESTIVE),
-  body_respiratory: bankGen(BODY_RESPIRATORY),
-  body_skeletal_muscular: bankGen(BODY_SKELETAL_MUSCULAR),
-  cell_biology: bankGen(CELL_BIOLOGY),
-  ecosystems: bankGen(ECOSYSTEMS),
-  ecosystem_roles: bankGen(ECOSYSTEM_ROLES),
-  ecosystem_relationships: bankGen(ECOSYSTEM_RELATIONSHIPS),
-  periodic_table_basics: bankGen(PERIODIC_TABLE),
-  earth_science: bankGen(EARTH_SCIENCE),
-  earth_rocks_tectonics: bankGen(EARTH_ROCKS_TECTONICS),
-  earth_weather: bankGen(EARTH_WEATHER),
-  chemistry_basics: bankGen(CHEMISTRY_BASICS),
-  chemistry_atoms: bankGen(CHEMISTRY_ATOMS),
-  chemistry_compounds: bankGen(CHEMISTRY_COMPOUNDS),
-  chemistry_reactions: bankGen(CHEMISTRY_REACTIONS),
-  biology_advanced: bankGen(BIOLOGY_ADVANCED),
-  bio_photosynthesis_respiration: bankGen(BIO_PHOTOSYNTHESIS_RESPIRATION),
-  bio_cell_division: bankGen(BIO_CELL_DIVISION),
+  living_nonliving: tieredBankGen(B.LIVING_NONLIVING),
+  five_senses: tieredBankGen(B.FIVE_SENSES),
+  animal_habitats: tieredBankGen(B.ANIMAL_HABITATS),
+  plant_parts: tieredBankGen(B.PLANT_PARTS),
+  states_of_matter: tieredBankGen(B.STATES_OF_MATTER),
+  water_cycle: tieredBankGen(B.WATER_CYCLE),
+  simple_machines: tieredBankGen(B.SIMPLE_MACHINES),
+  food_chain: tieredBankGen(B.FOOD_CHAIN),
+  solar_system: tieredBankGen(B.SOLAR_SYSTEM_PLANETS, B.SOLAR_SYSTEM_EARTH_MOON),
+  solar_system_planets: tieredBankGen(B.SOLAR_SYSTEM_PLANETS),
+  solar_system_earth_moon: tieredBankGen(B.SOLAR_SYSTEM_EARTH_MOON),
+  human_body_systems: tieredBankGen(B.BODY_CIRCULATORY, B.BODY_DIGESTIVE, B.BODY_RESPIRATORY, B.BODY_SKELETAL_MUSCULAR),
+  body_circulatory: tieredBankGen(B.BODY_CIRCULATORY),
+  body_digestive: tieredBankGen(B.BODY_DIGESTIVE),
+  body_respiratory: tieredBankGen(B.BODY_RESPIRATORY),
+  body_skeletal_muscular: tieredBankGen(B.BODY_SKELETAL_MUSCULAR),
+  cell_biology: tieredBankGen(B.CELL_BIOLOGY),
+  ecosystems: tieredBankGen(B.ECOSYSTEM_ROLES, B.ECOSYSTEM_RELATIONSHIPS),
+  ecosystem_roles: tieredBankGen(B.ECOSYSTEM_ROLES),
+  ecosystem_relationships: tieredBankGen(B.ECOSYSTEM_RELATIONSHIPS),
+  periodic_table_basics: tieredBankGen(B.PERIODIC_TABLE),
+  earth_science: tieredBankGen(B.EARTH_ROCKS_TECTONICS, B.EARTH_WEATHER),
+  earth_rocks_tectonics: tieredBankGen(B.EARTH_ROCKS_TECTONICS),
+  earth_weather: tieredBankGen(B.EARTH_WEATHER, B.WATER_CYCLE),
+  chemistry_basics: tieredBankGen(B.CHEMISTRY_ATOMS, B.CHEMISTRY_COMPOUNDS, B.CHEMISTRY_REACTIONS),
+  chemistry_atoms: tieredBankGen(B.CHEMISTRY_ATOMS),
+  chemistry_compounds: tieredBankGen(B.CHEMISTRY_COMPOUNDS),
+  chemistry_reactions: tieredBankGen(B.CHEMISTRY_REACTIONS),
+  biology_advanced: tieredBankGen(B.BIO_PHOTOSYNTHESIS_RESPIRATION, B.BIO_CELL_DIVISION, B.GENETICS_VOCAB),
+  bio_photosynthesis_respiration: tieredBankGen(B.BIO_PHOTOSYNTHESIS_RESPIRATION),
+  bio_cell_division: tieredBankGen(B.BIO_CELL_DIVISION),
   forces_motion: genForcesMotion,
   forces_speed: genForcesSpeed,
-  forces_laws: genForcesLaws,
+  forces_laws: (grade, diff, rng) => (diff !== "easy" && rng() < 0.35 ? genForcesNewton(grade, diff, rng) : tieredBankGen(B.FORCES_LAWS)(grade, diff, rng)),
   physics_formulas: genPhysicsFormulas,
   genetics_basics: genGeneticsBasics,
-  genetics_vocabulary: genGeneticsVocabulary,
+  genetics_vocabulary: tieredBankGen(B.GENETICS_VOCAB),
   genetics_punnett: genGeneticsPunnett,
 };

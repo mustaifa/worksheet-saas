@@ -45,7 +45,8 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: Params }): Metadata {
   const subject = SUBJECTS.find((s) => s.id === params.subject);
   if (!subject) return {};
-  const label = topicLabel(subject.id, params.topic);
+  // "Grade 3 Water Cycle", not "Grade 3 The Water Cycle"
+  const label = topicLabel(subject.id, params.topic).replace(/^The /, "");
   const path = `/worksheets/${subject.id}/${params.grade}/${params.topic}`;
   const title = `Grade ${params.grade} ${label} Worksheet with Answers (Free PDF)`;
   const description = `Free printable Grade ${params.grade} ${subject.label} worksheet on ${label}, with a full answer key. Print it or save it as a PDF — every answer is checked by code, not guessed.`;
@@ -79,6 +80,7 @@ export default function TopicPage({ params }: { params: Params }) {
   const passage = questions[0]?.passage ? { title: questions[0].passageTitle, text: questions[0].passage } : null;
 
   const description = topicDescription(subjectId, topic.id);
+  const name = topic.label.replace(/^The /, ""); // used after "Grade N" and in sentences
   const tips = howToUse(grade);
 
   // Related links: same-group topics first, then the rest of this grade; and
@@ -92,7 +94,7 @@ export default function TopicPage({ params }: { params: Params }) {
   const path = `/worksheets/${subject.id}/${grade}/${topic.id}`;
   const faqs = [
     {
-      q: `Does this Grade ${grade} ${topic.label} worksheet come with answers?`,
+      q: `Does this Grade ${grade} ${name} worksheet come with answers?`,
       a: `Yes. The full answer key is on this page, and it prints on its own page after the questions. Every answer is calculated or checked by code rather than written by an AI model, so the key is always correct.`,
     },
     {
@@ -100,10 +102,10 @@ export default function TopicPage({ params }: { params: Params }) {
       a: `Click "Print / Save as PDF". Your browser's print window opens with just the worksheet and answer key. Choose your printer, or pick "Save as PDF" as the destination to download a PDF.`,
     },
     {
-      q: `Can I get a different ${topic.label} worksheet?`,
+      q: `Can I get a different ${name} worksheet?`,
       a: freeMode
-        ? `Yes. Create a free account to generate as many fresh Grade ${grade} ${topic.label} worksheets as you like, at easy, medium or hard difficulty, each with its own answer key.`
-        : `Yes. Start a free trial (no card needed) to generate as many fresh Grade ${grade} ${topic.label} worksheets as you like, at easy, medium or hard difficulty, each with its own answer key.`,
+        ? `Yes. Create a free account to generate as many fresh Grade ${grade} ${name} worksheets as you like, at easy, medium or hard difficulty, each with its own answer key.`
+        : `Yes. Start a free trial (no card needed) to generate as many fresh Grade ${grade} ${name} worksheets as you like, at easy, medium or hard difficulty, each with its own answer key.`,
     },
     {
       q: "Is this worksheet free?",
@@ -127,7 +129,7 @@ export default function TopicPage({ params }: { params: Params }) {
           {
             "@context": "https://schema.org",
             "@type": "LearningResource",
-            name: `Grade ${grade} ${topic.label} Worksheet`,
+            name: `Grade ${grade} ${name} Worksheet`,
             description: description || undefined,
             url: absoluteUrl(path),
             learningResourceType: "Worksheet",
@@ -147,7 +149,7 @@ export default function TopicPage({ params }: { params: Params }) {
           <Link href={`/worksheets/${subject.id}`} className="hover:underline">{subject.label}</Link> /{" "}
           <Link href={`/worksheets/${subject.id}/${grade}`} className="hover:underline">Grade {grade}</Link> / {topic.label}
         </nav>
-        <h1 className="print:hidden text-3xl font-bold mt-2 text-slate-900 dark:text-white">Grade {grade} {topic.label} Worksheet with Answers</h1>
+        <h1 className="print:hidden text-3xl font-bold mt-2 text-slate-900 dark:text-white">Grade {grade} {name} Worksheet with Answers</h1>
         <p className="print:hidden text-slate-600 dark:text-slate-300 mt-3">
           {description ? `${description} ` : ""}
           This free {gradeBand(grade)} worksheet has {questions.length} questions and a full answer key. Print it or save it as a PDF — every answer is checked by code, not guessed.
@@ -218,7 +220,7 @@ export default function TopicPage({ params }: { params: Params }) {
         </details>
 
         <div className="print:hidden mt-10 text-center bg-slate-100 dark:bg-slate-900 rounded-xl p-8">
-          <p className="text-lg font-semibold text-slate-900 dark:text-white">Need another {topic.label} worksheet?</p>
+          <p className="text-lg font-semibold text-slate-900 dark:text-white">Need another {name} worksheet?</p>
           <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Generate unlimited fresh versions at easy, medium or hard difficulty, each with its own answer key.{" "}
             {freeMode ? "Free during our launch — no card needed." : `Free ${process.env.NEXT_PUBLIC_TRIAL_DAYS || "7"}-day trial, no card required.`}
@@ -238,7 +240,7 @@ export default function TopicPage({ params }: { params: Params }) {
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Related worksheets</h2>
             {otherGrades.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{topic.label} at other grades</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{name} at other grades</p>
                 <div className="flex flex-wrap gap-2">
                   {otherGrades.map((g) => (
                     <Link key={g} href={`/worksheets/${subject.id}/${g}/${topic.id}`} className="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 hover:border-slate-900 dark:hover:border-white">
@@ -254,7 +256,7 @@ export default function TopicPage({ params }: { params: Params }) {
                 <div className="grid sm:grid-cols-2 gap-2">
                   {sameGrade.map((t) => (
                     <Link key={t.id} href={`/worksheets/${subject.id}/${grade}/${t.id}`} className="rounded-lg border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-medium text-slate-800 dark:text-slate-100 hover:border-slate-900 dark:hover:border-white">
-                      Grade {grade} {t.label}
+                      Grade {grade} {t.label.replace(/^The /, "")}
                     </Link>
                   ))}
                 </div>

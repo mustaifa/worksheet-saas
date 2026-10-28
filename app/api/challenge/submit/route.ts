@@ -30,6 +30,7 @@ export async function POST(req: Request) {
     difficulty: attempt.difficulty as Difficulty,
     count: attempt.count,
     seed: attempt.seed,
+    forTyping: true
   });
 
   let score = 0;

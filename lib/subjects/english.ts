@@ -1,4 +1,5 @@
 import { Topic, Gen, makeHelpers } from "./types";
+import * as E from "./englishBanks";
 
 export const ENGLISH_TOPICS: Topic[] = [
   { id: "phonics", label: "Letter Sounds & Rhyming", grades: [1], aliases: ["phonics", "letter sound", "rhyme", "rhyming"] },
@@ -61,6 +62,10 @@ const IRREGULAR_VERBS: [string, string, string][] = [
   ["write", "wrote", "will write"], ["buy", "bought", "will buy"], ["bring", "brought", "will bring"],
   ["think", "thought", "will think"], ["catch", "caught", "will catch"], ["swim", "swam", "will swim"],
 ];
+const IRREGULAR_OBJECTS: Record<string, string> = {
+  go: "to school", eat: "my lunch", run: "in the park", see: "my friends", write: "a letter",
+  buy: "some apples", bring: "my lunch", think: "about the test", catch: "the ball", swim: "in the pool",
+};
 const SYNONYM_ANTONYM_PAIRS: [string, string, string][] = [
   // word, synonym, antonym
   ["happy", "joyful", "sad"], ["big", "large", "small"], ["fast", "quick", "slow"], ["cold", "chilly", "hot"],
@@ -127,103 +132,128 @@ const GRAMMAR_ADVANCED: [string, string][] = [
   ["The scissors ___ (is/are) on the table.", "are"], ["The news ___ (was/were) surprising.", "was"],
 ];
 
+// Weighted pick by level: easy leans on level 1, medium on 2, hard on 3.
+const LEVEL_WEIGHTS = { easy: [3, 1, 0], medium: [1, 3, 1], hard: [0, 1, 3] } as const;
+function byLevel<T>(items: T[], level: (t: T) => number, diff: "easy" | "medium" | "hard", rng: () => number): T {
+  const w = LEVEL_WEIGHTS[diff];
+  const weighted: T[] = [];
+  for (const it of items) for (let i = 0; i < w[level(it) - 1]; i++) weighted.push(it);
+  const pool = weighted.length ? weighted : items;
+  return pool[Math.floor(rng() * pool.length)];
+}
+
+// Regular past tense with the spelling rules students learn:
+// dance → danced, cry → cried, stop → stopped, play → played, walk → walked.
+export function pastTense(verb: string): string {
+  if (verb.endsWith("e")) return verb + "d";
+  if (/[^aeiou]y$/.test(verb)) return verb.slice(0, -1) + "ied";
+  if (/^[^aeiou]*[aeiou][^aeiouwxy]$/.test(verb)) return verb + verb.slice(-1) + "ed"; // one-syllable CVC
+  return verb + "ed";
+}
+
 const genPhonics: Gen = (grade, diff, rng) => {
   const { pick } = makeHelpers(rng);
-  if (rng() < 0.5) { const [word, letter] = pick(LETTER_WORDS); return { q: `Which letter does "${word}" start with?`, a: letter }; }
+  const r = rng();
+  if (diff !== "easy" && r < 0.45) {
+    const [q, a] = byLevel(E.PHONICS_EXTRA, (x) => x[2], diff, rng);
+    return { q, a };
+  }
+  if (r < 0.7) { const [word, letter] = pick(LETTER_WORDS); return { q: `Which letter does "${word}" start with?`, a: letter }; }
   const [word, rhymes] = pick(RHYME_PAIRS);
   return { q: `Name a word that rhymes with "${word}".`, a: rhymes.join(" / ") };
 };
 const genSightWords: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const word = pick(SIGHT_WORDS);
-  return { q: `Spell this word out loud, then write it: "${word}"`, a: word };
+  const [word] = byLevel(E.SIGHT_WORDS, (x) => x[1], diff, rng);
+  return { q: `Read this word, then write it three times: "${word}"`, a: word };
 };
 const genNounsVerbs: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [sentence, word, type] = pick(NOUN_VERB_SENTENCES);
+  const [sentence, word, type] = byLevel(E.NOUNS_VERBS, (x) => x[3], diff, rng);
   return { q: `In the sentence "${sentence}", is "${word}" a noun or a verb?`, a: type };
 };
 const genSpelling: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [wrong, right] = pick(SPELLING_WORDS);
+  const [wrong, right] = byLevel(E.SPELLING, (x) => x[2], diff, rng);
   return { q: `Correct the spelling: "${wrong}"`, a: right };
 };
 const genPunctuation: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [sentence, mark] = pick(PUNCTUATION_ITEMS);
+  const [sentence, mark] = byLevel(E.PUNCTUATION, (x) => x[2], diff, rng);
   return { q: `What punctuation belongs in the blank? "${sentence}"`, a: mark };
 };
 const genGrammarTenses: Gen = (grade, diff, rng) => {
   const { pick } = makeHelpers(rng);
   if (diff !== "easy" && rng() < 0.4) {
     const [base, past, future] = pick(IRREGULAR_VERBS);
+    // each irregular verb gets an object that makes sense ("I think to school" did not)
+    const rest = IRREGULAR_OBJECTS[base] || "every day";
     const which = pick(["past", "future"]);
-    return { q: `Change to the ${which} tense: "I ${base} to school."`, a: which === "past" ? `I ${past} to school.` : `I ${future} to school.` };
+    return { q: `Change to the ${which} tense: "I ${base} ${rest}."`, a: which === "past" ? `I ${past} ${rest}.` : `I ${future} ${rest}.` };
+  }
+  if (diff === "hard" && rng() < 0.4) {
+    const verb = pick(REGULAR_VERBS);
+    return { q: `Write the present perfect tense: "She ___ (${verb}) all morning."`, a: `She has ${pastTense(verb)} all morning.` };
   }
   const verb = pick(REGULAR_VERBS);
   const which = pick(["past", "future"]);
-  return { q: `Change to the ${which} tense: "I ${verb} every day."`, a: which === "past" ? `I ${verb}ed every day.` : `I will ${verb} every day.` };
+  return { q: `Change to the ${which} tense: "I ${verb} every day."`, a: which === "past" ? `I ${pastTense(verb)} every day.` : `I will ${verb} every day.` };
 };
 const genSynonymsAntonyms: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [word, syn, ant] = pick(SYNONYM_ANTONYM_PAIRS);
-  const wantSyn = rng() < 0.5;
-  return wantSyn ? { q: `Give a synonym for "${word}".`, a: syn } : { q: `Give an antonym for "${word}".`, a: ant };
+  const [word, syn, ant] = byLevel(E.SYN_ANT, (x) => x[3], diff, rng);
+  return rng() < 0.5 ? { q: `Give a synonym for "${word}".`, a: syn } : { q: `Give an antonym for "${word}".`, a: ant };
 };
 const genJustSynonyms: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [word, syn] = pick(SYNONYM_ANTONYM_PAIRS);
+  const [word, syn] = byLevel(E.SYN_ANT, (x) => x[3], diff, rng);
   return { q: `Give a synonym for "${word}".`, a: syn };
 };
 const genJustAntonyms: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [word, , ant] = pick(SYNONYM_ANTONYM_PAIRS);
+  const [word, , ant] = byLevel(E.SYN_ANT, (x) => x[3], diff, rng);
   return { q: `Give an antonym for "${word}".`, a: ant };
 };
-const genPartsOfSpeech: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [sentence, word, part] = pick(PARTS_OF_SPEECH);
-  return { q: `In "${sentence}", what part of speech is "${word}"?`, a: part };
-};
 const genAdjectivesAdverbs: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [sentence, word, part] = pick(ADJECTIVES_ADVERBS);
+  const [sentence, word, part] = byLevel(E.ADJECTIVES_ADVERBS, (x) => x[3], diff, rng);
   return { q: `In "${sentence}", is "${word}" an adjective or an adverb?`, a: part };
 };
 const genPrepositions: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [sentence, word] = pick(PREPOSITIONS);
-  return { q: `Find the preposition in: "${sentence}"`, a: word };
+  const [sentence, word] = byLevel(E.PREPOSITIONS, (x) => x[2], diff, rng);
+  return { q: `Find the preposition(s) in: "${sentence}"`, a: word };
+};
+const genPartsOfSpeech: Gen = (grade, diff, rng) => {
+  const r = rng();
+  if (r < 0.4) return genAdjectivesAdverbs(grade, diff, rng);
+  if (r < 0.7) {
+    const [sentence, word] = byLevel(E.PREPOSITIONS, (x) => x[2], diff, rng);
+    return { q: `In "${sentence}", what part of speech is "${word.split(",")[0].trim()}"?`, a: "preposition" };
+  }
+  const [sentence, word, type] = byLevel(E.NOUNS_VERBS, (x) => x[3], diff, rng);
+  return { q: `In "${sentence}", what part of speech is "${word}"?`, a: type };
 };
 const genIdioms: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [idiom, meaning] = pick(IDIOMS);
+  const [idiom, meaning] = byLevel(E.IDIOMS, (x) => x[2], diff, rng);
   return { q: `What does the idiom "${idiom}" mean?`, a: meaning };
 };
 const genAnalogies: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [a, b, c, d] = pick(ANALOGIES);
+  const [a, b, c, d] = byLevel(E.ANALOGIES, (x) => x[4], diff, rng);
   return { q: `${a[0].toUpperCase()}${a.slice(1)} is to ${b} as ${c} is to ___?`, a: d };
 };
 const genVocabulary: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [word, def] = pick(VOCAB_WORDS);
+  const [word, def] = byLevel(E.VOCAB_WORDS, (x) => x[2], diff, rng);
   return { q: `Define: "${word}"`, a: def };
 };
 const genSentenceTypes: Gen = (grade, diff, rng) => {
   const { pick } = makeHelpers(rng);
-  const [sentence, type] = pick(SENTENCE_EXAMPLES);
-  return { q: `Is this sentence simple, compound, or complex? "${sentence}"`, a: type };
+  if (diff !== "hard" && rng() < 0.25) {
+    const [sentence, purpose] = pick(E.SENTENCE_PURPOSE);
+    return { q: `Is this sentence declarative, interrogative, imperative, or exclamatory? "${sentence}"`, a: purpose };
+  }
+  const [sentence, type] = byLevel(E.SENTENCE_STRUCTURE, (x) => x[2], diff, rng);
+  const options = diff === "hard" ? "simple, compound, complex, or compound-complex" : "simple, compound, or complex";
+  return { q: `Is this sentence ${options}? "${sentence}"`, a: type };
 };
 const genLiteraryDevices: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [sentence, device] = pick(LITERARY_DEVICES);
+  const [sentence, device] = byLevel(E.LITERARY_DEVICES, (x) => x[2], diff, rng);
   return { q: `Identify the literary device: "${sentence}"`, a: device };
 };
 const genGrammarAdvanced: Gen = (grade, diff, rng) => {
-  const { pick } = makeHelpers(rng);
-  const [sentence, answer] = pick(GRAMMAR_ADVANCED);
-  return { q: `Choose the correct word: "${sentence}"`, a: answer };
+  const [sentence, answer] = byLevel(E.GRAMMAR_ADVANCED, (x) => x[2], diff, rng);
+  return /^(Fix|Rewrite|Active|Is this)/.test(sentence) ? { q: sentence, a: answer } : { q: `Choose the correct word: "${sentence}"`, a: answer };
 };
 
 export const ENGLISH_GENERATORS: Record<string, Gen> = {

@@ -30,6 +30,7 @@ export async function POST(req: Request) {
     difficulty: difficulty as Difficulty,
     count,
     seed,
+    forTyping: true
   });
 
   if (questions.length === 0) {

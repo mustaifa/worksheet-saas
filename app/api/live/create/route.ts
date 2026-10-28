@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const count = 10;
 
   // sanity-check the combination actually produces questions before creating the session
-  const preview = generateWorksheet({ subject: subject as SubjectId, grade: parseInt(grade, 10), topic, difficulty: difficulty as Difficulty, count, seed });
+  const preview = generateWorksheet({ subject: subject as SubjectId, grade: parseInt(grade, 10), topic, difficulty: difficulty as Difficulty, count, seed, forTyping: true });
   if (preview.length === 0) {
     return NextResponse.json({ error: "Could not generate that quiz — try a different topic." }, { status: 400 });
   }
