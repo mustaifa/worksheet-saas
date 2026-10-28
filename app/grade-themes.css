@@ -44,7 +44,7 @@ html.dark[data-grade] .grade-theme-bar { background: linear-gradient(110deg, col
   html[data-grade] :is(a,button).bg-indigo-700 { background-color: var(--grade-accent); }
   html[data-grade] :is(.text-indigo-700, .text-blue-600):not(#worksheet-print-area, #worksheet-print-area *) { color: var(--grade-accent); }
   html[data-grade] :is(a,button,select,input,textarea):focus-visible { outline-color: var(--grade-accent); }
-  html.dark[data-grade] :is(.bg-white, .bg-slate-50, .bg-slate-100, .dark\:bg-slate-900, .dark\:bg-slate-950):not(#worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-dark) 88%, white); }
+  html.dark[data-grade] :is(.dark\:bg-slate-800, .dark\:bg-slate-900, .dark\:bg-slate-950):not(#worksheet-print-area, #worksheet-print-area *) { background-color: color-mix(in srgb, var(--grade-dark) 88%, white); }
   html.dark[data-grade] :is(.border-slate-200, .border-slate-300, .dark\:border-slate-700, .dark\:border-slate-800):not(#worksheet-print-area, #worksheet-print-area *) { border-color: color-mix(in srgb, var(--grade-bright) 22%, var(--grade-dark)); }
   html.dark[data-grade] :is(a,button).bg-slate-900:not(#worksheet-print-area *) { background-color: var(--grade-accent); color: white; }
   html.dark[data-grade] :is(.text-indigo-700, .text-blue-600):not(#worksheet-print-area, #worksheet-print-area *) { color: var(--grade-bright); }
