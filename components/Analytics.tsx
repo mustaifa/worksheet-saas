@@ -44,6 +44,13 @@ export default function Analytics() {
     return () => window.removeEventListener("ps-open-cookie-settings", reopen);
   }, []);
 
+  // Once loaded, GA stays on the page across client-side navigation, so switch it
+  // off entirely (scrolls, clicks, page views) while a child's screen is open.
+  useEffect(() => {
+    if (consent !== "granted") return;
+    (window as any)[`ga-disable-${BRAND.gaMeasurementId}`] = childScreen;
+  }, [childScreen, consent]);
+
   // Send a page view on client-side navigation (the first one is sent by config).
   useEffect(() => {
     const w = window as any;
