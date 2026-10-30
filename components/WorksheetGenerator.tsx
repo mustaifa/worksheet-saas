@@ -11,8 +11,8 @@ import { downloadWorksheetPdf } from "@/lib/brandedPdf";
 import { subjectStyle } from "@/components/subjectStyles";
 import { DocIcon } from "@/components/Icons";
 import { brandedFilename } from "@/lib/brand";
-import { variantPath, formatVariant } from "@/lib/worksheetVariant";
-import { pinDescription, sharePaths } from "@/lib/shareImage";
+import { pinPageLinks, type PinPageLink } from "@/lib/pinLinks";
+import PinPages from "@/components/PinPages";
 
 import { useGradeTheme } from "@/components/GradeThemeProvider";
 
@@ -43,6 +43,7 @@ export default function WorksheetGenerator() {
   const [command, setCommand] = useState("");
   const [feedback, setFeedback] = useState("");
   const [toastMsg, setToastMsg] = useState("");
+  const [pinLinks, setPinLinks] = useState<PinPageLink[] | null>(null);
   const seedRef = useRef<number>(newSeed());
   const printRef = useRef<HTMLDivElement>(null);
   // What the current questions were generated for (the pickers may have moved on since).
@@ -179,18 +180,20 @@ export default function WorksheetGenerator() {
     return url.toString();
   }
 
-  // Opens Pinterest with a picture of this exact worksheet. The pin links to a
-  // public page (/ws/...) showing the same questions, since the dashboard needs a login.
+  // Opens Pinterest with a picture of this exact worksheet. Long worksheets are
+  // split into several pin pages, shown in a small dialog to pin one by one.
+  // Pins link to a public page (/ws/...) since the dashboard needs a login.
   function handlePin() {
     const g = gen ?? { subject, grade, topic };
-    const v = { difficulty: g.difficulty ?? difficulty, count: g.count ?? count, seed: seedRef.current };
-    const path = variantPath(g.subject, g.grade, g.topic, v);
-    const origin = window.location.origin;
-    const media = origin + sharePaths(g.subject, g.grade, g.topic, formatVariant(v)).pin;
-    const name = topicLabel(g.subject, g.topic).replace(/^The /, "");
-    const label = SUBJECTS.find((x) => x.id === g.subject)?.label || g.subject;
-    const href = `https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(origin + path)}&media=${encodeURIComponent(media)}&description=${encodeURIComponent(pinDescription(g.grade, label, name))}`;
-    window.open(href, "_blank", "noopener,noreferrer,width=760,height=640");
+    const links = pinPageLinks({
+      origin: window.location.origin,
+      subject: g.subject, subjectLabel: SUBJECTS.find((x) => x.id === g.subject)?.label || g.subject,
+      grade: g.grade, topic: g.topic, name: topicLabel(g.subject, g.topic).replace(/^The /, ""),
+      variant: { difficulty: g.difficulty ?? difficulty, count: g.count ?? count, seed: seedRef.current },
+      questions: questions.map((q) => q.q),
+    });
+    if (links.length === 1) window.open(links[0].href, "_blank", "noopener,noreferrer,width=760,height=640");
+    else setPinLinks(links);
   }
 
   async function handleShare() {
@@ -383,6 +386,20 @@ export default function WorksheetGenerator() {
               <button onClick={() => generate()} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">New set</button>
             </div>
             {toastMsg && <p className="text-xs text-red-600 mt-2">{toastMsg}</p>}
+            {pinLinks && (
+              <div role="dialog" aria-modal="true" aria-label="Pin this worksheet" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setPinLinks(null)}>
+                <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white dark:bg-slate-900 p-6" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-lg font-semibold text-slate-900 dark:text-white">Pin this worksheet</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">It&apos;s too long for one pin, so it&apos;s split into {pinLinks.length} pages. Pin each page — every pin links to the full worksheet.</p>
+                    </div>
+                    <button onClick={() => setPinLinks(null)} aria-label="Close" className="text-slate-500 hover:text-slate-900 dark:hover:text-white text-xl leading-none">×</button>
+                  </div>
+                  <div className="mt-5"><PinPages links={pinLinks} compact /></div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

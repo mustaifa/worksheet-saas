@@ -7,14 +7,16 @@ import PrintButton from "@/components/PrintButton";
 import DownloadPdfButton from "@/components/DownloadPdfButton";
 import WorksheetSheet from "@/components/WorksheetSheet";
 import SignupCta from "@/components/SignupCta";
-import PinButton from "@/components/PinButton";
+import PinPages from "@/components/PinPages";
+import { pinPageLinks } from "@/lib/pinLinks";
+import { SITE_URL } from "@/lib/site";
 import { layoutWorksheet } from "@/lib/worksheetLayout";
 import { BRAND, brandedFilename } from "@/lib/brand";
 import { isFreeMode } from "@/lib/access";
 import { absoluteUrl } from "@/lib/site";
 import { SUBJECTS, SubjectId, topicsForGrade, generateWorksheet, exampleQuestion, challengeQuestion } from "@/lib/subjects";
 import { parseVariant, formatVariant } from "@/lib/worksheetVariant";
-import { sharePaths, pinDescription, OG_SIZE } from "@/lib/shareImage";
+import { sharePaths, OG_SIZE } from "@/lib/shareImage";
 
 // Public page for one exact generated worksheet (what a "Pin it" from the
 // generator links to). Not indexed: the topic page is the one for search.
@@ -61,6 +63,10 @@ export default function GeneratedWorksheetPage({ params }: { params: Params }) {
   const path = `/ws/${subject.id}/${grade}/${topic.id}/${formatVariant(v)}`;
   const topicPath = `/worksheets/${subject.id}/${grade}/${topic.id}`;
   const freeMode = isFreeMode();
+  const pinLinks = pinPageLinks({
+    origin: SITE_URL, subject: subject.id, subjectLabel: subject.label, grade, topic: topic.id, name,
+    variant: v, questions: questions.map((q) => q.q),
+  });
 
   return (
     <main>
@@ -85,11 +91,7 @@ export default function GeneratedWorksheetPage({ params }: { params: Params }) {
             filename={brandedFilename([`Grade ${grade}`, subject.label, name], "pdf")}
             layout={layout}
           />
-          <PinButton
-            url={absoluteUrl(path)}
-            media={absoluteUrl(sharePaths(subject.id, grade, topic.id, formatVariant(v)).pin)}
-            description={pinDescription(grade, subject.label, name)}
-          />
+          <a href="#pin" className="px-5 py-2.5 rounded-lg font-medium bg-[#E60023] hover:bg-[#ad081b] text-white">Save to Pinterest</a>
           <a href="#answer-key" className="px-5 py-2.5 rounded-lg font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">
             Jump to answer key
           </a>
@@ -124,6 +126,14 @@ export default function GeneratedWorksheetPage({ params }: { params: Params }) {
             {layout.challenge && <li className="flex gap-3 py-2 text-slate-700 dark:text-slate-200"><span className="text-violet-500 text-sm w-6 shrink-0">★</span><span>{layout.challenge.answer} <span className="text-xs text-slate-400">(challenge corner)</span></span></li>}
           </ol>
         </details>
+
+        <div id="pin" className="print:hidden mt-10">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Pin this worksheet</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 mb-4">
+            {pinLinks.length > 1 ? `Split into ${pinLinks.length} pin pages so every question is readable. Pin each page.` : "Save it to a Pinterest board."}
+          </p>
+          <PinPages links={pinLinks} />
+        </div>
 
         <div className="print:hidden mt-10 text-center bg-slate-100 dark:bg-slate-900 rounded-xl p-8">
           <p className="text-lg font-semibold text-slate-900 dark:text-white">Want another {name} worksheet?</p>

@@ -24,9 +24,20 @@ export function sharePaths(subject: string, grade: string | number, topic: strin
   return { pin: `/share/pin/${tail}${q}`, og: `/share/og/${tail}${q}` };
 }
 
+/** Pin image for page N (1-based) of an exact generated worksheet. */
+export function pinPagePath(subject: string, grade: string | number, topic: string, variant: string, page: number) {
+  return `/share/pin/${subject}/${grade}/${topic}?v=${variant}&p=${page}`;
+}
+
 /** "Grade 4 Long Division Worksheet — Free PDF + Answer Key" style text for pins. */
 export function pinDescription(grade: number, subjectLabel: string, name: string) {
   return `Free printable Grade ${grade} ${name} worksheet (${subjectLabel}) with a full answer key. Print it or save it as a PDF, or generate a fresh version. #worksheets #grade${grade} #${subjectLabel.replace(/\s+/g, "").toLowerCase()} #homeschool #teacherresources`;
+}
+
+/** Question texts in order, without repeats (some small fact banks repeat). */
+export function uniqueQuestions(qs: string[]): string[] {
+  const seen = new Set<string>();
+  return qs.filter((q) => (seen.has(q) ? false : (seen.add(q), true)));
 }
 
 type ShareData = { subjectLabel: string; grade: number; name: string; questions: string[]; total: number };
@@ -39,10 +50,7 @@ export function shareData(subject: string, gradeStr: string, topicId: string, va
   const topic = topicsForGrade(s.id as SubjectId, grade).find((t) => t.id === topicId);
   if (!topic) return null;
   const seed = variant?.seed ?? stableSeed(`${s.id}-${grade}-${topic.id}`);
-  const seen = new Set<string>();
-  const qs = generateWorksheet({ subject: s.id as SubjectId, grade, topic: topic.id, difficulty: variant?.difficulty ?? "medium", count: variant?.count ?? 12, seed })
-    .map((item) => item.q)
-    .filter((q) => (seen.has(q) ? false : (seen.add(q), true)));
+  const qs = uniqueQuestions(generateWorksheet({ subject: s.id as SubjectId, grade, topic: topic.id, difficulty: variant?.difficulty ?? "medium", count: variant?.count ?? 12, seed }).map((item) => item.q));
   return { subjectLabel: s.label, grade, name: topic.label.replace(/^The /, ""), questions: qs, total: qs.length };
 }
 
@@ -59,7 +67,6 @@ const SUBJECT_COLOR: Record<string, string> = {
   Chemistry: "#ea580c", Biology: "#16a34a", "Computer Science": "#0891b2",
 };
 
-/** Tall 2:3 pin — the format Pinterest shows best. */
 /** Take questions in order until the sheet is about full (estimated in pixels). */
 function fitQuestions(qs: string[], o: { budget: number; perLine: number; lineH: number; gap: number; maxChars: number }) {
   const out: string[] = [];
@@ -74,36 +81,86 @@ function fitQuestions(qs: string[], o: { budget: number; perLine: number; lineH:
   return out;
 }
 
-export function PinImage({ d }: { d: ShareData }) {
+// Pin sheet text metrics (DejaVu Sans 26px in a ~780px column).
+const PIN_Q = { perLine: 46, lineH: 34, gap: 22, maxChars: 130 };
+const FIRST_PAGE_BUDGET = 790;   // below the big title
+const NEXT_PAGE_BUDGET = 1080;   // continuation pages have a small header
+export const MAX_PIN_PAGES = 6;
+
+/**
+ * Split a worksheet's questions into pin-sized pages so nothing is cut off.
+ * Returns the questions on each page (page 1 first).
+ */
+export function pinPages(questions: string[]): string[][] {
+  const pages: string[][] = [];
+  let rest = questions;
+  while (rest.length && pages.length < MAX_PIN_PAGES) {
+    const page = fitQuestions(rest, { ...PIN_Q, budget: pages.length === 0 ? FIRST_PAGE_BUDGET : NEXT_PAGE_BUDGET });
+    pages.push(page);
+    rest = rest.slice(page.length);
+  }
+  return pages;
+}
+
+/** Title size that keeps the heading to two lines in the 888px header. */
+function titleSize(name: string) {
+  const perLineAt1px = 888 / 0.62; // DejaVu Bold averages ~0.62em per character
+  const size = Math.floor(perLineAt1px / Math.ceil(name.length / 2));
+  return Math.max(44, Math.min(76, size));
+}
+
+/**
+ * Tall 2:3 pin — the format Pinterest shows best.
+ * Without `page`, it's the single summary pin used for topic pages ("+ N more").
+ * With `page`, it's one page of a multi-page worksheet ("Page 2 of 3").
+ */
+export function PinImage({ d, page }: { d: ShareData; page?: { index: number; pages: string[][] } }) {
   const accent = SUBJECT_COLOR[d.subjectLabel] || "#2563eb";
-  const shown = fitQuestions(d.questions, { budget: 790, perLine: 46, lineH: 34, gap: 22, maxChars: 130 });
+  const paged = !!page;
+  const pageCount = page?.pages.length ?? 1;
+  const idx = page?.index ?? 0;
+  const shown = paged ? page!.pages[idx] : fitQuestions(d.questions, { ...PIN_Q, budget: FIRST_PAGE_BUDGET });
+  const offset = paged ? page!.pages.slice(0, idx).reduce((n, p) => n + p.length, 0) : 0;
+  const isFirst = idx === 0;
+  const isLast = idx === pageCount - 1;
+  const name = clip(d.name, 60);
+
+  let note: string;
+  if (paged) note = isLast ? "Full answer key on the free PDF" : `Continued on page ${idx + 2} of ${pageCount} →`;
+  else note = d.total > shown.length ? `+ ${d.total - shown.length} more question${d.total - shown.length === 1 ? "" : "s"} and the full answer key` : "Full answer key included";
+
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#0b1220", padding: 56, fontFamily: "DejaVu" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", color: "#F0C94E", fontSize: 34, fontWeight: 700 }}>{BRAND.name}</div>
         <div style={{ display: "flex", background: accent, color: "white", fontSize: 28, fontWeight: 700, borderRadius: 999, padding: "8px 24px" }}>
-          {`Grade ${d.grade} · ${d.subjectLabel}`}
+          {paged && pageCount > 1 ? `Page ${idx + 1} of ${pageCount}` : `Grade ${d.grade} · ${d.subjectLabel}`}
         </div>
       </div>
-      <div style={{ display: "flex", color: "white", fontSize: d.name.length > 28 ? 62 : 76, fontWeight: 800, lineHeight: 1.08, marginTop: 36 }}>
-        {clip(d.name, 48)}
-      </div>
-      <div style={{ display: "flex", color: "#cbd5e1", fontSize: 36, marginTop: 14 }}>Free printable worksheet + answer key</div>
 
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, background: "white", borderRadius: 24, padding: "36px 40px", marginTop: 40 }}>
+      {isFirst ? (
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", color: "white", fontSize: titleSize(name), fontWeight: 800, lineHeight: 1.08, marginTop: 36 }}>{name}</div>
+          <div style={{ display: "flex", color: "#cbd5e1", fontSize: 36, marginTop: 14 }}>
+            {paged && pageCount > 1 ? `Grade ${d.grade} ${d.subjectLabel} · ${d.total} questions + answer key` : "Free printable worksheet + answer key"}
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: "flex", color: "#cbd5e1", fontSize: 30, marginTop: 24 }}>{`Grade ${d.grade} ${d.subjectLabel} · ${clip(d.name, 44)}`}</div>
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", flex: 1, background: "white", borderRadius: 24, padding: "36px 40px", marginTop: isFirst ? 40 : 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "3px solid #0f172a", paddingBottom: 14 }}>
           <div style={{ display: "flex", fontSize: 26, fontWeight: 700, color: "#0f172a" }}>{clip(d.name, 34)}</div>
-          <div style={{ display: "flex", fontSize: 22, color: "#64748b" }}>Name: ____________</div>
+          <div style={{ display: "flex", fontSize: 22, color: "#64748b" }}>{isFirst ? "Name: ____________" : `Questions ${offset + 1}–${offset + shown.length}`}</div>
         </div>
         {shown.map((q, i) => (
           <div key={i} style={{ display: "flex", fontSize: 26, color: "#1e293b", marginTop: 22, lineHeight: 1.3 }}>
-            <div style={{ display: "flex", width: 56, color: accent, fontWeight: 700 }}>{`${i + 1}.`}</div>
+            <div style={{ display: "flex", width: 56, color: accent, fontWeight: 700 }}>{`${offset + i + 1}.`}</div>
             <div style={{ display: "flex", flex: 1 }}>{q}</div>
           </div>
         ))}
-        <div style={{ display: "flex", marginTop: "auto", paddingTop: 20, fontSize: 22, color: "#94a3b8" }}>
-          {d.total > shown.length ? `+ ${d.total - shown.length} more question${d.total - shown.length === 1 ? "" : "s"} and the full answer key` : "Full answer key included"}
-        </div>
+        <div style={{ display: "flex", marginTop: "auto", paddingTop: 20, fontSize: 22, color: "#94a3b8" }}>{note}</div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 34 }}>
