@@ -323,6 +323,14 @@ export default function WorksheetSheet({
         </div>
       )}
 
+      {/* "Remember" reference chart */}
+      {layout.anchor && (
+        <div className={`mt-4 rounded-xl border-2 ${t.ring} px-4 pt-2 pb-3 break-inside-avoid`}>
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-600 mb-2"><span className={`${t.badge} text-white rounded px-1.5 py-0.5 mr-2`}>Remember</span>{layout.anchor.title}</p>
+          <div className="flex justify-center"><VisualSvg v={layout.anchor.visual} /></div>
+        </div>
+      )}
+
       {/* word bank (single-part worksheets) */}
       {layout.wordBank && <WordBank words={layout.wordBank} t={t} large={L} />}
 
