@@ -67,6 +67,8 @@ export const MATH_BOOK: SubjectBook = {
     U("Going Further", FURTHER,
       L("Advanced: Grade 3 Preview", adv("mult_facts", "3.OA.C.7"), adv("time_minute", "3.MD.A.1")),
       L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
+      L("Graphs, Patterns & Real Life", adv("read_graphs")),
+      L("Logic Puzzles", ch("mini_sudoku")),
       L("Challenge Puzzles", ch("challenge_mystery_number"), ch("challenge_magic_square"), ch("challenge_missing_digits"))),
   ],
 
@@ -95,6 +97,8 @@ export const MATH_BOOK: SubjectBook = {
     U("Going Further", FURTHER,
       L("Advanced: Grade 4 Preview", adv("mult_multi", "4.NBT.B.5"), adv("long_division", "4.NBT.B.6"), adv("factors_multiples", "4.OA.B.4")),
       L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
+      L("Graphs, Patterns & Real Life", adv("read_graphs"), adv("growing_patterns")),
+      L("Logic Puzzles", ch("logic_grids"), ch("mini_sudoku")),
       L("Challenge Puzzles", ch("challenge_missing_digits"), ch("challenge_magic_square"), ch("challenge_mystery_number"))),
   ],
 
@@ -131,6 +135,8 @@ export const MATH_BOOK: SubjectBook = {
     U("Going Further", FURTHER,
       L("Advanced: Grade 5–6 Preview", adv("powers_of_10", "5.NBT.A.2"), adv("geometry_area_triangle", "6.G.A.1"), adv("geometry", "5.MD.C.5")),
       L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
+      L("Graphs, Patterns & Real Life", adv("read_graphs"), adv("growing_patterns"), adv("real_life_math")),
+      L("Logic Puzzles", ch("logic_grids"), ch("mini_sudoku")),
       L("Challenge Puzzles", ch("challenge_logic"), ch("challenge_missing_digits"), ch("challenge_magic_square"))),
   ],
 
@@ -160,6 +166,8 @@ export const MATH_BOOK: SubjectBook = {
     U("Going Further", FURTHER,
       L("Advanced: Grade 6 Preview", adv("stats_central_tendency", "6.SP.B.5c"), adv("stats_range", "6.SP.B.5c"), adv("stats", "6.SP.B.5"), adv("geometry_area_triangle", "6.G.A.1")),
       L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
+      L("Graphs, Patterns & Real Life", adv("read_graphs"), adv("growing_patterns"), adv("real_life_math")),
+      L("Logic Puzzles", ch("logic_grids"), ch("mini_sudoku")),
       L("Challenge Puzzles", ch("challenge_logic"), ch("challenge_missing_digits"), ch("challenge_magic_square"))),
   ],
 
@@ -190,6 +198,8 @@ export const MATH_BOOK: SubjectBook = {
     U("Going Further", FURTHER,
       L("Advanced: Grade 7 Preview", adv("integers_add_sub", "7.NS.A.1"), adv("integers_mul_div", "7.NS.A.2"), adv("integers", "7.NS.A.3"), adv("two_step_equations", "7.EE.B.4a")),
       L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
+      L("Graphs, Patterns & Real Life", adv("read_graphs"), adv("growing_patterns"), adv("real_life_math")),
+      L("Logic Puzzles", ch("logic_grids"), ch("mini_sudoku")),
       L("Challenge Puzzles", ch("challenge_number_theory"), ch("challenge_logic"))),
   ],
 
@@ -220,6 +230,8 @@ export const MATH_BOOK: SubjectBook = {
     U("Going Further", FURTHER,
       L("Advanced: Grade 8 Preview", adv("slope", "8.EE.B.6"), adv("pythagorean", "8.G.B.7"), adv("scientific_notation", "8.EE.A.4")),
       L("Thinking & Problem Solving", adv("find_the_mistake"), ch("balance_puzzles")),
+      L("Graphs, Patterns & Real Life", adv("read_graphs"), adv("growing_patterns"), adv("real_life_math")),
+      L("Logic Puzzles", ch("logic_grids")),
       L("Challenge Puzzles", ch("challenge_counting"), ch("challenge_number_theory"), ch("challenge_logic"))),
   ],
 
@@ -251,6 +263,8 @@ export const MATH_BOOK: SubjectBook = {
     U("Going Further", FURTHER,
       L("Advanced: Algebra I Preview", adv("polynomials", "A-APR.A.1"), adv("factoring_trinomials", "A-SSE.A.2"), adv("quadratics", "A-REI.B.4b")),
       L("Thinking & Problem Solving", adv("find_the_mistake"), ch("balance_puzzles")),
+      L("Graphs, Patterns & Real Life", adv("read_graphs"), adv("real_life_math")),
+      L("Logic Puzzles", ch("logic_grids")),
       L("Challenge Puzzles", ch("challenge_counting"), ch("challenge_number_theory"), ch("challenge_algebra"))),
   ],
 

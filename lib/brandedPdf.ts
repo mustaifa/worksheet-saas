@@ -138,6 +138,17 @@ function drawFooters(doc: JsPDF) {
   }
 }
 
+/** Swaps symbols the bundled PDF font doesn't have for ones it does. */
+const PDF_SUBS: [RegExp, string][] = [[/✓/g, "√"], [/✗/g, "×"], [/★/g, "*"], [/⟨/g, "<"], [/⟩/g, ">"], [/ᵐ/g, "^m"], [/ˣ/g, "^x"], [/ʸ/g, "^y"], [/ᵦ/g, "_b"], [/⁄/g, "/"]];
+export const pdfSafe = (t: string) => PDF_SUBS.reduce((acc, [re, to]) => acc.replace(re, to), t);
+function patchText(doc: JsPDF) {
+  const fix = (v: unknown): any => (typeof v === "string" ? pdfSafe(v) : Array.isArray(v) ? v.map(fix) : v);
+  const text = doc.text.bind(doc), split = doc.splitTextToSize.bind(doc), width = doc.getTextWidth.bind(doc);
+  (doc as any).text = (t: unknown, ...rest: unknown[]) => (text as any)(fix(t), ...rest);
+  (doc as any).splitTextToSize = (t: unknown, ...rest: unknown[]) => (split as any)(fix(t), ...rest);
+  (doc as any).getTextWidth = (t: string) => width(pdfSafe(t));
+}
+
 export async function downloadWorksheetPdf(o: WorksheetPdfOptions) {
   const doc = await buildWorksheetPdf(o);
   doc.save(o.filename);
@@ -148,6 +159,7 @@ export async function buildWorksheetPdf(o: WorksheetPdfOptions, preloaded?: { re
   const [{ jsPDF }, a] = await Promise.all([import("jspdf"), preloaded ? Promise.resolve(preloaded) : loadAssets()]);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   setupFonts(doc, a);
+  patchText(doc);
   const L = o.layout;
   const tint = TINT[L.subject] || TINT.math;
   const big = L.large;

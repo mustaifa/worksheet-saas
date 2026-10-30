@@ -864,6 +864,10 @@ function scienceVisual(topic: string, q: string): Visual | null {
 }
 
 
+function arrowShapes(x1: number, y1: number, x2: number, y2: number): Shape[] {
+  return [{ k: "line", x1, y1, x2: x2 - 6, y2, stroke: "#64748b", sw: 2 }, { k: "poly", pts: [[x2, y2], [x2 - 8, y2 - 5], [x2 - 8, y2 + 5]], closed: true, fill: "#64748b" }];
+}
+
 // ---------------------------------------------------------------- pictures from the icon library
 
 const COUNT_ICONS = ["apple", "star", "fish", "cookie", "ball", "duck", "flower", "car", "cherry", "bee", "egg", "heart", "kite", "pear", "bug", "cup"];
@@ -1021,6 +1025,188 @@ export function picVisual(pic: string): Visual | null {
       });
     });
     return { w: n * bw + 4, h: rows.length * bh + 4, shapes, alt: "A number pyramid", prompt: "Each brick is the sum of the two bricks below it. What number goes in the ? brick?" };
+  }
+  if (kind === "graph" || kind === "inv") {
+    const bar = rest.lastIndexOf("|");
+    const json = bar > 0 ? rest.slice(0, bar) : rest, ask = bar > 0 ? rest.slice(bar + 1) : "";
+    let sp: any; try { sp = JSON.parse(json); } catch { return null; }
+    const shapes: Shape[] = [];
+    let x0 = 0;
+    if (kind === "inv") {
+      // data table on the left
+      const cw = 92, rh = 20;
+      shapes.push({ k: "rect", x: 0, y: 4, w: cw * 2, h: rh * 1.6, fill: FILL_A, stroke: INK, sw: 1 });
+      const head = (t: string, x: number) => {
+        const words = t.split(" "); const mid = Math.ceil(words.length / 2);
+        const a1 = words.slice(0, mid).join(" "), a2 = words.slice(mid).join(" ");
+        const sz = Math.min(9, (cw - 8) / (Math.max(a1.length, a2.length) * 0.62));
+        shapes.push({ k: "text", x, y: 16, t: a1, size: sz, bold: true, anchor: "middle", fill: INK }, { k: "text", x, y: 27, t: a2, size: sz, bold: true, anchor: "middle", fill: INK });
+      };
+      head(sp.xName, cw / 2); head(sp.yName, cw * 1.5);
+      shapes.push({ k: "line", x1: cw, y1: 4, x2: cw, y2: 4 + rh * 1.6 + sp.xs.length * rh, stroke: INK, sw: 1 });
+      sp.xs.forEach((x: number, i: number) => {
+        const y = 4 + rh * 1.6 + i * rh;
+        shapes.push({ k: "rect", x: 0, y, w: cw * 2, h: rh, fill: i % 2 ? "#fff" : PALE, stroke: INK, sw: 0.8 }, { k: "text", x: cw / 2, y: y + 14, t: String(x), size: 11, anchor: "middle", fill: INK }, { k: "text", x: cw * 1.5, y: y + 14, t: String(sp.ys[i]), size: 11, anchor: "middle", bold: true, fill: INK });
+      });
+      shapes.push({ k: "line", x1: cw, y1: 4, x2: cw, y2: 4 + rh * 1.6 + sp.xs.length * rh, stroke: INK, sw: 1 });
+      x0 = cw * 2 + 30;
+      sp = { type: "line", title: sp.title, labels: sp.xs.map(String), values: sp.ys, xTitle: sp.xName };
+    }
+    const vals: number[] = sp.values, labels: string[] = sp.labels;
+    const maxV = Math.max(...vals);
+    const step = sp.step || Math.max(1, Math.ceil(maxV / 6 / 5) * 5);
+    const top = Math.ceil((maxV + (sp.type === "line" ? 0 : 0.001)) / step) * step;
+    const minV = sp.type === "line" ? Math.max(0, Math.floor(Math.min(...vals) / step) * step - step) : 0;
+    const gx = x0 + 34, gy = 22, gw = Math.min(300, labels.length * 52), gh = 130;
+    const Y = (v: number) => gy + gh - ((v - minV) / (top - minV)) * gh;
+    shapes.push({ k: "text", x: gx + gw / 2, y: 12, t: sp.title, size: 11.5, bold: true, anchor: "middle", fill: INK });
+    for (let v = minV; v <= top + 1e-9; v += step) {
+      shapes.push({ k: "line", x1: gx, y1: Y(v), x2: gx + gw, y2: Y(v), stroke: "#e2e8f0", sw: 0.8 }, { k: "text", x: gx - 5, y: Y(v) + 3.5, t: String(Math.round(v * 100) / 100), size: 9, anchor: "end", fill: "#475569" });
+    }
+    shapes.push({ k: "line", x1: gx, y1: gy - 4, x2: gx, y2: gy + gh, stroke: INK, sw: 1.4 }, { k: "line", x1: gx, y1: gy + gh, x2: gx + gw, y2: gy + gh, stroke: INK, sw: 1.4 });
+    const cw2 = gw / labels.length;
+    if (sp.type === "bar") {
+      vals.forEach((v, i) => {
+        shapes.push({ k: "rect", x: gx + i * cw2 + cw2 * 0.18, y: Y(v), w: cw2 * 0.64, h: gy + gh - Y(v), fill: BAR_FILLS[i % BAR_FILLS.length], stroke: INK, sw: 1.1 });
+      });
+    } else {
+      const pts = vals.map((v, i) => [gx + i * cw2 + cw2 / 2, Y(v)] as [number, number]);
+      shapes.push({ k: "poly", pts, stroke: "#2563eb", sw: 2.2 });
+      pts.forEach(([px, py]) => shapes.push({ k: "circle", cx: px, cy: py, r: 3.6, fill: "#2563eb", stroke: "#fff", sw: 1 }));
+    }
+    labels.forEach((l, i) => shapes.push({ k: "text", x: gx + i * cw2 + cw2 / 2, y: gy + gh + 14, t: l, size: 9.5, anchor: "middle", fill: INK }));
+    if (sp.xTitle) shapes.push({ k: "text", x: gx + gw / 2, y: gy + gh + 28, t: sp.xTitle, size: 9.5, bold: true, anchor: "middle", fill: "#475569" });
+    return { w: gx + gw + 10, h: gy + gh + (sp.xTitle ? 32 : 20), shapes, alt: `${sp.title}: ${labels.map((l, i) => `${l} ${vals[i]}`).join(", ")}`, ...(ask ? { prompt: ask } : {}) };
+  }
+  if (kind === "grow") {
+    const [rule, ask] = rest.split("|");
+    const sq = rule === "sq";
+    const [a, b] = sq ? [0, 0] : rule.split(",").map(Number);
+    const c = 14, shapes: Shape[] = [];
+    let x = 24, maxH = 0;
+    for (let n = 1; n <= 3; n++) {
+      const cells: [number, number, boolean][] = [];
+      if (sq) for (let r = 0; r < n; r++) for (let k = 0; k < n; k++) cells.push([k, r, false]);
+      else {
+        for (let k = 0; k < b; k++) cells.push([0, k, true]);
+        for (let col = 0; col < n; col++) for (let r = 0; r < a; r++) cells.push([col + (b ? 1 : 0), r, false]);
+      }
+      const cols = Math.max(...cells.map(([cx]) => cx)) + 1, rows = Math.max(...cells.map(([, ry]) => ry)) + 1;
+      maxH = Math.max(maxH, rows * c);
+      for (const [cx, ry, grey] of cells) shapes.push({ k: "rect", x: x + cx * c, y: 4 + (Math.max(3, b, a) * c) - (ry + 1) * c + (sq ? 0 : 0), w: c, h: c, fill: grey ? "#cbd5e1" : FILL_A, stroke: INK, sw: 1 });
+      shapes.push({ k: "text", x: x + (cols * c) / 2, y: 4 + Math.max(3, b, a) * c + 16, t: `Step ${n}`, size: 10, bold: true, anchor: "middle", fill: "#475569" });
+      x += cols * c + 30;
+    }
+    const h = 4 + Math.max(3, b, a) * c + 22;
+    return { w: x, h, shapes, alt: "A growing pattern of squares: steps 1, 2 and 3", ...(ask ? { prompt: `Look at the pattern. ${ask}` } : {}) };
+  }
+  if (kind === "lgrid") {
+    const [namesS, itemsS, cluesS, ask] = rest.split("|");
+    const names = namesS.split(","), items = itemsS.split(","), clues = cluesS.split("~");
+    const cw = 58, rh = 24, lw = 52, shapes: Shape[] = [];
+    items.forEach((it, j) => shapes.push({ k: "rect", x: lw + j * cw, y: 0, w: cw, h: rh, fill: FILL_B, stroke: INK, sw: 1 }, { k: "text", x: lw + j * cw + cw / 2, y: 16, t: it, size: Math.min(10, (cw - 6) / (it.length * 0.64)), bold: true, anchor: "middle", fill: INK }));
+    names.forEach((nm, i) => {
+      shapes.push({ k: "rect", x: 0, y: rh + i * rh, w: lw, h: rh, fill: FILL_A, stroke: INK, sw: 1 }, { k: "text", x: lw / 2, y: rh + i * rh + 16, t: nm, size: 10.5, bold: true, anchor: "middle", fill: INK });
+      items.forEach((_, j) => shapes.push({ k: "rect", x: lw + j * cw, y: rh + i * rh, w: cw, h: rh, fill: "#fff", stroke: INK, sw: 1 }));
+    });
+    const tx = lw + items.length * cw + 16;
+    shapes.push({ k: "text", x: tx, y: 12, t: "Clues", size: 11, bold: true, fill: "#92400e" });
+    clues.forEach((cl, i) => shapes.push({ k: "text", x: tx, y: 30 + i * 17, t: `${i + 1}. ${cl}`, size: 10.5, fill: INK }));
+    const h = Math.max(rh * (names.length + 1), 30 + clues.length * 17) + 4;
+    return { w: tx + Math.max(...clues.map((c) => c.length)) * 6 + 24, h, shapes, alt: "A logic grid with clues", prompt: `Use the clues. Put ✓ and ✗ in the grid. ${ask}` };
+  }
+  if (kind === "sudoku") {
+    const rows = rest.split("/").map((r) => r.split(" "));
+    const c = 30, shapes: Shape[] = [];
+    rows.forEach((r, i) => r.forEach((v, j) => {
+      shapes.push({ k: "rect", x: 2 + j * c, y: 2 + i * c, w: c, h: c, fill: v === "★" ? "#fef3c7" : "#fff", stroke: "#94a3b8", sw: 0.8 });
+      if (v !== "_") shapes.push({ k: "text", x: 2 + j * c + c / 2, y: 2 + i * c + 21, t: v, size: v === "★" ? 16 : 15, bold: true, anchor: "middle", fill: v === "★" ? "#d97706" : INK });
+    }));
+    shapes.push({ k: "rect", x: 2, y: 2, w: c * 4, h: c * 4, stroke: INK, sw: 2.2 }, { k: "line", x1: 2 + 2 * c, y1: 2, x2: 2 + 2 * c, y2: 2 + 4 * c, stroke: INK, sw: 2 }, { k: "line", x1: 2, y1: 2 + 2 * c, x2: 2 + 4 * c, y2: 2 + 2 * c, stroke: INK, sw: 2 });
+    return { w: c * 4 + 4, h: c * 4 + 4, shapes, alt: "A 4 by 4 sudoku grid", prompt: "Each row, column and 2 × 2 box has 1, 2, 3 and 4 once. What number goes in the ★ square?" };
+  }
+  const tag = (x: number, y: number, top: string, bottom: string, fill = FILL_B): Shape[] => [
+    { k: "poly", pts: [[x, y + 12], [x + 12, y], [x + 110, y], [x + 110, y + 50], [x + 12, y + 50], [x, y + 38]], closed: true, fill, stroke: INK, sw: 1.4 },
+    { k: "circle", cx: x + 12, cy: y + 25, r: 3.5, fill: "#fff", stroke: INK, sw: 1 },
+    { k: "text", x: x + 64, y: y + 21, t: top, size: 10.5, bold: true, anchor: "middle", fill: INK },
+    { k: "text", x: x + 64, y: y + 40, t: bottom, size: 14, bold: true, anchor: "middle", fill: "#1d4ed8" },
+  ];
+  if (kind === "tags") {
+    const [item, each, n, note] = rest.split("|");
+    const shapes: Shape[] = [...tag(0, 4, item, each)];
+    shapes.push({ k: "text", x: 128, y: 34, t: `× ${n}`, size: 15, bold: true, fill: INK });
+    shapes.push({ k: "rect", x: 180, y: 10, w: 90, h: 44, r: 4, fill: "#bbf7d0", stroke: INK, sw: 1.4 }, { k: "text", x: 225, y: 38, t: note.replace(" note", ""), size: 15, bold: true, anchor: "middle", fill: "#166534" });
+    return { w: 276, h: 60, shapes, alt: `${n} ${item} at ${each}, paid with ${note}` };
+  }
+  if (kind === "buy") {
+    const [item, n1, p1, n2, p2] = rest.split("|");
+    const shapes: Shape[] = [...tag(0, 4, `Shop A: ${n1} ${item}`, p1), ...tag(150, 4, `Shop B: ${n2} ${item}`, p2, FILL_C)];
+    shapes.forEach((sh) => { if (sh.k === "text" && sh.size === 10.5) sh.size = 9; });
+    return { w: 266, h: 60, shapes, alt: `Shop A ${n1} ${item} for ${p1}; Shop B ${n2} for ${p2}` };
+  }
+  if (kind === "sale") {
+    const [price, off] = rest.split("|");
+    const shapes: Shape[] = [...tag(0, 4, "Jacket", price)];
+    shapes.push({ k: "circle", cx: 150, cy: 30, r: 26, fill: "#fca5a5", stroke: "#b91c1c", sw: 1.6 }, { k: "text", x: 150, y: 28, t: off.split(" ")[0], size: 12, bold: true, anchor: "middle", fill: "#7f1d1d" }, { k: "text", x: 150, y: 41, t: "OFF", size: 9, bold: true, anchor: "middle", fill: "#7f1d1d" });
+    return { w: 180, h: 60, shapes, alt: `A jacket at ${price}, ${off}` };
+  }
+  if (kind === "recipe") {
+    const [serves, line1, want] = rest.split("|");
+    const shapes: Shape[] = [{ k: "rect", x: 0, y: 0, w: 170, h: 66, r: 6, fill: "#fff7ed", stroke: "#fdba74", sw: 1.4 }, { k: "text", x: 10, y: 18, t: `Recipe — serves ${serves}`, size: 10.5, bold: true, fill: "#9a3412" }, { k: "line", x1: 10, y1: 24, x2: 160, y2: 24, stroke: "#fdba74", sw: 1 }, { k: "text", x: 10, y: 44, t: `• ${line1}`, size: 12, fill: INK }];
+    if (want) shapes.push(...arrowShapes(180, 33, 214, 33), { k: "text", x: 222, y: 38, t: `for ${want}?`, size: 13, bold: true, fill: "#1d4ed8" });
+    return { w: want ? 290 : 172, h: 68, shapes, alt: `A recipe for ${serves} with ${line1}` };
+  }
+  if (kind === "table") {
+    const [body, ask] = rest.split("|");
+    const rows = body.split("/").map((r) => r.split(","));
+    const cw = [86, ...rows[0].slice(1).map(() => 58)], rh = 22, shapes: Shape[] = [];
+    rows.forEach((r, i) => { let x = 0; r.forEach((v, j) => { shapes.push({ k: "rect", x, y: i * rh, w: cw[j], h: rh, fill: i === 0 ? FILL_A : j === 0 ? PALE : "#fff", stroke: INK, sw: 0.9 }, { k: "text", x: x + cw[j] / 2, y: i * rh + 15, t: v, size: 10.5, bold: i === 0 || j === 0, anchor: "middle", fill: INK }); x += cw[j]; }); });
+    return { w: cw.reduce((a2, b2) => a2 + b2, 0) + 2, h: rows.length * rh + 2, shapes, alt: "A bus timetable", ...(ask ? { prompt: ask } : {}) };
+  }
+  if (kind === "garden") {
+    const [L, Wd, cost] = rest.split("|");
+    const w = 150, h = Math.max(50, Math.min(100, (150 * +Wd) / +L));
+    const shapes: Shape[] = [{ k: "rect", x: 30, y: 8, w, h, fill: "#bbf7d0", stroke: "#92400e", sw: 3, dash: true }];
+    shapes.push({ k: "text", x: 30 + w / 2, y: h + 26, t: `${L} m`, size: 12, bold: true, anchor: "middle", fill: "#1d4ed8" }, { k: "text", x: 24, y: 8 + h / 2 + 4, t: `${Wd} m`, size: 12, bold: true, anchor: "end", fill: "#1d4ed8" }, { k: "text", x: 196, y: 8 + h / 2 + 4, t: `fence: ${cost}`, size: 11, bold: true, fill: "#92400e" });
+    return { w: 300, h: h + 32, shapes, alt: `A ${L} m by ${Wd} m garden` };
+  }
+  if (kind === "codekey") {
+    const [mode, msg] = rest.split("|");
+    const shapes: Shape[] = [];
+    const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const c = 20;
+    if (mode === "num") {
+      A.split("").forEach((L, i) => {
+        const x = (i % 13) * c, y = Math.floor(i / 13) * 34;
+        shapes.push({ k: "rect", x, y, w: c, h: 32, fill: i % 2 ? "#fff" : PALE, stroke: "#94a3b8", sw: 0.7 }, { k: "text", x: x + c / 2, y: y + 13, t: L, size: 11, bold: true, anchor: "middle", fill: INK }, { k: "text", x: x + c / 2, y: y + 27, t: String(i + 1), size: 9, anchor: "middle", fill: "#1d4ed8" });
+      });
+    } else {
+      const k = +mode.replace("shift", "");
+      A.split("").forEach((L, i) => {
+        const x = i * c;
+        shapes.push({ k: "rect", x, y: 0, w: c, h: 18, fill: PALE, stroke: "#94a3b8", sw: 0.7 }, { k: "text", x: x + c / 2, y: 13, t: L, size: 10, bold: true, anchor: "middle", fill: INK });
+        shapes.push({ k: "rect", x, y: 30, w: c, h: 18, fill: "#fef3c7", stroke: "#94a3b8", sw: 0.7 }, { k: "text", x: x + c / 2, y: 43, t: A[(i + k) % 26], size: 10, bold: true, anchor: "middle", fill: "#b45309" });
+        if (i % 3 === 0) shapes.push({ k: "line", x1: x + c / 2, y1: 19, x2: x + c / 2, y2: 29, stroke: "#94a3b8", sw: 0.8 });
+      });
+    }
+    const y = mode === "num" ? 92 : 70;
+    shapes.push({ k: "rect", x: 0, y: y - 16, w: Math.max(160, msg.length * 11 + 30), h: 26, r: 5, fill: "#ede9fe", stroke: "#7c3aed", sw: 1.4 }, { k: "text", x: 10, y: y + 2, t: `🔒 ${msg}`.replace("🔒 ", "Code: "), size: 13, bold: true, fill: "#5b21b6" });
+    return { w: mode === "num" ? 13 * c + 2 : 26 * c + 2, h: y + 14, shapes, alt: "A code key" };
+  }
+  if (kind === "ladder") {
+    const parts = rest.split("|");
+    const clue = parts.pop()!;
+    const words = parts;
+    const rh = 34, shapes: Shape[] = [];
+    const h = words.length * rh + 8;
+    shapes.push({ k: "line", x1: 10, y1: 0, x2: 10, y2: h, stroke: "#92400e", sw: 4 }, { k: "line", x1: 130, y1: 0, x2: 130, y2: h, stroke: "#92400e", sw: 4 });
+    [...words].reverse().forEach((wd, i) => {
+      const y = 6 + i * rh;
+      shapes.push({ k: "rect", x: 16, y, w: 108, h: 26, r: 4, fill: wd === "?" ? "#fff" : FILL_B, stroke: INK, sw: 1.2 });
+      shapes.push({ k: "text", x: 70, y: y + 18, t: wd === "?" ? "_ _ _" : wd.toUpperCase(), size: 14, bold: true, anchor: "middle", fill: wd === "?" ? "#94a3b8" : INK });
+    });
+    shapes.push({ k: "text", x: 146, y: h / 2 - 4, t: "Clue:", size: 11, bold: true, fill: "#92400e" }, { k: "text", x: 146, y: h / 2 + 12, t: clue, size: 11, fill: INK });
+    return { w: 146 + clue.length * 6 + 10, h, shapes, alt: `A word ladder from ${words[0]} to ${words[words.length - 1]}`, prompt: `Change one letter at a time, from the bottom to the top. Use the clue: what is the missing word?` };
   }
   if (kind === "icon") {
     const ic = ICONS[rest];
