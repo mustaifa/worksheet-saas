@@ -2,13 +2,15 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   SUBJECTS, SubjectId, Difficulty, Question,
-  topicsForGrade, topicLabel, generateWorksheet, parseCommand, allGrades, allTopics,
+  topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, parseCommand, allGrades, allTopics,
 } from "@/lib/subjects";
 import TopicPicker from "@/components/TopicPicker";
+import WorksheetSheet from "@/components/WorksheetSheet";
+import { layoutWorksheet } from "@/lib/worksheetLayout";
 import { downloadWorksheetPdf } from "@/lib/brandedPdf";
 import { subjectStyle } from "@/components/subjectStyles";
 import { DocIcon } from "@/components/Icons";
-import { brandedFilename, BRAND } from "@/lib/brand";
+import { brandedFilename } from "@/lib/brand";
 
 import { useGradeTheme } from "@/components/GradeThemeProvider";
 
@@ -41,6 +43,8 @@ export default function WorksheetGenerator() {
   const [toastMsg, setToastMsg] = useState("");
   const seedRef = useRef<number>(newSeed());
   const printRef = useRef<HTMLDivElement>(null);
+  // What the current questions were generated for (the pickers may have moved on since).
+  const [gen, setGen] = useState<{ subject: SubjectId; grade: number; topic: string } | null>(null);
 
   const generatedGradeRef = useRef(grade);
 
@@ -72,6 +76,7 @@ export default function WorksheetGenerator() {
     setCount(c);
     seedRef.current = seed;
     generatedGradeRef.current = g;
+    setGen({ subject: s, grade: g, topic: t });
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -106,6 +111,7 @@ export default function WorksheetGenerator() {
     generatedGradeRef.current = g;
     seedRef.current = newSeed();
     setShowAnswers(false);
+    setGen({ subject: s, grade: g, topic: t });
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed: seedRef.current }));
     // On phones the worksheet renders below the long options form — bring it into view.
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -146,8 +152,7 @@ export default function WorksheetGenerator() {
       await downloadWorksheetPdf({
         title,
         meta: `Grade ${grade} · ${subjectLabel} · ${difficulty[0].toUpperCase()}${difficulty.slice(1)} · ${questions.length} questions`,
-        questions,
-        passage: questions[0]?.passage ? { title: questions[0].passageTitle, text: questions[0].passage } : null,
+        layout: layout!,
         includeAnswerKey: true,
         filename: brandedFilename([`Grade ${grade}`, subjectLabel, title.replace(/^The /, "")], "pdf"),
       });
@@ -181,7 +186,14 @@ export default function WorksheetGenerator() {
     window.prompt("Copy this link to share the exact same worksheet:", url);
   }
 
-  const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  const layout = useMemo(() => {
+    if (!questions.length) return null;
+    const g = gen ?? { subject, grade, topic };
+    const example = exampleQuestion({ subject: g.subject, grade: g.grade, topic: g.topic, seed: seedRef.current, avoid: questions });
+    return layoutWorksheet({ subject: g.subject, subjectLabel: SUBJECTS.find((x) => x.id === g.subject)?.label || g.subject, grade: g.grade, topic: g.topic, title: topicLabel(g.subject, g.topic), questions, example });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions, gen]);
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
@@ -333,44 +345,9 @@ export default function WorksheetGenerator() {
             </div>
           </div>
         ) : (
-          <div className="w-full max-w-xl">
-            <div id="worksheet-print-area" ref={printRef} className="bg-white text-slate-900 rounded-lg shadow-lg p-8">
-              <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
-                <span className="flex items-center gap-1.5 font-semibold text-slate-700"><img src={BRAND.logoPath} alt="" width={16} height={16} className="rounded" />{BRAND.name}</span>
-                <span>{BRAND.domain}</span>
-              </div>
-              <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-2">
-                <h2 className="text-2xl font-bold">{topicLabel(subject, topic)}</h2>
-                <div className="text-right text-xs text-slate-500 uppercase tracking-wide">
-                  Grade {grade} · {SUBJECTS.find((s) => s.id === subject)?.label}<br />{difficulty} · {questions.length} questions
-                </div>
-              </div>
-              <div className="flex gap-6 text-sm text-slate-500 my-4">
-                <span className="border-b border-slate-400 pb-0.5">Name: ______________</span>
-                <span className="border-b border-slate-400 pb-0.5">Date: {today}</span>
-              </div>
-              {questions[0]?.passage && (
-                <div className="mb-5 bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <p className="font-semibold text-sm mb-2">{questions[0].passageTitle}</p>
-                  <p className="text-sm leading-relaxed whitespace-pre-line">{questions[0].passage}</p>
-                </div>
-              )}
-              <ul>
-                {questions.map((item, i) => (
-                  <li key={i} className="flex gap-3 py-3 border-b border-dotted border-slate-200 last:border-0">
-                    <span className="text-slate-400 font-mono text-sm w-6">{i + 1}.</span>
-                    <span>
-                      {item.q}
-                      {showAnswers ? (
-                        <span className="text-red-600 font-semibold ml-2">{item.a}</span>
-                      ) : (
-                        <span className="inline-block min-w-[90px] border-b border-slate-400 ml-2">&nbsp;</span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-6 pt-3 border-t border-slate-200 text-[11px] text-slate-400">{BRAND.tagline} · {BRAND.domain}</p>
+          <div className="w-full max-w-3xl">
+            <div ref={printRef}>
+              {layout && <WorksheetSheet layout={layout} showAnswers={showAnswers} />}
             </div>
 
             <div className="flex flex-wrap gap-2 mt-4">

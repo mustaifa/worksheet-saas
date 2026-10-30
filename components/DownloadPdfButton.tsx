@@ -1,16 +1,16 @@
 "use client";
 import { useState } from "react";
-import { downloadWorksheetPdf, type PdfQuestion } from "@/lib/brandedPdf";
+import { downloadWorksheetPdf } from "@/lib/brandedPdf";
+import type { WorksheetLayout } from "@/lib/worksheetLayout";
 
 export default function DownloadPdfButton(props: {
-  title: string; meta: string; filename: string; questions: PdfQuestion[];
-  passage?: { title?: string; text: string } | null; className?: string;
+  title: string; meta: string; filename: string; layout: WorksheetLayout; className?: string;
 }) {
   const [state, setState] = useState<"idle" | "busy" | "error">("idle");
   async function go() {
     setState("busy");
     try {
-      await downloadWorksheetPdf({ ...props, includeAnswerKey: true });
+      await downloadWorksheetPdf({ title: props.title, meta: props.meta, filename: props.filename, layout: props.layout, includeAnswerKey: true });
       setState("idle");
     } catch {
       setState("error");

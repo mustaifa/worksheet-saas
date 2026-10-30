@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PrintButton from "@/components/PrintButton";
 import DownloadPdfButton from "@/components/DownloadPdfButton";
+import WorksheetSheet from "@/components/WorksheetSheet";
+import { layoutWorksheet } from "@/lib/worksheetLayout";
 import { BRAND, brandedFilename } from "@/lib/brand";
 import SignupCta from "@/components/SignupCta";
 import TopicRequestBox from "@/components/TopicRequestBox";
@@ -13,7 +15,7 @@ import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
 import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
-import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet, exampleQuestion } from "@/lib/subjects";
 import { locateSkill, LEVEL_LABEL, LEVEL_BADGE, STANDARDS } from "@/lib/curriculum";
 import { guidesForWorksheet } from "@/lib/blogNav";
 
@@ -83,7 +85,8 @@ export default function TopicPage({ params }: { params: Params }) {
   const seenQ = new Set<string>();
   const questions = generateWorksheet({ subject: subjectId, grade, topic: topic.id, difficulty: "medium", count: SAMPLE_COUNT, seed })
     .filter((item) => (seenQ.has(item.q) ? false : (seenQ.add(item.q), true)));
-  const passage = questions[0]?.passage ? { title: questions[0].passageTitle, text: questions[0].passage } : null;
+  const example = exampleQuestion({ subject: subjectId, grade, topic: topic.id, seed, avoid: questions });
+  const layout = layoutWorksheet({ subject: subjectId, subjectLabel: subject.label, grade, topic: topic.id, title: topic.label, questions, example });
 
   const description = topicDescription(subjectId, topic.id);
   const name = topic.label.replace(/^The /, ""); // used after "Grade N" and in sentences
@@ -187,7 +190,7 @@ export default function TopicPage({ params }: { params: Params }) {
         )}
         <p className="print:hidden text-slate-600 dark:text-slate-300 mt-3">
           {description ? `${description} ` : ""}
-          This free {gradeBand(grade)} worksheet has {questions.length} questions and a full answer key. Print it or save it as a PDF — every answer is checked by code, not guessed.
+          This free {gradeBand(grade)} worksheet has {layout.questions.length} questions and a full answer key. Print it or save it as a PDF — every answer is checked by code, not guessed.
         </p>
 
         <div className="print:hidden mt-6 flex flex-wrap items-center gap-3">
@@ -196,8 +199,7 @@ export default function TopicPage({ params }: { params: Params }) {
             title={topic.label}
             meta={`Grade ${grade} · ${subject.label} · ${questions.length} questions`}
             filename={brandedFilename([`Grade ${grade}`, subject.label, name], "pdf")}
-            questions={questions.map(({ q, a }) => ({ q, a }))}
-            passage={passage ? { title: passage.title, text: passage.text! } : null}
+            layout={layout}
           />
           <a href="#answer-key" className="px-5 py-2.5 rounded-lg font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">
             Jump to answer key
@@ -207,61 +209,31 @@ export default function TopicPage({ params }: { params: Params }) {
         <div className="mt-5"><TrustStrip compact /></div>
 
         {/* Everything inside this element (and only this) is printed — see globals.css */}
-        <div id="worksheet-print-area" className="mt-8 print:mt-0 bg-white text-slate-900 rounded-lg shadow-lg p-8 border border-slate-200">
-          <div className="hidden print:flex items-center justify-between text-xs text-slate-500 mb-4">
-            <span className="flex items-center gap-1.5 font-semibold text-slate-700"><img src={BRAND.logoPath} alt="" width={16} height={16} className="rounded" />{BRAND.name}</span>
-            <span>{BRAND.domain}</span>
-          </div>
-          <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4">
-            <div>
-              <h2 className="text-xl font-bold">{topic.label}</h2>
-              <p className="text-xs text-slate-500 uppercase tracking-wide mt-1">Grade {grade} · {subject.label}</p>
-            </div>
-            <div className="text-sm text-slate-600 space-y-2 text-right">
-              <p>Name: <span className="inline-block w-36 border-b border-slate-400">&nbsp;</span></p>
-              <p>Date: <span className="inline-block w-36 border-b border-slate-400">&nbsp;</span></p>
-            </div>
-          </div>
-          {passage && (
-            <div className="mb-5 bg-slate-50 rounded-lg p-4 border border-slate-200">
-              <p className="font-semibold text-sm mb-2">{passage.title}</p>
-              <p className="text-sm leading-relaxed whitespace-pre-line">{passage.text}</p>
-            </div>
-          )}
-          <ol>
-            {questions.map((item, i) => (
-              <li key={i} className="flex gap-3 py-3 border-b border-dotted border-slate-200 last:border-0 break-inside-avoid">
-                <span className="text-slate-400 font-mono text-sm w-6 shrink-0">{i + 1}.</span>
-                <span>{item.q}<span className="inline-block min-w-[90px] border-b border-slate-400 ml-2">&nbsp;</span></span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-6 pt-3 border-t border-slate-200 text-[11px] text-slate-400">{BRAND.tagline} · {absoluteUrl(path).replace(/^https?:\/\//, "")}</p>
-
+        <WorksheetSheet layout={layout} className="mt-8 print:mt-0" footerText={`${BRAND.tagline} · ${absoluteUrl(path).replace(/^https?:\/\//, "")}`}>
           {/* Printed answer key: always on its own page in print, hidden on screen
               (the on-screen version is the expandable block below). */}
           <div className="hidden print:block break-before-page">
             <h2 className="text-xl font-bold border-b-2 border-slate-900 pb-3 mb-4">Answer key — {topic.label} (Grade {grade})</h2>
             <ol>
-              {questions.map((item, i) => (
-                <li key={i} className="flex gap-3 py-1.5 text-sm">
-                  <span className="text-slate-400 font-mono w-6 shrink-0">{i + 1}.</span>
-                  <span>{item.a}</span>
+              {layout.questions.map((item) => (
+                <li key={item.n} className="flex gap-3 py-1.5 text-sm">
+                  <span className="text-slate-400 font-mono w-6 shrink-0">{item.n}.</span>
+                  <span>{item.letter ? `${item.letter} — ` : ""}{item.answer}</span>
                 </li>
               ))}
             </ol>
           </div>
-        </div>
+        </WorksheetSheet>
 
         <details id="answer-key" className="print:hidden mt-6 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 group">
           <summary className="cursor-pointer select-none px-6 py-4 font-semibold text-slate-900 dark:text-white">
             Answer key <span className="text-sm font-normal text-slate-500 dark:text-slate-400">(click to show)</span>
           </summary>
           <ol className="px-6 pb-5">
-            {questions.map((item, i) => (
-              <li key={i} className="flex gap-3 py-2 border-b border-dotted border-slate-200 dark:border-slate-800 last:border-0 text-slate-700 dark:text-slate-200">
-                <span className="text-slate-400 font-mono text-sm w-6 shrink-0">{i + 1}.</span>
-                <span>{item.a}</span>
+            {layout.questions.map((item) => (
+              <li key={item.n} className="flex gap-3 py-2 border-b border-dotted border-slate-200 dark:border-slate-800 last:border-0 text-slate-700 dark:text-slate-200">
+                <span className="text-slate-400 font-mono text-sm w-6 shrink-0">{item.n}.</span>
+                <span>{item.letter ? `${item.letter} — ` : ""}{item.answer}</span>
               </li>
             ))}
           </ol>
