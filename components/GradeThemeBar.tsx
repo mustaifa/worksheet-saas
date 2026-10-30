@@ -20,7 +20,7 @@ export default function GradeThemeBar() {
   }
 
   // Keep sign-up and log-in focused on the form.
-  if (pathname === "/signup" || pathname === "/login") return null;
+  if (["/signup", "/login", "/forgot-password", "/reset-password"].includes(pathname)) return null;
 
   return (
     <section className={`grade-theme-bar print:hidden ${theme ? "is-themed" : ""}`} aria-label="Your learning theme">

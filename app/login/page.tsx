@@ -46,7 +46,10 @@ function LoginForm() {
             <label htmlFor="li-email" className={labelClass}>Email</label>
             <input id="li-email" name="email" type="email" required autoComplete="email" inputMode="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} />
           </div>
-          <PasswordField id="li-password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} autoComplete="current-password" />
+          <div>
+            <PasswordField id="li-password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} autoComplete="current-password" />
+            <p className="text-right mt-1.5"><Link href="/forgot-password" className="text-sm font-medium text-indigo-700 dark:text-indigo-300 hover:underline">Forgot password?</Link></p>
+          </div>
           {error && (
             <div role="alert" className="rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-3 py-2 text-sm text-red-700 dark:text-red-300">{error}</div>
           )}
@@ -54,9 +57,6 @@ function LoginForm() {
             {loading ? "Logging in…" : "Log in"}
           </button>
         </form>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-4">
-          Forgot your password? <Link href="/contact" className="underline">Contact us</Link> and we&apos;ll help you get back in.
-        </p>
       </div>
       <p className="text-center text-sm text-slate-600 dark:text-slate-300 mt-6">
         New here? <Link href="/signup" className="font-semibold text-indigo-700 dark:text-indigo-300 hover:underline">Create a free account</Link>
