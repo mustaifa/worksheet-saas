@@ -8,7 +8,8 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "verify:curriculum": "npx -y tsx scripts/verify-curriculum.ts"
   },
   "dependencies": {
     "docx": "8.5.0",

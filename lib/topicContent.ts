@@ -1,4 +1,4 @@
-import { SubjectId } from "@/lib/subjects";
+import { SubjectId, allTopics } from "@/lib/subjects";
 
 /**
  * One- or two-sentence description of what each topic covers. Rendered on the
@@ -141,7 +141,7 @@ const TOPIC_DESCRIPTIONS: Record<SubjectId, Record<string, string>> = {
 };
 
 export function topicDescription(subject: SubjectId, topicId: string): string | null {
-  return TOPIC_DESCRIPTIONS[subject]?.[topicId] ?? null;
+  return TOPIC_DESCRIPTIONS[subject]?.[topicId] ?? allTopics(subject).find((t) => t.id === topicId)?.desc ?? null;
 }
 
 export function gradeBand(grade: number): string {

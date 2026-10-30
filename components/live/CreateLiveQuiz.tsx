@@ -67,7 +67,7 @@ export default function CreateLiveQuiz() {
 
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Topic</p>
-        <TopicPicker topics={availableTopics} selected={currentTopic} onSelect={setTopic} maxHeight="14rem" />
+        <TopicPicker topics={availableTopics} selected={currentTopic} onSelect={setTopic} maxHeight="18rem" subject={subject} grade={grade} />
       </div>
 
       <div>

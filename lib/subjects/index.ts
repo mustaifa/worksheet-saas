@@ -1,5 +1,9 @@
 import { Topic, Difficulty, Question, mulberry32, buildQuestionSet } from "./types";
 import { MATH_TOPICS, MATH_GENERATORS } from "./math";
+import { MATH_ELEM_TOPICS, MATH_ELEM_GENERATORS } from "./mathSkillsElem";
+import { MATH_MIDDLE_TOPICS, MATH_MIDDLE_GENERATORS } from "./mathSkillsMiddle";
+import { MATH_HIGH_TOPICS, MATH_HIGH_GENERATORS } from "./mathSkillsHigh";
+import { bookFor, bookSkills, bookGradesByTopic } from "@/lib/curriculum";
 import { ENGLISH_TOPICS, ENGLISH_GENERATORS } from "./english";
 import { SCIENCE_TOPICS, SCIENCE_GENERATORS } from "./science";
 import { pickPassageForGrade } from "./comprehension";
@@ -14,14 +18,29 @@ export const SUBJECTS: { id: SubjectId; label: string }[] = [
   { id: "science", label: "Science" },
 ];
 
+/**
+ * For subjects with a curriculum book, a topic's grade list is the union of
+ * its own `grades` and every grade whose book lists it — so the book is the
+ * single place to decide where a skill is taught, and older topic URLs keep
+ * working even if a topic is ever left out of a book.
+ */
+function withBookGrades(subject: SubjectId, topics: Topic[]): Topic[] {
+  const fromBook = bookGradesByTopic(subject);
+  return topics.map((t) => {
+    const extra = fromBook.get(t.id);
+    if (!extra) return t;
+    return { ...t, grades: [...new Set([...t.grades, ...extra])].sort((a, b) => a - b) };
+  });
+}
+
 const TOPICS_BY_SUBJECT: Record<SubjectId, Topic[]> = {
-  math: MATH_TOPICS,
+  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS]),
   english: ENGLISH_TOPICS,
   science: SCIENCE_TOPICS,
 };
 
 const GENERATORS_BY_SUBJECT: Record<SubjectId, Record<string, any>> = {
-  math: MATH_GENERATORS,
+  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS },
   english: ENGLISH_GENERATORS,
   science: SCIENCE_GENERATORS,
 };
@@ -30,8 +49,22 @@ export function allGrades(): number[] {
   return Array.from({ length: 12 }, (_, i) => i + 1);
 }
 
+/**
+ * Topics offered at a grade. With a curriculum book they come back in book
+ * (teaching) order; any topic tagged for the grade but missing from the book
+ * is appended so its page never disappears.
+ */
 export function topicsForGrade(subject: SubjectId, grade: number): Topic[] {
-  return TOPICS_BY_SUBJECT[subject].filter((t) => t.grades.includes(grade));
+  const all = TOPICS_BY_SUBJECT[subject].filter((t) => t.grades.includes(grade));
+  const book = bookFor(subject, grade);
+  if (!book) return all;
+  const byId = new Map(all.map((t) => [t.id, t]));
+  const ordered: Topic[] = [];
+  for (const s of bookSkills(book)) {
+    const t = byId.get(s.topic);
+    if (t && !ordered.includes(t)) ordered.push(t);
+  }
+  return [...ordered, ...all.filter((t) => !ordered.includes(t))];
 }
 
 export function topicLabel(subject: SubjectId, topicId: string): string {

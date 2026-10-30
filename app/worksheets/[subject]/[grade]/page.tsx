@@ -10,7 +10,8 @@ import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { absoluteUrl, OG_IMAGE } from "@/lib/site";
 import { isFreeMode } from "@/lib/access";
 import { topicDescription, gradeEquivalents, gradeOverview } from "@/lib/topicContent";
-import { SUBJECTS, SubjectId, allGrades, topicsForGrade, groupTopics, generateWorksheet } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, Topic, allGrades, topicsForGrade, groupTopics, generateWorksheet } from "@/lib/subjects";
+import { bookFor, LEVEL_LABEL, LEVEL_BADGE, type Skill } from "@/lib/curriculum";
 
 export const dynamicParams = false;
 
@@ -62,10 +63,36 @@ export default function GradePage({ params }: { params: { subject: string; grade
   const grades = allGrades().filter((g) => topicsForGrade(sid, g).length > 0);
   const otherSubjects = SUBJECTS.filter((s) => s.id !== sid && topicsForGrade(s.id, grade).length > 0);
 
+  const book = bookFor(sid, grade);
+  const byId = new Map(topics.map((t) => [t.id, t]));
+
   const sample = (topicId: string) => {
     const q = generateWorksheet({ subject: sid, grade, topic: topicId, difficulty: "medium", count: 1, seed: stableSeed(`${sid}-${grade}-${topicId}`) })[0];
     return q && !q.passage ? q.q : null;
   };
+
+  function TopicCard({ t, skill }: { t: Topic; skill?: Skill }) {
+    const q = sample(t.id);
+    const desc = topicDescription(sid, t.id);
+    const level = skill?.level ?? "core";
+    return (
+      <Link
+        href={`/worksheets/${sid}/${grade}/${t.id}`}
+        className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:border-slate-900 dark:hover:border-white transition-colors"
+      >
+        <p className="font-semibold text-slate-900 dark:text-white group-hover:underline">Grade {grade} {t.label.replace(/^The /, "")}</p>
+        {(level !== "core" || skill?.std) && (
+          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+            {level !== "core" && <span className={`rounded px-1.5 py-0.5 font-semibold ${LEVEL_BADGE[level]}`}>{LEVEL_LABEL[level]}</span>}
+            {skill?.std && <span className="font-mono text-slate-500 dark:text-slate-400">{skill.std}</span>}
+          </p>
+        )}
+        {desc && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{desc}</p>}
+        {q && <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 border-l-2 border-amber-400 pl-2 italic line-clamp-2">e.g. {q}</p>}
+        <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mt-3">Worksheet + answer key →</p>
+      </Link>
+    );
+  }
 
   const faqs = [
     { q: `Are these Grade ${grade} ${lower} worksheets free?`, a: `Yes. Every Grade ${grade} ${lower} worksheet on this page is free to print or save as a PDF, and each one includes a full answer key.` },
@@ -108,31 +135,51 @@ export default function GradePage({ params }: { params: { subject: string; grade
         </p>
         <div className="mt-5"><TrustStrip compact /></div>
 
-        <div className="mt-10 space-y-10">
-          {groupTopics(topics).map(({ group, topics: groupedTopics }) => (
-            <div key={group ?? "_"}>
-              {group && <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-3">{group}</h2>}
-              <div className="grid sm:grid-cols-2 gap-3">
-                {groupedTopics.map((t) => {
-                  const q = sample(t.id);
-                  const desc = topicDescription(sid, t.id);
-                  return (
-                    <Link
-                      key={t.id}
-                      href={`/worksheets/${sid}/${grade}/${t.id}`}
-                      className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:border-slate-900 dark:hover:border-white transition-colors"
-                    >
-                      <p className="font-semibold text-slate-900 dark:text-white group-hover:underline">Grade {grade} {t.label.replace(/^The /, "")}</p>
-                      {desc && <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{desc}</p>}
-                      {q && <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 border-l-2 border-amber-400 pl-2 italic line-clamp-2">e.g. {q}</p>}
-                      <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mt-3">Worksheet + answer key →</p>
-                    </Link>
-                  );
-                })}
-              </div>
+        {book ? (
+          <>
+            <nav aria-label={`Grade ${grade} ${lower} units`} className="mt-8 rounded-xl border border-slate-200 dark:border-slate-800 p-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Contents</p>
+              <ol className="mt-2 grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                {book.map((u, i) => (
+                  <li key={u.title}><a href={`#unit-${i + 1}`} className="text-slate-700 dark:text-slate-200 hover:underline">Unit {i + 1}: {u.title}</a></li>
+                ))}
+              </ol>
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Aligned to the Common Core State Standards. <span className={`rounded px-1.5 py-0.5 font-semibold ${LEVEL_BADGE.advanced}`}>Advanced</span> skills preview the next grade; <span className={`rounded px-1.5 py-0.5 font-semibold ${LEVEL_BADGE.challenge}`}>Challenge</span> skills are puzzles for curious students.</p>
+            </nav>
+            <div className="mt-10 space-y-12">
+              {book.map((unit, ui) => (
+                <section key={unit.title} id={`unit-${ui + 1}`} className="scroll-mt-20">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Unit {ui + 1}: {unit.title}</h2>
+                  {unit.domain && <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{unit.domain}</p>}
+                  <div className="mt-4 space-y-6">
+                    {unit.lessons.map((lesson) => (
+                      <div key={lesson.title}>
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300 mb-2">{lesson.title}</h3>
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          {lesson.skills.map((skill) => {
+                            const t = byId.get(skill.topic);
+                            return t ? <TopicCard key={t.id} t={t} skill={skill} /> : null;
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <div className="mt-10 space-y-10">
+            {groupTopics(topics).map(({ group, topics: groupedTopics }) => (
+              <div key={group ?? "_"}>
+                {group && <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-3">{group}</h2>}
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {groupedTopics.map((t) => <TopicCard key={t.id} t={t} />)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="mt-12 grid sm:grid-cols-2 gap-6">
           <div>
