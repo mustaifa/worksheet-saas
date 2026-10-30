@@ -146,6 +146,7 @@ function QuestionItem({ q, layout, t, show, compact, wide = true }: { q: LaidOut
     <li className="py-3 border-b border-dotted border-slate-200 break-inside-avoid">
       <div className="flex gap-3">
         <Badge n={q.n} t={t} large={L} />
+        {q.icon && <VisualSvg v={q.icon} scale={L ? 1.1 : 0.9} className="order-last shrink-0 self-start" />}
         <div className="flex-1 min-w-0">
           {q.boxed ? (
             <p className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2 italic leading-relaxed">{q.text}</p>
@@ -231,7 +232,7 @@ function SectionBlock({ sec, layout, t, show }: { sec: Section; layout: Workshee
             {qs.map((q) => (
               <tr key={q.n} className="border-t border-slate-200">
                 <td className="py-2.5 pr-3">
-                  <div className="flex gap-3 items-start"><Badge n={q.n} t={t} large={L} /><span className={L ? "text-lg" : ""}><Emph text={q.text} em={q.em} /></span></div>
+                  <div className="flex gap-3 items-center"><Badge n={q.n} t={t} large={L} />{q.icon && <VisualSvg v={q.icon} scale={L ? 0.9 : 0.75} className="shrink-0" />}<span className={L ? "text-lg" : ""}><Emph text={q.text} em={q.em} /></span></div>
                 </td>
                 {sec.tickCols!.map((c) => {
                   const on = show && c === q.correct;

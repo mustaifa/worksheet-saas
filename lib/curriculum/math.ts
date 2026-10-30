@@ -18,7 +18,7 @@ const FURTHER = "Enrichment for curious students";
 export const MATH_BOOK: SubjectBook = {
   1: [
     U("Numbers to 120", "Number & Operations in Base Ten",
-      L("Counting", c("counting", "1.NBT.A.1"), c("count_120", "1.NBT.A.1")),
+      L("Counting", c("count_objects", "1.NBT.A.1"), c("counting", "1.NBT.A.1"), c("count_120", "1.NBT.A.1")),
       L("Tens and Ones", c("tens_ones", "1.NBT.B.2")),
       L("Comparing Numbers", c("comparing", "1.NBT.B.3"))),
     U("Addition & Subtraction Facts", "Operations & Algebraic Thinking",
@@ -39,6 +39,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Equal Parts", c("halves_quarters", "1.G.A.3"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 2 Preview", adv("skip_counting", "2.NBT.A.2"), adv("add_2d", "2.NBT.B.5"), adv("money", "2.MD.C.8")),
+      L("Patterns", adv("picture_patterns")),
       L("Challenge Puzzles", ch("challenge_mystery_number"), ch("challenge_magic_square"))),
   ],
 

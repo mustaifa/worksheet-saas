@@ -88,6 +88,8 @@ const PASS_THRESHOLD = 0.7; // 70% correct to pass and be eligible for a reward
  */
 export const FREE_TEXT_TOPICS = new Set([
   "reading_comprehension",
+  // Needs the picture to answer (Live Quiz and challenges show text only).
+  "count_objects",
   "idioms",
   "vocabulary",
   // Curriculum-book skills whose answers are rewritten sentences or open

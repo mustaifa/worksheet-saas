@@ -17,7 +17,7 @@ const RF = "Reading: Foundational Skills", LANG = "Language", RL = "Reading: Lit
 export const ENGLISH_BOOK: SubjectBook = {
   1: [
     U("Phonics & Word Recognition", RF,
-      L("Letter Sounds & Rhymes", c("phonics", "RF.1.2")),
+      L("Letter Sounds & Rhymes", c("beginning_sounds", "RF.1.2c"), c("rhyming_pictures", "RF.K.2a"), c("phonics", "RF.1.2")),
       L("Vowel Sounds", c("vowel_sounds", "RF.1.3c")),
       L("Digraphs & Blends", c("digraphs_blends", "RF.1.3a")),
       L("Syllables", c("syllables", "RF.1.3d")),

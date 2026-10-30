@@ -9,6 +9,7 @@ import { ENGLISH_SKILL_TOPICS, ENGLISH_SKILL_GENERATORS } from "./englishSkills"
 import { SCIENCE_TOPICS, SCIENCE_GENERATORS } from "./science";
 import { SCIENCE_SKILL_TOPICS, SCIENCE_SKILL_GENERATORS } from "./scienceSkills";
 import { pickPassageForGrade } from "./comprehension";
+import { PICTURE_MATH_TOPICS, PICTURE_ENGLISH_TOPICS, PICTURE_SCIENCE_TOPICS, PICTURE_GENERATORS } from "./pictureSkills";
 
 export type { Difficulty, Question, Topic };
 
@@ -36,15 +37,15 @@ function withBookGrades(subject: SubjectId, topics: Topic[]): Topic[] {
 }
 
 const TOPICS_BY_SUBJECT: Record<SubjectId, Topic[]> = {
-  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS]),
-  english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS]),
-  science: withBookGrades("science", [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS]),
+  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS]),
+  english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS, ...PICTURE_ENGLISH_TOPICS]),
+  science: withBookGrades("science", [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS]),
 };
 
 const GENERATORS_BY_SUBJECT: Record<SubjectId, Record<string, any>> = {
-  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS },
-  english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS },
-  science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS },
+  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS },
+  english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS, ...PICTURE_GENERATORS },
+  science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...PICTURE_GENERATORS },
 };
 
 export function allGrades(): number[] {
