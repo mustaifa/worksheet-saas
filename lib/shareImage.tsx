@@ -22,15 +22,22 @@ export function stableSeed(str: string): number {
   return Math.abs(hash) || 1;
 }
 
+/**
+ * Bump when the pin/card artwork changes. It's part of every image URL, so
+ * browsers, the CDN and Pinterest (which all cache images by URL) fetch the new
+ * artwork instead of reusing an old copy.
+ */
+export const SHARE_IMAGE_VERSION = 3;
+
 export function sharePaths(subject: string, grade: string | number, topic: string, variant?: string) {
   const tail = `${subject}/${grade}/${topic}`;
-  const q = variant ? `?v=${variant}` : "";
+  const q = `?${variant ? `v=${variant}&` : ""}r=${SHARE_IMAGE_VERSION}`;
   return { pin: `/share/pin/${tail}${q}`, og: `/share/og/${tail}${q}` };
 }
 
 /** Pin image for page N (1-based) of an exact generated worksheet. */
 export function pinPagePath(subject: string, grade: string | number, topic: string, variant: string, page: number) {
-  return `/share/pin/${subject}/${grade}/${topic}?v=${variant}&p=${page}`;
+  return `/share/pin/${subject}/${grade}/${topic}?v=${variant}&p=${page}&r=${SHARE_IMAGE_VERSION}`;
 }
 
 /** "Grade 4 Long Division Worksheet — Free PDF + Answer Key" style text for pins. */
