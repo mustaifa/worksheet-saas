@@ -30,6 +30,8 @@ export const metadata: Metadata = {
   verification: {
     // Paste the content value Google Search Console gives you (Settings > Ownership verification > HTML tag method)
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    // Pinterest website claim for pinterest.com/aethelsystems (needed for RSS auto-publish)
+    other: { "p:domain_verify": "b2bab1a93caff65fa769e253905e06c0" },
   },
 };
 
