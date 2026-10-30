@@ -56,7 +56,7 @@ export default function TutorChat() {
       <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
         <div>
           <p className="font-semibold text-slate-900 dark:text-white">Homework Tutor</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Share a specific problem you're stuck on.</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Gives hints one step at a time, so you work it out yourself.</p>
         </div>
         <select
           aria-label="Tutor grade"
@@ -73,7 +73,7 @@ export default function TutorChat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <p className="text-sm text-slate-400 dark:text-slate-500 text-center mt-8">
-            Try: "I'm stuck on 3/4 + 1/2, can you help?" or "Explain what a metaphor is with an example."
+            Try: "I'm stuck on 3/4 + 1/2 — I got 4/6, is that right?" or "Explain what a metaphor is with an example." The tutor gives hints and checks your work instead of handing over answers.
           </p>
         )}
         {messages.map((m, i) => (
@@ -93,6 +93,7 @@ export default function TutorChat() {
 
       {error && <p className="text-xs text-red-600 px-4">{error}</p>}
       {remaining !== null && <p className="text-xs text-slate-400 px-4 pb-1">{remaining} messages left today</p>}
+      <p className="text-[11px] text-slate-400 dark:text-slate-500 px-4 pb-1">AI can make mistakes — check important answers with a teacher. Please don't share personal information. <a href="/ai" className="underline">How we use AI</a></p>
 
       <div className="border-t border-slate-200 dark:border-slate-800 p-3 flex gap-2">
         <input

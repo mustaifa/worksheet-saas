@@ -86,8 +86,9 @@ export default function About() {
           ))}
         </div>
         <p className="mt-6 text-slate-600 dark:text-slate-300">
-          Read more about <Link href="/blog/how-we-keep-every-answer-key-accurate" className="underline underline-offset-2">how we keep every answer key accurate</Link> and
-          our <Link href="/safety" className="underline underline-offset-2">safety & privacy commitments</Link>.
+          Read more about <Link href="/blog/how-we-keep-every-answer-key-accurate" className="underline underline-offset-2">how we keep every answer key accurate</Link>,
+          our <Link href="/safety" className="underline underline-offset-2">safety & privacy commitments</Link>, and{" "}
+          <Link href="/ai" className="underline underline-offset-2">how we use AI (and where we don't)</Link>.
         </p>
       </section>
 
