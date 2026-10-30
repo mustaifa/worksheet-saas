@@ -7,7 +7,7 @@
  * screen, print and PDF match and nothing changes the questions or answers.
  */
 import type { Question } from "./subjects/types";
-import { visualFor, type Visual } from "./worksheetVisuals";
+import { visualFor, questionIcon, picVisual, type Visual } from "./worksheetVisuals";
 import { locateSkill, STANDARDS } from "./curriculum";
 import { scienceDiagram } from "./scienceDiagrams";
 
@@ -31,6 +31,8 @@ export type LaidOutQuestion = {
   boxed?: boolean;
   /** Match activities: the letter of the correct option. */
   letter?: string;
+  /** Small decorative picture of the thing the question is about (early grades). */
+  icon?: Visual | null;
 };
 
 export type SectionKind = "list" | "tick" | "match" | "label";
@@ -184,6 +186,9 @@ function templateOf(q: LaidOutQuestion, orig: string): Tpl | null {
     if ((m = orig.match(new RegExp(`^In (?:the sentence )?${QO}(.+?)${QC},? is ${QO}(.+?)${QC} (an? [\\w-]+(?:,? (?:or )?an? [\\w-]+)+)\\?$`)))) {
       return { key: `tick:${m[3]}`, heading: `Is the underlined word ${m[3]}? Tick one box.`, item: m[1], em: m[2], tick: true };
     }
+    if ((m = orig.match(/^Is an? (.+?) living or non-living\?$/))) {
+      return { key: "tick:living", heading: "Is each one living or non-living? Tick one box.", item: m[1].charAt(0).toUpperCase() + m[1].slice(1), tick: true };
+    }
     if ((m = orig.match(new RegExp(`^Is this sentence (.+?)\\? ${QO}(.+)${QC}$`)))) {
       return { key: `tick:${m[1]}`, heading: `Is each sentence ${m[1]}? Tick one box.`, item: m[2], tick: true };
     }
@@ -246,7 +251,9 @@ export function layoutWorksheet(opts: {
   const passage = first?.passage ? { title: first.passageTitle, text: first.passage } : undefined;
 
   const prep = (item: Question, i: number): LaidOutQuestion => {
-    const visual = visualFor(subject, topic, grade, item.q);
+    const iconOnly = item.pic?.startsWith("icon:");
+    const visual = iconOnly ? null : visualFor(subject, topic, grade, item.q, item.pic);
+    const icon = iconOnly ? picVisual(item.pic!) : visual ? null : questionIcon(subject, grade, item.q);
     let text = visual?.prompt || item.q;
     const ch = findChoices(text, item.a);
     if (ch) text = ch.text;
@@ -255,7 +262,7 @@ export function layoutWorksheet(opts: {
     const mode: AnswerMode = ch && !hasBlank ? "choice" : hasBlank ? "blank" : isMath ? "box" : "lines";
     const long = item.a.length > 38 || /\bexplain|describe|why\b|what is the difference/i.test(item.q);
     const correct = ch?.choices.find((c) => norm(c) === norm(item.a));
-    return { n: i + 1, text, answer: item.a, mode, choices: ch?.choices, correct, lines: mode === "lines" ? (long ? 2 : 1) : 0, visual };
+    return { n: i + 1, text, answer: item.a, mode, choices: ch?.choices, correct, lines: mode === "lines" ? (long ? 2 : 1) : 0, visual, icon };
   };
   const laid = questions.map(prep);
 
@@ -382,7 +389,7 @@ export function layoutWorksheet(opts: {
         else if (nChoice > 0) parts.push("Read each question carefully. Circle the correct choice or write your answer on the line.");
         else parts.push("Read each question carefully and write your answer on the line.");
       }
-      if (anyVisual && !isMath) parts.push("Use the diagram to help you.");
+      if (anyVisual && !isMath) parts.push(grade <= 3 ? "Use the pictures to help you." : "Use the diagram to help you.");
     }
     if (only?.heading && only.bank) parts.push("Use the words in the word bank.");
   }
@@ -401,7 +408,7 @@ export function layoutWorksheet(opts: {
 
   // ---- Worked example
   let example: WorksheetLayout["example"];
-  if (opts.example && !passage) {
+  if (opts.example && !passage && !opts.example.pic && !visualFor(subject, topic, grade, opts.example.q)?.prompt) {
     let text = opts.example.q;
     if (BLANK_RE.test(text)) { BLANK_RE.lastIndex = 0; text = text.replace(BLANK_RE, "____"); }
     if (text.length <= 220 && opts.example.a.length <= 120) example = { text, answer: opts.example.a };

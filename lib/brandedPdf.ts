@@ -309,8 +309,11 @@ export async function buildWorksheetPdf(o: WorksheetPdfOptions, preloaded?: { re
   };
 
   /** Lays out (and, unless dry, draws) one question; returns its height. */
-  const question = (q: LaidOutQuestion, x: number, top: number, w: number, dry: boolean): number => {
+  const question = (q: LaidOutQuestion, x: number, top: number, w0: number, dry: boolean): number => {
+    const iconMM = q.icon ? (big ? 15 : 13) : 0;
+    const w = w0 - (iconMM ? iconMM + 3 : 0);
     const ix = x + badgeR * 2 + 3, iw = w - (ix - x);
+    if (q.icon && !dry) drawVisual(doc, q.icon, x + w0 - iconMM, top, iconMM / q.icon.w);
     let yy = top + 4;
     if (!dry) badge(q.n, x, top);
     doc.setFont("DejaVu", "normal"); doc.setFontSize(qSize); doc.setTextColor(...INK);
@@ -379,7 +382,7 @@ export async function buildWorksheetPdf(o: WorksheetPdfOptions, preloaded?: { re
         if (!dry) { doc.setDrawColor(...LINE); doc.setLineWidth(0.3); doc.line(ix, yy, ix + iw, yy); }
       }
     }
-    return yy - top + 3;
+    return Math.max(yy - top + 3, iconMM ? iconMM + 3 : 0);
   };
 
   const listRows = (qs: LaidOutQuestion[], nCols: number) => {
@@ -473,12 +476,14 @@ export async function buildWorksheetPdf(o: WorksheetPdfOptions, preloaded?: { re
       ensure(14); head();
       for (const q of qs) {
         doc.setFont("DejaVu", "normal"); doc.setFontSize(qSize);
-        const lines: string[] = doc.splitTextToSize(q.text, textW);
-        const h = Math.max(9, lines.length * lh(qSize) + 4);
+        const lines: string[] = doc.splitTextToSize(q.text, textW - (q.icon ? 10 : 0));
+        const h = Math.max(q.icon ? 10 : 9, lines.length * lh(qSize) + 4);
         if (y + h > BOTTOM) { newPage(); head(); }
         doc.setDrawColor(...FAINT); doc.setLineWidth(0.25); doc.line(M, y, PAGE_W - M, y);
         badge(q.n, M, y + 1.5);
-        doc.setFont("DejaVu", "normal"); doc.setFontSize(qSize); doc.setTextColor(...INK); emText(lines, M + badgeR * 2 + 3, y + 5.5, q.em);
+        let tx3 = M + badgeR * 2 + 3;
+        if (q.icon) { drawVisual(doc, q.icon, tx3, y + 0.8, 8 / q.icon.w); tx3 += 10; }
+        doc.setFont("DejaVu", "normal"); doc.setFontSize(qSize); doc.setTextColor(...INK); emText(lines, tx3, y + 5.5, q.em);
         cols2.forEach((_, k) => {
           const cx2 = M + CONTENT_W - (cols2.length - k - 0.5) * colW3;
           doc.setDrawColor(...LINE); doc.setLineWidth(0.45); doc.roundedRect(cx2 - 2.6, y + 2, 5.2, 5.2, 0.8, 0.8, "S");

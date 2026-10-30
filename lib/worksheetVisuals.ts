@@ -11,6 +11,8 @@
  * Units are CSS pixels (1 unit ≈ 0.2646 mm in the PDF).
  */
 
+import { ICONS, iconFor, placeIcon, type Icon } from "./icons";
+
 export type Shape =
   | { k: "rect"; x: number; y: number; w: number; h: number; r?: number; fill?: string; stroke?: string; sw?: number; dash?: boolean }
   | { k: "circle"; cx: number; cy: number; r: number; fill?: string; stroke?: string; sw?: number }
@@ -290,8 +292,9 @@ const UNIT = "(?:cm|mm|m|km|in|ft|yd|units?)";
 const SHAPE_SIDES: Record<string, number> = { triangle: 3, square: 4, rectangle: 4, pentagon: 5, hexagon: 6, heptagon: 7, octagon: 8, rhombus: 4 };
 
 /** Returns a picture for a question, or null when none fits. */
-export function visualFor(subject: string, topic: string, grade: number, q: string): Visual | null {
-  if (subject === "math") return mathVisual(topic, grade, q);
+export function visualFor(subject: string, topic: string, grade: number, q: string, pic?: string): Visual | null {
+  if (pic) { const v = picVisual(pic); if (v) return v; }
+  if (subject === "math") { const v = earlyMathPicture(topic, grade, q); if (v) return v; return mathVisual(topic, grade, q); }
   if (subject === "science") return scienceVisual(topic, q);
   return null;
 }
@@ -764,6 +767,140 @@ function scienceVisual(topic: string, q: string): Visual | null {
     return { w: x + s * 2 + 6, h: y + s * 2 + 6, shapes, alt: "An empty Punnett square to fill in" };
   }
   return null;
+}
+
+
+// ---------------------------------------------------------------- pictures from the icon library
+
+const COUNT_ICONS = ["apple", "star", "fish", "cookie", "ball", "duck", "flower", "car", "cherry", "bee", "egg", "heart", "kite", "pear", "bug", "cup"];
+
+function iconRow(words: string[], size: number, gap: number, y = 0, x0 = 0): Shape[] {
+  const out: Shape[] = [];
+  words.forEach((w, i) => { const ic = ICONS[w]; if (ic) out.push(...placeIcon(ic, x0 + i * (size + gap), y, size)); });
+  return out;
+}
+
+/** n copies of an icon in rows of `perRow`; the last `crossed` get a red X. */
+function iconGroup(icon: Icon, n: number, size: number, perRow: number, x0: number, y0: number, crossed = 0): { shapes: Shape[]; w: number; h: number } {
+  const shapes: Shape[] = [];
+  const g = size * 0.18;
+  for (let i = 0; i < n; i++) {
+    const x = x0 + (i % perRow) * (size + g), y = y0 + Math.floor(i / perRow) * (size + g);
+    shapes.push(...placeIcon(icon, x, y, size));
+    if (i >= n - crossed) shapes.push({ k: "line", x1: x + 2, y1: y + 2, x2: x + size - 2, y2: y + size - 2, stroke: "#dc2626", sw: 2.4 }, { k: "line", x1: x + size - 2, y1: y + 2, x2: x + 2, y2: y + size - 2, stroke: "#dc2626", sw: 2.4 });
+  }
+  const cols = Math.min(n, perRow), rows = Math.ceil(n / perRow);
+  return { shapes, w: cols * (size + g) - g, h: rows * (size + g) - g };
+}
+
+/** Draws the picture described by a question's `pic` spec. */
+export function picVisual(pic: string): Visual | null {
+  const [kind, ...restParts] = pic.split(":");
+  const rest = restParts.join(":");
+  if (kind === "count") {
+    const [word, nStr] = rest.split(":");
+    const icon = ICONS[word], n = +nStr;
+    if (!icon || !n) return null;
+    const per = n <= 10 ? 5 : 5;
+    const size = n <= 10 ? 36 : 30;
+    // Two blocks of five per row make counting easier (like a ten-frame).
+    const shapes: Shape[] = [];
+    let w = 0, h = 0;
+    for (let i = 0; i < n; i++) {
+      const blockRow = Math.floor(i / 10), inTen = i % 10;
+      const x = 6 + (inTen % per) * (size + 6) + (inTen >= per ? 0 : 0);
+      const y = 6 + blockRow * 2 * (size + 6) + Math.floor(inTen / per) * (size + 6);
+      shapes.push(...placeIcon(icon, x, y, size));
+      w = Math.max(w, x + size + 6); h = Math.max(h, y + size + 6);
+    }
+    return { w, h, shapes, alt: `${n} ${n === 1 ? icon.word : icon.plural}`, prompt: `How many ${icon.plural} are there? Count them.` };
+  }
+  if (kind === "pattern") {
+    const words = rest.split(",");
+    const size = 36, gap = 8;
+    const shapes = iconRow(words, size, gap, 4, 4);
+    const x = 4 + words.length * (size + gap);
+    shapes.push({ k: "rect", x, y: 4, w: size, h: size, r: 6, stroke: "#64748b", sw: 1.6, dash: true }, { k: "text", x: x + size / 2, y: 4 + size / 2 + 6, t: "?", size: 18, bold: true, anchor: "middle", fill: "#dc2626" });
+    return { w: x + size + 6, h: size + 10, shapes, alt: `A pattern: ${words.join(", ")}, then a gap`, prompt: "What comes next in the pattern? Write its name." };
+  }
+  if (kind === "pics") {
+    const words = rest.split(",");
+    const size = 52, gap = 30;
+    return { w: words.length * (size + gap), h: size + 8, shapes: iconRow(words, size, gap, 4, 8), alt: words.join(", ") };
+  }
+  if (kind === "rhyme") {
+    const [target, optStr] = rest.split("|");
+    const opts = optStr.split(",");
+    const size = 48;
+    const shapes: Shape[] = [...iconRow([target], 56, 0, 2, 2)];
+    shapes.push({ k: "rect", x: 0, y: 0, w: 60, h: 60, r: 8, stroke: "#be185d", sw: 2 });
+    shapes.push({ k: "line", x1: 68, y1: 30, x2: 88, y2: 30, stroke: "#64748b", sw: 2 }, { k: "poly", pts: [[94, 30], [86, 25], [86, 35]], closed: true, fill: "#64748b" });
+    shapes.push(...iconRow(opts, size, 24, 6, 104));
+    return { w: 104 + opts.length * (size + 24), h: 62, shapes, alt: `${target} and three pictures: ${opts.join(", ")}` };
+  }
+  if (kind === "icon") {
+    const ic = ICONS[rest];
+    return ic ? { w: 48, h: 48, shapes: placeIcon(ic, 0, 0, 48), alt: ic.word } : null;
+  }
+  return null;
+}
+
+/** Picture sums for Grade 1–2: groups of objects for small additions and subtractions and simple word problems. */
+function earlyMathPicture(topic: string, grade: number, q: string): Visual | null {
+  if (grade > 2) return null;
+  let m: RegExpMatchArray | null;
+  const pickIcon = (seed: string) => ICONS[COUNT_ICONS[hashStr(seed) % COUNT_ICONS.length]];
+  const plus = (a: number, b: number, icon: Icon): Visual => {
+    const size = a + b > 12 ? 20 : 26;
+    const A = iconGroup(icon, a, size, 5, 8, 8), B = iconGroup(icon, b, size, 5, 0, 8);
+    const bx = 8 + A.w + 40;
+    const shapes: Shape[] = [
+      { k: "rect", x: 2, y: 2, w: A.w + 12, h: Math.max(A.h, B.h) + 12, r: 8, fill: "#f0f9ff", stroke: "#93c5fd", sw: 1.4 },
+      ...A.shapes,
+      { k: "text", x: 8 + A.w + 20, y: 10 + Math.max(A.h, B.h) / 2 + 6, t: "+", size: 20, bold: true, anchor: "middle", fill: INK },
+      { k: "rect", x: bx - 6, y: 2, w: B.w + 12, h: Math.max(A.h, B.h) + 12, r: 8, fill: "#fdf2f8", stroke: "#f9a8d4", sw: 1.4 },
+      ...B.shapes.map((sh) => { shift(sh, bx, 0); return sh; }),
+    ];
+    return { w: bx + B.w + 10, h: Math.max(A.h, B.h) + 16, shapes, alt: `${a} ${icon.plural} and ${b} more ${icon.plural}` };
+  };
+  const minus = (a: number, b: number, icon: Icon): Visual => {
+    const size = a > 12 ? 20 : 26;
+    const G = iconGroup(icon, a, size, 10, 4, 4, b);
+    return { w: G.w + 8, h: G.h + 8, shapes: G.shapes, alt: `${a} ${icon.plural}, ${b} crossed out` };
+  };
+  if (/add_within|doubles|addsub|three_addends|add_2d_1d/.test(topic) || topic === "add_within_10" || topic === "add_within_20") {
+    if ((m = q.match(/^(\d+) \+ (\d+) = \?$/)) && +m[1] >= 1 && +m[2] >= 1 && +m[1] <= 10 && +m[2] <= 10) return plus(+m[1], +m[2], pickIcon(q));
+  }
+  if (/sub_within|addsub/.test(topic)) {
+    if ((m = q.match(/^(\d+) - (\d+) = \?$/)) && +m[1] <= 20 && +m[2] >= 1) return minus(+m[1], +m[2], pickIcon(q));
+  }
+  if (/wordproblems|word/.test(topic)) {
+    if ((m = q.match(/has (\d+) ([a-z]+(?: [a-z]+)?) and (?:gives away|eats|loses|uses) (\d+)/)) && iconFor(m[2]) && +m[1] <= 20) return minus(+m[1], +m[3], iconFor(m[2])!);
+    if ((m = q.match(/has (\d+) ([a-z]+(?: [a-z]+)?)\. .*?(\d+) more/)) && iconFor(m[2]) && +m[1] <= 10 && +m[3] <= 10) return plus(+m[1], +m[3], iconFor(m[2])!);
+  }
+  return null;
+}
+
+function hashStr(s: string) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+
+/** Words with other everyday meanings ("the key idea", "a big fan") — never added as decoration. */
+const AMBIGUOUS = new Set(["key", "fan", "ring", "heart", "card", "rock", "bead", "pan", "box"]);
+
+/** A small picture for an early-grade question that names one thing we can draw ("What is a baby cat called?"). */
+export function questionIcon(subject: string, grade: number, q: string): Visual | null {
+  if (grade > 3 || subject === "math") return null;
+  const found = new Set<string>();
+  for (const w of q.toLowerCase().match(/[a-z]+/g) || []) {
+    const ic = iconFor(w);
+    if (ic && !AMBIGUOUS.has(ic.word)) found.add(ic.word);
+  }
+  if (found.size !== 1) return null;
+  const ic = ICONS[[...found][0]];
+  return { w: 48, h: 48, shapes: placeIcon(ic, 0, 0, 48), alt: ic.word };
 }
 
 // ---------------------------------------------------------------- decorations

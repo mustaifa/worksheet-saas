@@ -18,7 +18,7 @@ const PS = "Physical Science", LS = "Life Science", ESS = "Earth & Space Science
 export const SCIENCE_BOOK: SubjectBook = {
   1: [
     U("Living Things", LS,
-      L("Living & Non-living", c("living_nonliving", "K-LS1-1")),
+      L("Living & Non-living", c("sort_living", "K-LS1-1"), c("living_nonliving", "K-LS1-1")),
       L("Body Parts for Survival", c("structures_survival", "1-LS1-1")),
       L("Parents & Offspring", c("parents_offspring", "1-LS3-1")),
       L("Senses & Habitats", c("five_senses", "1-LS1-1"), c("animal_habitats", "K-ESS3-1"))),

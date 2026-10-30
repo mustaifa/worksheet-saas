@@ -1,5 +1,12 @@
 export type Difficulty = "easy" | "medium" | "hard";
-export type Question = { q: string; a: string; passage?: string; passageTitle?: string };
+export type Question = {
+  q: string;
+  a: string;
+  passage?: string;
+  passageTitle?: string;
+  /** Picture spec for worksheets (see lib/worksheetVisuals picVisual), e.g. "count:apple:7". */
+  pic?: string;
+};
 export type RNG = () => number;
 
 export type Topic = {
