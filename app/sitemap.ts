@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/students`, priority: 0.8 },
     { url: `${base}/about`, priority: 0.6 },
     { url: `${base}/safety`, priority: 0.6 },
+    { url: `${base}/ai`, priority: 0.6 },
     { url: `${base}/contact`, priority: 0.4 },
     { url: `${base}/blog`, priority: 0.7 },
     { url: `${base}/terms`, priority: 0.2 },

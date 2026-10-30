@@ -45,6 +45,7 @@ export default function Footer() {
           <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
             <li><Link href="/about" className="hover:text-slate-900 dark:hover:text-white">About</Link></li>
             <li><Link href="/contact" className="hover:text-slate-900 dark:hover:text-white">Contact</Link></li>
+            <li><Link href="/ai" className="hover:text-slate-900 dark:hover:text-white">How we use AI</Link></li>
             <li><Link href="/safety" className="hover:text-slate-900 dark:hover:text-white">Safety & privacy</Link></li>
           </ul>
         </div>
