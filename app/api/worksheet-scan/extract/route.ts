@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasAccess } from "@/lib/access";
+import { AI_FEATURES_ENABLED } from "@/lib/features";
 import { checkAndIncrementScanUsage } from "@/lib/worksheetScanUsage";
 import { extractWorksheetFromImage } from "@/lib/worksheetScanAI";
 
 const MAX_IMAGE_SIZE = 8 * 1024 * 1024; // ~8MB of base64
 
 export async function POST(req: Request) {
+  if (!AI_FEATURES_ENABLED) return NextResponse.json({ error: "This feature is temporarily unavailable." }, { status: 503 });
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "You must be signed in." }, { status: 401 });
 

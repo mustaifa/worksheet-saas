@@ -6,6 +6,9 @@ import { useSession, signOut } from "next-auth/react";
 import ThemeToggle from "./ThemeToggle";
 import GradeThemeBar from "./GradeThemeBar";
 import { isFreeMode } from "@/lib/access";
+import { AI_FEATURES_ENABLED, AI_PATHS } from "@/lib/features";
+
+const showLink = (l: { href: string }) => AI_FEATURES_ENABLED || !AI_PATHS.includes(l.href);
 
 type NavItem = { href: string; label: string; desc?: string };
 
@@ -19,19 +22,19 @@ const PUBLIC_LINKS: NavItem[] = [
 ];
 
 // Signed-in: the everyday tool first, classroom extras grouped under "Tools".
-const APP_LINKS: NavItem[] = [
+const APP_LINKS: NavItem[] = ([
   { href: "/dashboard", label: "Create worksheet" },
   { href: "/dashboard/family", label: "Family" },
   { href: "/dashboard/tutor", label: "Homework help" },
   { href: "/worksheets", label: "Library" },
   { href: "/blog", label: "Blog" },
-];
-const TOOL_LINKS: NavItem[] = [
+] as NavItem[]).filter(showLink);
+const TOOL_LINKS: NavItem[] = ([
   { href: "/dashboard/live", label: "Live Quiz", desc: "Run a quiz students join from their own devices" },
   { href: "/dashboard/whiteboard", label: "Whiteboard", desc: "Draw live for a class, students join with a code" },
   { href: "/dashboard/custom-worksheet", label: "Custom worksheet", desc: "Type or draw your own worksheet, export to PDF" },
   { href: "/dashboard/worksheet-scan", label: "Scan a worksheet", desc: "Turn a photo of a worksheet into a clean PDF" },
-];
+] as NavItem[]).filter(showLink);
 
 function isActive(pathname: string, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
