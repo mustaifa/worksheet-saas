@@ -123,3 +123,21 @@ export async function sendCustomWorksheetEmail(to: string, teacherName: string |
   `);
   return sendEmail(to, `${teacherName || "Your teacher"} shared a worksheet: ${title}`, html);
 }
+
+export async function sendPasswordResetEmail(to: string, name: string | null, token: string) {
+  const link = `${APP_URL}/reset-password?token=${encodeURIComponent(token)}`;
+  const html = wrapper(`
+    <h2 style="color: #0f172a;">Reset your password</h2>
+    <p style="color: #334155; line-height: 1.6;">
+      Hi${name ? ` ${escapeHtml(name)}` : ""}, someone (hopefully you) asked to reset the password for your
+      Practice Sheet account. Click the button below to choose a new one. The link works once and expires in 1 hour.
+    </p>
+    <a href="${link}" style="display:inline-block; background:#0f172a; color:white; padding:12px 20px; border-radius:8px; text-decoration:none; margin-top:12px;">
+      Choose a new password
+    </a>
+    <p style="color: #64748b; font-size: 13px; line-height: 1.6; margin-top: 20px;">
+      If you didn't ask for this, you can ignore this email — your password won't change.
+    </p>
+  `);
+  return sendEmail(to, "Reset your Practice Sheet password", html);
+}
