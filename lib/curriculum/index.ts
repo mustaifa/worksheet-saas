@@ -1,5 +1,7 @@
 import type { SubjectBook, Unit, Lesson, Skill, SkillLevel } from "./types";
 import { MATH_BOOK } from "./math";
+import { ENGLISH_BOOK } from "./english";
+import { SCIENCE_BOOK } from "./science";
 
 export type { SubjectBook, Unit, Lesson, Skill, SkillLevel };
 export { LEVEL_LABEL, LEVEL_BADGE } from "./types";
@@ -9,6 +11,15 @@ type SubjectKey = "math" | "english" | "science";
 /** Subjects that have a book-style outline. Others fall back to the flat topic list. */
 const BOOKS: Partial<Record<SubjectKey, SubjectBook>> = {
   math: MATH_BOOK,
+  english: ENGLISH_BOOK,
+  science: SCIENCE_BOOK,
+};
+
+/** Which standards each book follows: full name for prose, short label for code badges. */
+export const STANDARDS: Record<SubjectKey, { name: string; short: string }> = {
+  math: { name: "Common Core State Standards for Mathematics", short: "CCSS" },
+  english: { name: "Common Core State Standards for English Language Arts", short: "CCSS" },
+  science: { name: "Next Generation Science Standards (NGSS)", short: "NGSS" },
 };
 
 export function hasBook(subject: SubjectKey): boolean {

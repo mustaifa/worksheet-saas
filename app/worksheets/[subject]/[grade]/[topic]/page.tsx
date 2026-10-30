@@ -14,7 +14,7 @@ import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
 import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet } from "@/lib/subjects";
-import { locateSkill, LEVEL_LABEL, LEVEL_BADGE } from "@/lib/curriculum";
+import { locateSkill, LEVEL_LABEL, LEVEL_BADGE, STANDARDS } from "@/lib/curriculum";
 
 // Number of questions on the free public worksheet (reading comprehension
 // ignores this and uses its passage's own question set).
@@ -179,7 +179,7 @@ export default function TopicPage({ params }: { params: Params }) {
             <Link href={`/worksheets/${subject.id}/${grade}#unit-${loc.unitNumber}`} className="hover:underline">Unit {loc.unitNumber}: {loc.unit.title}</Link>
             <span aria-hidden>›</span>
             <span>{loc.lesson.title}</span>
-            {loc.skill.std && <span className="font-mono text-xs rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5" title="Common Core State Standard">CCSS {loc.skill.std}</span>}
+            {loc.skill.std && <span className="font-mono text-xs rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5" title={STANDARDS[subjectId].name}>{STANDARDS[subjectId].short} {loc.skill.std}</span>}
             {level !== "core" && <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${LEVEL_BADGE[level]}`}>{LEVEL_LABEL[level]}</span>}
           </p>
         )}
