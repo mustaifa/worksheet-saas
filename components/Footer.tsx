@@ -13,7 +13,7 @@ export default function Footer() {
             <img src="/logo-mark.png" alt="" width={22} height={22} className="rounded-md" />
             Practice Sheet
           </p>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">Worksheets for Math, English & Science, grades 1–12. A product of Aethel Systems.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">Worksheets for Math, English, Science and Computer Science, grades 1–12. A product of Aethel Systems.</p>
           <a href="mailto:aethelsystems@gmail.com" className="inline-block mt-3 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white underline underline-offset-2">aethelsystems@gmail.com</a>
         </div>
         <div>

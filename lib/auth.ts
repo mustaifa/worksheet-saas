@@ -19,6 +19,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/login",
+    error: "/login", // failed Google sign-ins land on the login page with a friendly message
   },
   providers: [
     CredentialsProvider({
