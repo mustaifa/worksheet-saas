@@ -11,7 +11,7 @@ import { absoluteUrl, OG_IMAGE } from "@/lib/site";
 import { isFreeMode } from "@/lib/access";
 import { topicDescription, gradeEquivalents, gradeOverview } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, Topic, allGrades, topicsForGrade, groupTopics, generateWorksheet } from "@/lib/subjects";
-import { bookFor, LEVEL_LABEL, LEVEL_BADGE, type Skill } from "@/lib/curriculum";
+import { bookFor, LEVEL_LABEL, LEVEL_BADGE, STANDARDS, type Skill } from "@/lib/curriculum";
 
 export const dynamicParams = false;
 
@@ -144,7 +144,7 @@ export default function GradePage({ params }: { params: { subject: string; grade
                   <li key={u.title}><a href={`#unit-${i + 1}`} className="text-slate-700 dark:text-slate-200 hover:underline">Unit {i + 1}: {u.title}</a></li>
                 ))}
               </ol>
-              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Aligned to the Common Core State Standards. <span className={`rounded px-1.5 py-0.5 font-semibold ${LEVEL_BADGE.advanced}`}>Advanced</span> skills preview the next grade; <span className={`rounded px-1.5 py-0.5 font-semibold ${LEVEL_BADGE.challenge}`}>Challenge</span> skills are puzzles for curious students.</p>
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Aligned to the {STANDARDS[sid].name}. <span className={`rounded px-1.5 py-0.5 font-semibold ${LEVEL_BADGE.advanced}`}>Advanced</span> skills preview the next grade; <span className={`rounded px-1.5 py-0.5 font-semibold ${LEVEL_BADGE.challenge}`}>Challenge</span> skills are puzzles for curious students.</p>
             </nav>
             <div className="mt-10 space-y-12">
               {book.map((unit, ui) => (

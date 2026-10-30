@@ -90,6 +90,18 @@ export const FREE_TEXT_TOPICS = new Set([
   "reading_comprehension",
   "idioms",
   "vocabulary",
+  // Curriculum-book skills whose answers are rewritten sentences or open
+  // explanations; capitalization and punctuation can't be typed-and-marked
+  // at all because answer matching ignores case and punctuation.
+  "capitalization",
+  "commas_quotes",
+  "punctuation_adv",
+  "main_idea",
+  "themes",
+  "context_clues",
+  "misplaced_modifiers",
+  "parallelism",
+  "fragments_runons",
 ]);
 
 export function isPassingScore(score: number, total: number): boolean {

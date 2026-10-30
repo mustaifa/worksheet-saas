@@ -9,16 +9,18 @@
  */
 import { SUBJECTS, allTopics, generateWorksheet, topicsForGrade, type SubjectId, type Difficulty } from "../lib/subjects";
 import { MATH_TOPICS } from "../lib/subjects/math";
+import { ENGLISH_TOPICS } from "../lib/subjects/english";
+import { SCIENCE_TOPICS } from "../lib/subjects/science";
 import { bookFor, bookSkills, hasBook } from "../lib/curriculum";
 
 const SEEDS = 40;
 const DIFFS: Difficulty[] = ["easy", "medium", "hard"];
-const BAD = /NaN|Infinity|\[object|null|-0(?![.\d])|\+ -|- -|\(\)|\b1[a-z]\b|\b0[a-z]\b|[a-z]\^1\b|[a-z)] [+-] 0(?![.\d])/;
+const BAD = /\bNaN\b|Infinity|\[object|null|-0(?![.\d])|\+ -|- -|\(\)|\b1[a-z]\b|\b0[a-z]\b|[a-z]\^1\b|[a-z)] [+-] 0(?![.\d])/;
 const errors: string[] = [];
 const warnings: string[] = [];
 const samples = process.argv.includes("--samples");
 
-const LEGACY: Partial<Record<SubjectId, { id: string; grades: number[] }[]>> = { math: MATH_TOPICS };
+const LEGACY: Partial<Record<SubjectId, { id: string; grades: number[] }[]>> = { math: MATH_TOPICS, english: ENGLISH_TOPICS, science: SCIENCE_TOPICS };
 
 for (const { id: subject } of SUBJECTS) {
   if (!hasBook(subject)) continue;
@@ -63,6 +65,8 @@ for (const { id: subject } of SUBJECTS) {
           }
           const ms = Date.now() - t0;
           if (ms > 250) warnings.push(`${subject} ${grade} ${s.topic} ${difficulty}: slow (${ms} ms)`);
+          // reading comprehension is one passage with its own fixed question set
+          if (s.topic === "reading_comprehension") { if (!qs.length || !qs[0].passage) errors.push(`${subject} ${grade} ${s.topic}: no passage`); break; }
           if (qs.length !== 10) errors.push(`${subject} ${grade} ${s.topic} ${difficulty}: ${qs.length}/10 questions`);
           for (const { q, a } of qs) {
             if (!q?.trim() || !a?.trim()) errors.push(`${subject} ${grade} ${s.topic} ${difficulty}: empty q/a → ${q} | ${a}`);
