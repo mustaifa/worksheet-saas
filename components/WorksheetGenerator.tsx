@@ -11,6 +11,8 @@ import { downloadWorksheetPdf } from "@/lib/brandedPdf";
 import { subjectStyle } from "@/components/subjectStyles";
 import { DocIcon } from "@/components/Icons";
 import { brandedFilename } from "@/lib/brand";
+import { variantPath, formatVariant } from "@/lib/worksheetVariant";
+import { pinDescription, sharePaths } from "@/lib/shareImage";
 
 import { useGradeTheme } from "@/components/GradeThemeProvider";
 
@@ -44,7 +46,7 @@ export default function WorksheetGenerator() {
   const seedRef = useRef<number>(newSeed());
   const printRef = useRef<HTMLDivElement>(null);
   // What the current questions were generated for (the pickers may have moved on since).
-  const [gen, setGen] = useState<{ subject: SubjectId; grade: number; topic: string } | null>(null);
+  const [gen, setGen] = useState<{ subject: SubjectId; grade: number; topic: string; difficulty?: Difficulty; count?: number } | null>(null);
 
   const generatedGradeRef = useRef(grade);
 
@@ -76,7 +78,7 @@ export default function WorksheetGenerator() {
     setCount(c);
     seedRef.current = seed;
     generatedGradeRef.current = g;
-    setGen({ subject: s, grade: g, topic: t });
+    setGen({ subject: s, grade: g, topic: t, difficulty: d, count: c });
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -115,7 +117,7 @@ export default function WorksheetGenerator() {
     generatedGradeRef.current = g;
     seedRef.current = newSeed();
     setShowAnswers(false);
-    setGen({ subject: s, grade: g, topic: t });
+    setGen({ subject: s, grade: g, topic: t, difficulty: d, count: c });
     setQuestions(generateWorksheet({ subject: s, grade: g, topic: t, difficulty: d, count: c, seed: seedRef.current }));
     // On phones the worksheet renders below the long options form — bring it into view.
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -175,6 +177,20 @@ export default function WorksheetGenerator() {
     url.searchParams.set("wsg_count", String(count));
     url.searchParams.set("wsg_seed", String(seedRef.current));
     return url.toString();
+  }
+
+  // Opens Pinterest with a picture of this exact worksheet. The pin links to a
+  // public page (/ws/...) showing the same questions, since the dashboard needs a login.
+  function handlePin() {
+    const g = gen ?? { subject, grade, topic };
+    const v = { difficulty: g.difficulty ?? difficulty, count: g.count ?? count, seed: seedRef.current };
+    const path = variantPath(g.subject, g.grade, g.topic, v);
+    const origin = window.location.origin;
+    const media = origin + sharePaths(g.subject, g.grade, g.topic, formatVariant(v)).pin;
+    const name = topicLabel(g.subject, g.topic).replace(/^The /, "");
+    const label = SUBJECTS.find((x) => x.id === g.subject)?.label || g.subject;
+    const href = `https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(origin + path)}&media=${encodeURIComponent(media)}&description=${encodeURIComponent(pinDescription(g.grade, label, name))}`;
+    window.open(href, "_blank", "noopener,noreferrer,width=760,height=640");
   }
 
   async function handleShare() {
@@ -363,6 +379,7 @@ export default function WorksheetGenerator() {
               <button onClick={handlePrint} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm px-4 py-2 rounded-lg">Print (A4)</button>
               <button onClick={handleDownload} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">Download PDF</button>
               <button onClick={handleShare} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">Share</button>
+              <button onClick={handlePin} className="bg-[#E60023] hover:bg-[#ad081b] text-white text-sm px-4 py-2 rounded-lg">Pin it</button>
               <button onClick={() => generate()} className="border border-slate-900 dark:border-white text-sm text-slate-900 dark:text-white px-4 py-2 rounded-lg">New set</button>
             </div>
             {toastMsg && <p className="text-xs text-red-600 mt-2">{toastMsg}</p>}
