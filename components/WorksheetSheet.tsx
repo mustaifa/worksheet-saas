@@ -8,6 +8,10 @@ const TINT: Record<string, { band: string; badge: string; soft: string; ring: st
   math: { band: "bg-sky-50 border-sky-200", badge: "bg-sky-600", soft: "bg-sky-50", ring: "border-sky-300" },
   english: { band: "bg-rose-50 border-rose-200", badge: "bg-rose-600", soft: "bg-rose-50", ring: "border-rose-300" },
   science: { band: "bg-emerald-50 border-emerald-200", badge: "bg-emerald-600", soft: "bg-emerald-50", ring: "border-emerald-300" },
+  physics: { band: "bg-indigo-50 border-indigo-200", badge: "bg-indigo-600", soft: "bg-indigo-50", ring: "border-indigo-300" },
+  chemistry: { band: "bg-orange-50 border-orange-200", badge: "bg-orange-600", soft: "bg-orange-50", ring: "border-orange-300" },
+  biology: { band: "bg-teal-50 border-teal-200", badge: "bg-teal-600", soft: "bg-teal-50", ring: "border-teal-300" },
+  computer: { band: "bg-violet-50 border-violet-200", badge: "bg-violet-600", soft: "bg-violet-50", ring: "border-violet-300" },
 };
 
 function ShapeEl({ s }: { s: Shape }) {

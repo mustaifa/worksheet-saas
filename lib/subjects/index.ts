@@ -11,16 +11,25 @@ import { SCIENCE_SKILL_TOPICS, SCIENCE_SKILL_GENERATORS } from "./scienceSkills"
 import { pickPassageForGrade } from "./comprehension";
 import { THINKING_TOPICS, THINKING_GENERATORS } from "./thinkingSkills";
 import { CREATIVE_MATH_TOPICS, CREATIVE_ENGLISH_TOPICS, CREATIVE_SCIENCE_TOPICS, CREATIVE_GENERATORS } from "./creativeSkills";
+import { CS_TOPICS, CS_GENERATORS } from "./csSkills";
 import { PICTURE_MATH_TOPICS, PICTURE_ENGLISH_TOPICS, PICTURE_SCIENCE_TOPICS, PICTURE_GENERATORS } from "./pictureSkills";
 
 export type { Difficulty, Question, Topic };
 
-export type SubjectId = "math" | "english" | "science";
+export type SubjectId = "math" | "english" | "science" | "physics" | "chemistry" | "biology" | "computer";
+
+/** High-school science courses that reuse the Science generators, pictures and charts. */
+export const SCIENCE_COURSES: SubjectId[] = ["physics", "chemistry", "biology"];
+export const isScienceFamily = (s: string) => s === "science" || s === "physics" || s === "chemistry" || s === "biology";
 
 export const SUBJECTS: { id: SubjectId; label: string }[] = [
   { id: "math", label: "Math" },
   { id: "english", label: "English" },
   { id: "science", label: "Science" },
+  { id: "physics", label: "Physics" },
+  { id: "chemistry", label: "Chemistry" },
+  { id: "biology", label: "Biology" },
+  { id: "computer", label: "Computer Science" },
 ];
 
 /**
@@ -38,20 +47,46 @@ function withBookGrades(subject: SubjectId, topics: Topic[]): Topic[] {
   });
 }
 
+/** A course's topics come only from its own book (no inherited grade lists). */
+function courseTopics(subject: SubjectId, pool: Topic[]): Topic[] {
+  const fromBook = bookGradesByTopic(subject);
+  return pool.filter((t) => fromBook.has(t.id)).map((t) => ({ ...t, grades: [...fromBook.get(t.id)!].sort((a, b) => a - b) }));
+}
+const SCIENCE_POOL = [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS, ...CREATIVE_SCIENCE_TOPICS];
+
 const TOPICS_BY_SUBJECT: Record<SubjectId, Topic[]> = {
   math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS, ...THINKING_TOPICS, ...CREATIVE_MATH_TOPICS]),
   english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS, ...PICTURE_ENGLISH_TOPICS, ...CREATIVE_ENGLISH_TOPICS]),
-  science: withBookGrades("science", [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS, ...CREATIVE_SCIENCE_TOPICS]),
+  science: withBookGrades("science", SCIENCE_POOL),
+  physics: courseTopics("physics", SCIENCE_POOL),
+  chemistry: courseTopics("chemistry", SCIENCE_POOL),
+  biology: courseTopics("biology", SCIENCE_POOL),
+  computer: courseTopics("computer", CS_TOPICS),
 };
 
 const GENERATORS_BY_SUBJECT: Record<SubjectId, Record<string, any>> = {
   math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS, ...THINKING_GENERATORS, ...CREATIVE_GENERATORS },
   english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS },
   science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS },
+  physics: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS },
+  chemistry: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS },
+  biology: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS },
+  computer: CS_GENERATORS,
 };
 
 export function allGrades(): number[] {
   return Array.from({ length: 12 }, (_, i) => i + 1);
+}
+
+/** Grades where a subject has at least one topic (Physics/Chemistry/Biology 9–12, Computer Science 6–12, others 1–12). */
+export function gradesFor(subject: SubjectId): number[] {
+  return allGrades().filter((g) => TOPICS_BY_SUBJECT[subject].some((t) => t.grades.includes(g)));
+}
+
+/** "Grades 1–12" style range label for a subject. */
+export function gradeRangeLabel(subject: SubjectId): string {
+  const gs = gradesFor(subject);
+  return gs.length ? `Grades ${gs[0]}–${gs[gs.length - 1]}` : "";
 }
 
 /**
@@ -157,12 +192,21 @@ export function parseCommand(
   let subject: SubjectId | null = null;
   if (/\b(math|maths|arithmetic|algebra|geometry)\b/.test(t)) subject = "math";
   else if (/\b(english|grammar|vocabulary|spelling|reading|writing)\b/.test(t)) subject = "english";
+  else if (/\b(computer science|computing|coding|programming)\b/.test(t)) subject = "computer";
   else if (/\b(science|biology|chemistry|physics)\b/.test(t)) subject = "science";
 
   let grade: number | null = null;
   // "5th grade" wins over "grade N" so "5th grade 12 questions" means grade 5.
   const gm = t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s*grade\b/) || t.match(/grade\s*(\d{1,2})/);
   if (gm) grade = Math.max(1, Math.min(12, parseInt(gm[1], 10)));
+  // "grade 10 chemistry" → the Chemistry course (high school only); younger grades stay in Science.
+  const course = t.match(/\b(physics|chemistry|biology)\b/);
+  let topicText = t;
+  if (course && !/\bscience\b/.test(t) && (grade ?? current.grade) >= 9) {
+    subject = course[1] as SubjectId;
+    topicText = t.replace(course[0], " "); // the course name alone shouldn't pick a topic
+  }
+  if (subject === "computer") topicText = topicText.replace(/\b(computer science|computing)\b/, " ");
   // character position of the grade number, so it isn't also read as a count
   const gradeNumAt = gm ? (gm.index ?? 0) + gm[0].indexOf(gm[1]) : -1;
 
@@ -194,7 +238,7 @@ export function parseCommand(
     for (const top of TOPICS_BY_SUBJECT[subj]) {
       const names = [...top.aliases, top.label.toLowerCase()];
       for (const alias of names) {
-        if (alias.length < 3 || !t.includes(alias)) continue;
+        if (alias.length < 3 || !topicText.includes(alias)) continue;
         // small bonus for the current subject and for topics offered at the requested grade
         const score = alias.length * 10 + (grade && top.grades.includes(grade) ? 5 : 0) + (subj === resolvedSubject ? 1 : 0);
         if (score > best) { best = score; topicId = top.id; bestSubject = subj; }
@@ -202,6 +246,11 @@ export function parseCommand(
     }
   }
   if (topicId) resolvedSubject = bestSubject;
+
+  // Courses only cover some grades (Computer Science 6–12, Physics/Chemistry/Biology 9–12).
+  const offered = gradesFor(resolvedSubject);
+  const want = grade ?? current.grade;
+  if (!topicId && offered.length && !offered.includes(want)) grade = offered.reduce((b, x) => (Math.abs(x - want) < Math.abs(b - want) ? x : b), offered[0]);
 
   if (topicId && grade) {
     const top = TOPICS_BY_SUBJECT[resolvedSubject].find((x) => x.id === topicId)!;

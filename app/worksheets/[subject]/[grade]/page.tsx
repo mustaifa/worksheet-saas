@@ -10,7 +10,8 @@ import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { absoluteUrl, OG_IMAGE } from "@/lib/site";
 import { isFreeMode } from "@/lib/access";
 import { topicDescription, gradeEquivalents, gradeOverview } from "@/lib/topicContent";
-import { SUBJECTS, SubjectId, Topic, allGrades, topicsForGrade, groupTopics, generateWorksheet } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, Topic, allGrades, topicsForGrade, groupTopics, generateWorksheet, SCIENCE_COURSES } from "@/lib/subjects";
+import { subjectStyle } from "@/components/subjectStyles";
 import { bookFor, LEVEL_LABEL, LEVEL_BADGE, STANDARDS, type Skill } from "@/lib/curriculum";
 import { guidesForWorksheet, SUBJECT_HUBS } from "@/lib/blogNav";
 
@@ -137,6 +138,22 @@ export default function GradePage({ params }: { params: { subject: string; grade
           {gradeOverview(sid, grade)}
         </p>
         <div className="mt-5"><TrustStrip compact /></div>
+        {sid === "science" && grade >= 9 && (
+          <p className="mt-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+            Teaching one science at a time? Grade {grade} also has its own course pages:{" "}
+            {SCIENCE_COURSES.map((c, i) => (
+              <span key={c}>{i > 0 && " · "}<Link href={`/worksheets/${c}/${grade}`} className={`font-semibold hover:underline ${subjectStyle(c).text}`}>Grade {grade} {SUBJECTS.find((x) => x.id === c)?.label}</Link></span>
+            ))}
+          </p>
+        )}
+        {SCIENCE_COURSES.includes(sid) && (
+          <p className="mt-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-sm text-slate-700 dark:text-slate-200">
+            Part of high-school science. See the other Grade {grade} courses —{" "}
+            {SCIENCE_COURSES.filter((c) => c !== sid).map((c, i) => (
+              <span key={c}>{i > 0 && " · "}<Link href={`/worksheets/${c}/${grade}`} className={`font-semibold hover:underline ${subjectStyle(c).text}`}>{SUBJECTS.find((x) => x.id === c)?.label}</Link></span>
+            ))}{" "}— or the combined <Link href={`/worksheets/science/${grade}`} className="font-semibold hover:underline">Grade {grade} Science</Link> page.
+          </p>
+        )}
 
         {book ? (
           <>

@@ -33,6 +33,10 @@ const SUBJECT_BLURBS: Record<SubjectId, string> = {
   math: "From counting and place value to fractions, algebra, geometry and trigonometry.",
   english: "Phonics, spelling, grammar, parts of speech, vocabulary, literary devices and reading comprehension.",
   science: "Living things, the human body, the solar system, matter, forces, chemistry and genetics.",
+  physics: "High-school physics: motion, forces, momentum, energy, waves, circuits and nuclear decay.",
+  chemistry: "High-school chemistry: atoms, bonding, reactions, the mole, solutions, acids, bases and gases.",
+  biology: "High-school biology: cells, DNA and genetics, evolution, ecology and body systems.",
+  computer: "Binary, logic gates, algorithms, Python code tracing, networks, cybersecurity and Big-O.",
 };
 
 export default function Home() {
@@ -179,7 +183,7 @@ export default function Home() {
 
       <section className="max-w-6xl mx-auto px-6 py-12">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Worksheets by subject</h2>
-        <div className="mt-6 grid sm:grid-cols-3 gap-6">
+        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {SUBJECTS.map((s) => (
             <div key={s.id} className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 pt-7">
               <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-1.5 ${subjectStyle(s.id).stripe}`} />

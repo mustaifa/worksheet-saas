@@ -282,7 +282,7 @@ export function layoutWorksheet(opts: {
   // A. Label the diagram (science topics with a matching diagram).
   const labelQs: LaidOutQuestion[] = [];
   let diagramSec: Section | null = null;
-  if (subject === "science" && !passage) {
+  if ((subject === "science" || subject === "physics" || subject === "chemistry" || subject === "biology") && !passage) {
     const d = scienceDiagram(topic, grade);
     if (d) {
       for (const l of d.labels) labelQs.push({ n: 0, text: "", answer: l.answer, mode: "lines", lines: 1 });
@@ -404,9 +404,10 @@ export function layoutWorksheet(opts: {
   if (sections.length === 1 && sections[0].heading) sections[0].heading = undefined; // already in the directions
 
   let goal: string | undefined;
-  if (subject === "math" || subject === "english" || subject === "science") {
-    const loc = locateSkill(subject, grade, topic);
-    if (loc) goal = `${loc.lesson.title}${loc.skill.std ? ` · ${STANDARDS[subject].short} ${loc.skill.std}` : ""}`;
+  if (subject in STANDARDS) {
+    const key = subject as keyof typeof STANDARDS;
+    const loc = locateSkill(key, grade, topic);
+    if (loc) goal = `${loc.lesson.title}${loc.skill.std ? ` · ${STANDARDS[key].short} ${loc.skill.std}` : ""}`;
   }
 
   const compact = rest.length > 0 && rest.every((q) => q.text.length <= (q.visual ? 72 : 44) && (q.mode === "box" || q.mode === "blank" || q.mode === "choice") && (!q.visual || q.visual.w <= 260));

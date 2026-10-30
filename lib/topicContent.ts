@@ -6,7 +6,7 @@ import { SubjectId, allTopics } from "@/lib/subjects";
  * instead of only a templated title — that's what makes these pages useful
  * (and indexable) rather than near-duplicates of each other.
  */
-const TOPIC_DESCRIPTIONS: Record<SubjectId, Record<string, string>> = {
+const TOPIC_DESCRIPTIONS: Partial<Record<SubjectId, Record<string, string>>> = {
   math: {
     addsub: "Practice adding and subtracting whole numbers, building fact fluency and the habit of checking an answer by working backwards.",
     counting: "Counting forwards and backwards, skip counting, and finishing number sequences — the foundation for place value and early addition.",
@@ -141,7 +141,9 @@ const TOPIC_DESCRIPTIONS: Record<SubjectId, Record<string, string>> = {
 };
 
 export function topicDescription(subject: SubjectId, topicId: string): string | null {
-  return TOPIC_DESCRIPTIONS[subject]?.[topicId] ?? allTopics(subject).find((t) => t.id === topicId)?.desc ?? null;
+  // Physics, Chemistry and Biology reuse the Science descriptions for shared topics.
+  const own = subject === "physics" || subject === "chemistry" || subject === "biology" ? "science" : subject;
+  return TOPIC_DESCRIPTIONS[own]?.[topicId] ?? allTopics(subject).find((t) => t.id === topicId)?.desc ?? null;
 }
 
 export function gradeBand(grade: number): string {
@@ -188,7 +190,7 @@ export function gradeEquivalents(grade: number) {
 }
 
 /** What a typical grade band practises in each subject (shown on grade pages). */
-export function gradeOverview(subject: "math" | "english" | "science", grade: number): string {
+export function gradeOverview(subject: SubjectId, grade: number): string {
   const band = grade <= 2 ? 0 : grade <= 5 ? 1 : grade <= 8 ? 2 : 3;
   const text: Record<string, string[]> = {
     math: [
@@ -210,5 +212,36 @@ export function gradeOverview(subject: "math" | "english" | "science", grade: nu
       "High school science goes deeper into chemistry, physics formulas, genetics and Punnett squares, photosynthesis and respiration, and cell division.",
     ],
   };
+  const course: Record<string, string[]> = {
+    physics: [
+      "Grade 9 Physics starts with motion and forces — speed, acceleration and F = ma — then energy, work, waves and simple circuits, with every calculation worked from a formula.",
+      "Grade 10 Physics builds fluency with kinematics, momentum, mechanical and thermal energy, waves and circuits, and choosing the right equation for a problem.",
+      "Grade 11 Physics covers mechanics in depth — Newton's laws, momentum and universal gravitation — plus energy, specific heat, waves, circuits and radioactive decay.",
+      "Grade 12 Physics pulls it together: collisions, gravitation and orbits, thermodynamics, waves and light, circuits, and modern physics from half-life to the Big Bang.",
+    ],
+    chemistry: [
+      "Grade 9 Chemistry introduces matter and its changes, atoms and the periodic table, compounds and bonds, and balancing simple chemical equations.",
+      "Grade 10 Chemistry covers atomic structure and electron shells, periodic trends, bonding, reaction types, the mole, molarity, acids and bases, and the gas laws.",
+      "Grade 11 Chemistry focuses on stoichiometry — balanced equations, moles and concentration — alongside periodicity, acids and bases, gases and nuclear chemistry.",
+      "Grade 12 Chemistry reviews structure and bonding and sharpens quantitative skills: mole calculations, solutions, gas laws, pH and half-life.",
+    ],
+    biology: [
+      "Grade 9 Biology covers cells and biomolecules, DNA and inheritance with Punnett squares, natural selection, classification and ecology.",
+      "Grade 10 Biology goes into cell structure and transport, photosynthesis and respiration, mitosis and meiosis, protein synthesis, genetics and human body systems.",
+      "Grade 11 Biology deepens molecular biology and heredity, evolution and classification, and energy flow and populations in ecosystems.",
+      "Grade 12 Biology reviews cell processes, molecular genetics and evolution, and connects ecology to human impact and sustainability.",
+    ],
+    computer: [
+      "Grade 6 Computer Science introduces binary, bits and bytes, step-by-step algorithms with robots and flowcharts, simple loops, data types and password safety.",
+      "Grade 7 Computer Science adds spreadsheets, repeat loops and decisions, true/false logic and logic gates, how the internet moves data, and cybersecurity.",
+      "Grade 8 Computer Science covers hexadecimal and colour codes, tracing Python code, lists, searching and sorting, logic circuits, networks and protecting data.",
+      "Grade 9 Computer Science builds programming fundamentals: binary arithmetic, hexadecimal, control structures, lists, searching and sorting, Boolean logic and networks.",
+      "Grade 10 Computer Science focuses on tracing programs, lists and functions, algorithm efficiency with Big-O, logic circuits, networks and security.",
+      "Grade 11 Computer Science goes deeper into functions, recursion and data structures, classic algorithms and their efficiency, logic circuits and encryption.",
+      "Grade 12 Computer Science reviews classic algorithms, Big-O and recursion, functions and data structures, data representation, networks and cybersecurity.",
+    ],
+  };
+  if (subject === "computer") return course.computer[Math.max(0, Math.min(6, grade - 6))];
+  if (course[subject]) return course[subject][Math.max(0, Math.min(3, grade - 9))];
   return text[subject][band];
 }

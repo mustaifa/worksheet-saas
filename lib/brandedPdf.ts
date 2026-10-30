@@ -32,6 +32,10 @@ const TINT: Record<string, { band: RGB; border: RGB; badge: RGB }> = {
   math: { band: [240, 249, 255], border: [186, 230, 253], badge: [2, 132, 199] },
   english: { band: [255, 241, 242], border: [254, 205, 211], badge: [225, 29, 72] },
   science: { band: [236, 253, 245], border: [167, 243, 208], badge: [5, 150, 105] },
+  physics: { band: [238, 242, 255], border: [199, 210, 254], badge: [79, 70, 229] },
+  chemistry: { band: [255, 247, 237], border: [254, 215, 170], badge: [234, 88, 12] },
+  biology: { band: [240, 253, 250], border: [153, 246, 228], badge: [13, 148, 136] },
+  computer: { band: [245, 243, 255], border: [221, 214, 254], badge: [124, 58, 237] },
 };
 
 let assets: Promise<{ regular: string; bold: string; logo: string | null }> | null = null;

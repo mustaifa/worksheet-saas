@@ -11,6 +11,7 @@
  * Units are CSS pixels (1 unit ≈ 0.2646 mm in the PDF).
  */
 
+import { csVisual, computerDoodle } from "./csVisuals";
 import { ICONS, iconFor, placeIcon, type Icon } from "./icons";
 
 export type Shape =
@@ -352,9 +353,10 @@ const SHAPE_SIDES: Record<string, number> = { triangle: 3, square: 4, rectangle:
 
 /** Returns a picture for a question, or null when none fits. */
 export function visualFor(subject: string, topic: string, grade: number, q: string, pic?: string): Visual | null {
+  if (subject === "computer") return pic ? csVisual(pic) ?? picVisual(pic) : null;
   if (pic) { const v = picVisual(pic); if (v) return v; }
   if (subject === "math") { const v = earlyMathPicture(topic, grade, q); if (v) return v; return mathVisual(topic, grade, q); }
-  if (subject === "science") return scienceVisual(topic, q);
+  if (subject === "science" || subject === "physics" || subject === "chemistry" || subject === "biology") return scienceVisual(topic, q);
   return null;
 }
 
@@ -1782,6 +1784,8 @@ export function subjectDoodle(subject: string): Visual {
       { k: "line", x1: 54, y1: 26, x2: 38, y2: 29, stroke: INK, sw: 1 }, { k: "line", x1: 54, y1: 33, x2: 38, y2: 36, stroke: INK, sw: 1 },
       { k: "text", x: 46, y: 12, t: "Aa", size: 12, bold: true, anchor: "middle", fill: INK },
     );
+  } else if (subject === "computer") {
+    return computerDoodle();
   } else {
     shapes.push(
       { k: "poly", pts: [[22, 6], [34, 6], [34, 24], [46, 50], [10, 50], [22, 24]], closed: true, fill: FILL_C, stroke: INK, sw: 1.5 },
@@ -1844,7 +1848,7 @@ export function topicDoodle(subject: string, topic: string): Visual {
       return done();
     }
   }
-  if (subject === "science") {
+  if (subject === "science" || subject === "physics" || subject === "chemistry" || subject === "biology") {
     if (/solar|moon|planet|star|universe|kepler|gravit|sky/.test(t)) {
       S.push({ k: "circle", cx: 30, cy: 30, r: 16, fill: "#fdba74", stroke: INK, sw: 1.5 }, { k: "poly", pts: Array.from({ length: 33 }, (_, i) => { const a = (i / 32) * Math.PI * 2; return [30 + Math.cos(a) * 28, 30 + Math.sin(a) * 7] as [number, number]; }), closed: true, stroke: INK, sw: 1.3 });
       S.push({ k: "circle", cx: 56, cy: 10, r: 3, fill: FILL_B, stroke: INK, sw: 1 });

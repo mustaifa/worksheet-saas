@@ -15,7 +15,7 @@ import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
 import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
-import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, challengeQuestion } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, challengeQuestion, isScienceFamily } from "@/lib/subjects";
 import { locateSkill, LEVEL_LABEL, LEVEL_BADGE, STANDARDS } from "@/lib/curriculum";
 import { guidesForWorksheet } from "@/lib/blogNav";
 
@@ -117,6 +117,10 @@ export default function TopicPage({ params }: { params: Params }) {
     .slice(0, 8);
   const guides = guidesForWorksheet(subjectId, grade, topic.id, 3);
   const otherGrades = (allTopics(subjectId).find((t) => t.id === topic.id)?.grades || []).filter((g) => g !== grade);
+  // Science 9–12 topics also live in the Physics, Chemistry and Biology courses (and vice versa).
+  const sameTopicElsewhere = isScienceFamily(subjectId) && grade >= 9
+    ? SUBJECTS.filter((s) => s.id !== subjectId && isScienceFamily(s.id) && topicsForGrade(s.id, grade).some((t) => t.id === topic.id))
+    : [];
 
   const path = `/worksheets/${subject.id}/${grade}/${topic.id}`;
   const faqs = [
@@ -258,9 +262,21 @@ export default function TopicPage({ params }: { params: Params }) {
           </ul>
         </div>
 
-        {(sameGrade.length > 0 || otherGrades.length > 0) && (
+        {(sameGrade.length > 0 || otherGrades.length > 0 || sameTopicElsewhere.length > 0) && (
           <div className="print:hidden mt-12">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Related worksheets</h2>
+            {sameTopicElsewhere.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{name} in other Grade {grade} courses</p>
+                <div className="flex flex-wrap gap-2">
+                  {sameTopicElsewhere.map((s) => (
+                    <Link key={s.id} href={`/worksheets/${s.id}/${grade}/${topic.id}`} className="px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 hover:border-slate-900 dark:hover:border-white">
+                      Grade {grade} {s.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
             {otherGrades.length > 0 && (
               <div className="mt-4">
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">{name} at other grades</p>
