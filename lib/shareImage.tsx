@@ -3,6 +3,7 @@
 // of the free worksheet on that page, so the image matches what people land on.
 import { SUBJECTS, SubjectId, topicsForGrade, generateWorksheet } from "@/lib/subjects";
 import { BRAND } from "@/lib/brand";
+import type { Variant } from "@/lib/worksheetVariant";
 
 export const PIN_SIZE = { width: 1000, height: 1500 };
 export const OG_SIZE = { width: 1200, height: 630 };
@@ -17,9 +18,10 @@ export function stableSeed(str: string): number {
   return Math.abs(hash) || 1;
 }
 
-export function sharePaths(subject: string, grade: string | number, topic: string) {
+export function sharePaths(subject: string, grade: string | number, topic: string, variant?: string) {
   const tail = `${subject}/${grade}/${topic}`;
-  return { pin: `/share/pin/${tail}`, og: `/share/og/${tail}` };
+  const q = variant ? `?v=${variant}` : "";
+  return { pin: `/share/pin/${tail}${q}`, og: `/share/og/${tail}${q}` };
 }
 
 /** "Grade 4 Long Division Worksheet — Free PDF + Answer Key" style text for pins. */
@@ -29,15 +31,16 @@ export function pinDescription(grade: number, subjectLabel: string, name: string
 
 type ShareData = { subjectLabel: string; grade: number; name: string; questions: string[]; total: number };
 
-export function shareData(subject: string, gradeStr: string, topicId: string): ShareData | null {
+/** Data for a share image: the topic page's fixed worksheet, or an exact generated one (variant). */
+export function shareData(subject: string, gradeStr: string, topicId: string, variant?: Variant | null): ShareData | null {
   const s = SUBJECTS.find((x) => x.id === subject);
   const grade = parseInt(gradeStr, 10);
   if (!s || isNaN(grade)) return null;
   const topic = topicsForGrade(s.id as SubjectId, grade).find((t) => t.id === topicId);
   if (!topic) return null;
-  const seed = stableSeed(`${s.id}-${grade}-${topic.id}`);
+  const seed = variant?.seed ?? stableSeed(`${s.id}-${grade}-${topic.id}`);
   const seen = new Set<string>();
-  const qs = generateWorksheet({ subject: s.id as SubjectId, grade, topic: topic.id, difficulty: "medium", count: 12, seed })
+  const qs = generateWorksheet({ subject: s.id as SubjectId, grade, topic: topic.id, difficulty: variant?.difficulty ?? "medium", count: variant?.count ?? 12, seed })
     .map((item) => item.q)
     .filter((q) => (seen.has(q) ? false : (seen.add(q), true)));
   return { subjectLabel: s.label, grade, name: topic.label.replace(/^The /, ""), questions: qs, total: qs.length };
@@ -99,7 +102,7 @@ export function PinImage({ d }: { d: ShareData }) {
           </div>
         ))}
         <div style={{ display: "flex", marginTop: "auto", paddingTop: 20, fontSize: 22, color: "#94a3b8" }}>
-          {d.total > shown.length ? `+ ${d.total - shown.length} more questions and the full answer key` : "Full answer key included"}
+          {d.total > shown.length ? `+ ${d.total - shown.length} more question${d.total - shown.length === 1 ? "" : "s"} and the full answer key` : "Full answer key included"}
         </div>
       </div>
 
