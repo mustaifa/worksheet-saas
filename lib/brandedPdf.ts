@@ -76,8 +76,8 @@ function drawVisual(doc: JsPDF, v: Visual, x: number, y: number, scale = PX): nu
   for (const s of v.shapes) {
     const sw = ("sw" in s && s.sw ? s.sw : 1) * scale;
     doc.setLineWidth(sw);
-    const stroke = "stroke" in s && s.stroke ? hex(s.stroke) : null;
-    const fill = "fill" in s && s.fill ? hex(s.fill) : null;
+    const stroke = "stroke" in s && s.stroke && s.stroke !== "none" ? hex(s.stroke) : null;
+    const fill = "fill" in s && s.fill && s.fill !== "none" ? hex(s.fill) : null;
     if (stroke) doc.setDrawColor(...stroke);
     if (fill) doc.setFillColor(...fill);
     const style = fill && stroke ? "FD" : fill ? "F" : "S";
@@ -266,6 +266,19 @@ export async function buildWorksheetPdf(o: WorksheetPdfOptions, preloaded?: { re
     doc.text(lines, M + 27, y + 7, { lineHeightFactor: 1.38 });
     doc.setTextColor(29, 78, 216); doc.text(ansLines, M + 27, y + 7 + lines.length * lh(qSize), { lineHeightFactor: 1.38 });
     y += h + 5;
+  }
+
+  // ---- "Remember" reference chart
+  if (L.anchor) {
+    const v = L.anchor.visual, scale = Math.min(0.3, (CONTENT_W - 8) / v.w), vh = v.h * scale;
+    ensure(vh + 14);
+    doc.setDrawColor(...tint.border); doc.setLineWidth(0.6);
+    doc.roundedRect(M, y, CONTENT_W, vh + 12, 2.5, 2.5, "S");
+    doc.setFillColor(...tint.badge); doc.roundedRect(M + 3, y + 2.6, 19, 5, 1, 1, "F");
+    doc.setFont("DejaVu", "bold"); doc.setFontSize(6.8); doc.setTextColor(255, 255, 255); doc.text("REMEMBER", M + 12.5, y + 6, { align: "center" });
+    doc.setFontSize(8); doc.setTextColor(71, 85, 105); doc.text(L.anchor.title.toUpperCase(), M + 25, y + 6.2);
+    drawVisual(doc, v, M + (CONTENT_W - v.w * scale) / 2, y + 9.5, scale);
+    y += vh + 16;
   }
 
   if (L.wordBank?.length) drawBank(L.wordBank);

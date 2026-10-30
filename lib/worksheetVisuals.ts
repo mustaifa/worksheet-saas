@@ -60,7 +60,7 @@ function tenFrame(x: number, y: number, filled: number, color: string, crossedFr
   return out;
 }
 
-function clock(hour: number | null, minute: number, size = 120): Visual["shapes"] {
+export function clock(hour: number | null, minute: number, size = 120): Visual["shapes"] {
   const r = size / 2 - 4, cx = size / 2, cy = size / 2;
   const out: Shape[] = [
     { k: "circle", cx, cy, r, fill: "#fff", stroke: INK, sw: 2.5 },
@@ -92,7 +92,7 @@ function fractionBar(x: number, y: number, w: number, num: number, den: number, 
   return out;
 }
 
-function sectorPts(cx: number, cy: number, r: number, a0: number, a1: number): [number, number][] {
+export function sectorPts(cx: number, cy: number, r: number, a0: number, a1: number): [number, number][] {
   const pts: [number, number][] = [[cx, cy]];
   const steps = Math.max(4, Math.ceil(((a1 - a0) / (Math.PI * 2)) * 48));
   for (let i = 0; i <= steps; i++) {
@@ -145,7 +145,7 @@ function prismVisual(l: string, w: string, h: string, lv: number, wv: number, hv
   return { w: pad + x + L + D + 14 + w.length * 7, h: y + H + 26, shapes, alt: `Rectangular prism ${l} long, ${w} wide, ${h} high` };
 }
 
-function shift(s: Shape, dx: number, dy: number) {
+export function shift(s: Shape, dx: number, dy: number) {
   switch (s.k) {
     case "rect": s.x += dx; s.y += dy; break;
     case "circle": s.cx += dx; s.cy += dy; break;
@@ -203,7 +203,7 @@ function regularPolygon(sides: number, size = 90, fill = FILL_A): Shape {
   return { k: "poly", pts, closed: true, fill, stroke: INK, sw: 2 };
 }
 
-function coin(x: number, y: number, label: string, r: number, fill: string): Shape[] {
+export function coin(x: number, y: number, label: string, r: number, fill: string): Shape[] {
   return [
     { k: "circle", cx: x, cy: y, r, fill, stroke: INK, sw: 1.4 },
     { k: "circle", cx: x, cy: y, r: r - 3.5, stroke: "#64748b", sw: 0.6 },
@@ -241,7 +241,7 @@ function fractionGrid(x: number, y: number, size: number, parts: number, shaded:
 }
 
 /** Arc marking an angle from a0 to a1 degrees (counter-clockwise, 0° = east). */
-function angleArc(cx: number, cy: number, r: number, a0: number, a1: number, color: string): Shape {
+export function angleArc(cx: number, cy: number, r: number, a0: number, a1: number, color: string): Shape {
   const pts: [number, number][] = [];
   for (let i = 0; i <= 16; i++) { const a = ((a0 + ((a1 - a0) * i) / 16) * Math.PI) / 180; pts.push([cx + Math.cos(a) * r, cy - Math.sin(a) * r]); }
   return { k: "poly", pts, stroke: color, sw: 1.8 };
@@ -738,6 +738,100 @@ function mathVisual(topic: string, grade: number, q: string): Visual | null {
       const shapes: Shape[] = [{ k: "poly", pts: [[ox, oy], [ox + C, oy], [ox + px, oy - py]], closed: true, fill: FILL_B, stroke: INK, sw: 2 }];
       shapes.push(dimLabel(ox + C / 2, oy + 16, `${c} ${m[2]}`), dimLabel(ox + px / 2 - 6, oy - py / 2, `${b} ${m[2]}`, "end"), dimLabel(ox + (px + C) / 2 + 6, oy - py / 2, `${a} ${m[2]}`, "start"));
       return { w: ox + C + 70, h: oy + 24, shapes, alt: `A triangle with sides ${a}, ${b} and ${c} ${m[2]}` };
+    }
+  }
+
+  // ---- Line graph for y = mx + b
+  if (/slope_intercept|linear|functions_intro|point_slope/.test(topic) && (m = q.match(/y = (-?\d*)x(?: ([+-]) (\d+))?\b/))) {
+    const mm = m[1] === "" ? 1 : m[1] === "-" ? -1 : +m[1], b = m[2] ? (m[2] === "-" ? -1 : 1) * +m[3] : 0;
+    if (Math.abs(mm) <= 6 && Math.abs(b) <= 10) {
+      const lo = -10, hi = 10, cell = 7, o = 14, size = (hi - lo) * cell;
+      const X = (v: number) => o + (v - lo) * cell, Y = (v: number) => o + (hi - v) * cell;
+      const shapes: Shape[] = [];
+      for (let v = lo; v <= hi; v++) shapes.push({ k: "line", x1: X(v), y1: Y(lo), x2: X(v), y2: Y(hi), stroke: "#e2e8f0", sw: 0.6 }, { k: "line", x1: X(lo), y1: Y(v), x2: X(hi), y2: Y(v), stroke: "#e2e8f0", sw: 0.6 });
+      shapes.push({ k: "line", x1: X(lo), y1: Y(0), x2: X(hi), y2: Y(0), stroke: INK, sw: 1.4 }, { k: "line", x1: X(0), y1: Y(lo), x2: X(0), y2: Y(hi), stroke: INK, sw: 1.4 });
+      for (const t of [-10, -5, 5, 10]) shapes.push({ k: "text", x: X(t), y: Y(0) + 11, t: String(t), size: 8, anchor: "middle", fill: "#475569" }, { k: "text", x: X(0) - 3, y: Y(t) + 3, t: String(t), size: 8, anchor: "end", fill: "#475569" });
+      // clip the line to the grid
+      const xs = [lo, hi].map((x) => [x, mm * x + b]).concat([lo, hi].map((y) => [(y - b) / mm, y])).filter(([x, y]) => x >= lo - 1e-9 && x <= hi + 1e-9 && y >= lo - 1e-9 && y <= hi + 1e-9);
+      if (xs.length >= 2) {
+        xs.sort((p1, p2) => p1[0] - p2[0]);
+        const [p1, p2] = [xs[0], xs[xs.length - 1]];
+        shapes.push({ k: "line", x1: X(p1[0]), y1: Y(p1[1]), x2: X(p2[0]), y2: Y(p2[1]), stroke: "#2563eb", sw: 2.2 });
+        return { w: size + o * 2, h: size + o * 2, shapes, alt: `Graph of the line ${m[0]}` };
+      }
+    }
+  }
+
+  // ---- Dot plot for a small data set
+  if (/stats|central_tendency|mad_iqr|range/.test(topic) && (m = q.match(/(?:of|data|set)[^:]*: ((?:-?\d+(?:\.\d+)?, ){3,11}-?\d+(?:\.\d+)?)\.?$/))) {
+    const vals = m[1].split(", ").map(Number);
+    if (vals.every(Number.isInteger)) {
+      const lo = Math.min(...vals), hi = Math.max(...vals), span = Math.max(hi - lo, 1);
+      const step = span <= 12 ? 1 : span <= 30 ? 2 : span <= 60 ? 5 : 10;
+      const a = Math.floor(lo / step) * step, z = Math.ceil(hi / step) * step;
+      const n = (z - a) / step, W = 300, x0 = 12, dx = (W - 2 * x0) / Math.max(n, 1);
+      const counts = new Map<number, number>();
+      const shapes: Shape[] = [];
+      const maxStack = Math.max(...vals.map((v) => vals.filter((u) => u === v).length));
+      const base = 16 + maxStack * 12;
+      shapes.push({ k: "line", x1: x0 - 6, y1: base, x2: W - x0 + 6, y2: base, stroke: INK, sw: 1.6 });
+      for (let i = 0; i <= n; i++) {
+        const x = x0 + i * dx;
+        shapes.push({ k: "line", x1: x, y1: base - 4, x2: x, y2: base + 4, stroke: INK, sw: 1.1 });
+        if (n <= 15 || i % 2 === 0) shapes.push({ k: "text", x, y: base + 16, t: String(a + i * step), size: 9, anchor: "middle", fill: "#475569" });
+      }
+      for (const v of vals) {
+        const c = counts.get(v) || 0; counts.set(v, c + 1);
+        shapes.push({ k: "circle", cx: x0 + ((v - a) / step) * dx, cy: base - 8 - c * 12, r: 4.6, fill: "#60a5fa", stroke: INK, sw: 0.9 });
+      }
+      return { w: W, h: base + 22, shapes, alt: `A dot plot of ${vals.join(", ")}` };
+    }
+  }
+
+  // ---- A die
+  if (/probab/.test(topic) && /six-sided die|number cube/.test(q) && !/two dice|both dice|twice/.test(q)) {
+    const shapes: Shape[] = [];
+    const face = (x: number, n: number) => {
+      shapes.push({ k: "rect", x, y: 4, w: 38, h: 38, r: 7, fill: "#fff", stroke: INK, sw: 1.6 });
+      const P: Record<number, [number, number][]> = { 1: [[19, 19]], 2: [[10, 10], [28, 28]], 3: [[10, 10], [19, 19], [28, 28]], 4: [[10, 10], [28, 10], [10, 28], [28, 28]], 5: [[10, 10], [28, 10], [19, 19], [10, 28], [28, 28]], 6: [[10, 9], [28, 9], [10, 19], [28, 19], [10, 29], [28, 29]] };
+      for (const [px, py] of P[n]) shapes.push({ k: "circle", cx: x + px, cy: 4 + py, r: 3.3, fill: INK });
+    };
+    for (let i = 1; i <= 6; i++) face(4 + (i - 1) * 46, i);
+    return { w: 6 * 46 + 6, h: 48, shapes, alt: "The six faces of a die" };
+  }
+
+  // ---- Rounding on a number line
+  if ((m = q.match(/^Round (\d{1,3}(?:,\d{3})?|\d{2,4}) to the nearest (10|100)\.$/))) {
+    const v = +m[1].replace(/,/g, ""), step = +m[2], a = Math.floor(v / step) * step;
+    if (v !== a) {
+      const tick = step / 10, shapes: Shape[] = [], W = 300, x0 = 14, dx = (W - 2 * x0) / 10;
+      shapes.push({ k: "line", x1: x0 - 6, y1: 22, x2: W - x0 + 6, y2: 22, stroke: INK, sw: 1.6 });
+      for (let i = 0; i <= 10; i++) {
+        const x = x0 + i * dx, big = i % 5 === 0;
+        shapes.push({ k: "line", x1: x, y1: 22 - (big ? 8 : 4), x2: x, y2: 22 + (big ? 8 : 4), stroke: INK, sw: big ? 1.6 : 1 });
+        if (i === 0 || i === 10 || i === 5) shapes.push({ k: "text", x, y: 42, t: String(a + i * tick), size: 10.5, anchor: "middle", bold: i !== 5, fill: INK });
+      }
+      const pos = x0 + ((v - a) / tick) * dx;
+      shapes.push({ k: "poly", pts: [[pos, 20], [pos - 5, 8], [pos + 5, 8]], closed: true, fill: "#dc2626" }, { k: "text", x: pos, y: 6, t: String(v), size: 10, bold: true, anchor: "middle", fill: "#dc2626" });
+      return { w: W, h: 48, shapes, alt: `Number line from ${a} to ${a + step} with ${v} marked` };
+    }
+  }
+
+  // ---- Cube trains for measuring length (grades 1–2)
+  if (grade <= 2 && /compare_length/.test(topic)) {
+    const items = [...q.matchAll(/an? (\w+) is (\d+) (cubes|paper clips)/gi)].map((x) => [x[1], +x[2], x[3]] as [string, number, string]);
+    if (items.length >= 2 && items.every(([, n]) => n <= 15)) {
+      const shapes: Shape[] = [];
+      const c = 14;
+      items.forEach(([name, n, unit], r) => {
+        const y = 4 + r * 22;
+        shapes.push({ k: "text", x: 54, y: y + 11, t: name.toLowerCase(), size: 10.5, anchor: "end", bold: true, fill: INK });
+        for (let i = 0; i < n; i++) {
+          if (unit === "cubes") shapes.push({ k: "rect", x: 60 + i * c, y, w: c, h: c, fill: BAR_FILLS[r % BAR_FILLS.length], stroke: INK, sw: 1 });
+          else shapes.push({ k: "rect", x: 61 + i * c, y: y + 3, w: c - 2, h: 8, r: 4, stroke: "#475569", sw: 1.2 });
+        }
+      });
+      return { w: 60 + 15 * c + 6, h: 8 + items.length * 22, shapes, alt: items.map(([a, n, u]) => `${a}: ${n} ${u}`).join(", ") };
     }
   }
 

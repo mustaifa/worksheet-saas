@@ -10,6 +10,7 @@ import type { Question } from "./subjects/types";
 import { visualFor, questionIcon, picVisual, type Visual } from "./worksheetVisuals";
 import { locateSkill, STANDARDS } from "./curriculum";
 import { scienceDiagram } from "./scienceDiagrams";
+import { anchorChart, type AnchorChart } from "./anchorCharts";
 
 export type AnswerMode = "box" | "lines" | "blank" | "choice";
 
@@ -73,6 +74,8 @@ export type WorksheetLayout = {
   sections: Section[];
   /** A worked example shown before the questions. */
   example?: { text: string; answer: string };
+  /** A "Remember" reference chart for the topic. */
+  anchor?: AnchorChart;
 };
 
 const norm = (s: string) =>
@@ -429,6 +432,7 @@ export function layoutWorksheet(opts: {
     questions: ordered,
     sections,
     example,
+    anchor: passage || diagramSec ? undefined : anchorChart(subject, topic, grade) ?? undefined,
   };
 }
 
