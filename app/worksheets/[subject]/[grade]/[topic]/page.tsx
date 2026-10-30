@@ -15,6 +15,7 @@ import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
 import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet } from "@/lib/subjects";
 import { locateSkill, LEVEL_LABEL, LEVEL_BADGE, STANDARDS } from "@/lib/curriculum";
+import { guidesForWorksheet } from "@/lib/blogNav";
 
 // Number of questions on the free public worksheet (reading comprehension
 // ignores this and uses its passage's own question set).
@@ -110,6 +111,7 @@ export default function TopicPage({ params }: { params: Params }) {
     .sort((a, b) => b.c - a.c || a.i - b.i)
     .map((x) => x.t)
     .slice(0, 8);
+  const guides = guidesForWorksheet(subjectId, grade, topic.id, 3);
   const otherGrades = (allTopics(subjectId).find((t) => t.id === topic.id)?.grades || []).filter((g) => g !== grade);
 
   const path = `/worksheets/${subject.id}/${grade}/${topic.id}`;
@@ -308,6 +310,20 @@ export default function TopicPage({ params }: { params: Params }) {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {guides.length > 0 && (
+          <div className="print:hidden mt-12">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Guides for teaching {name}</h2>
+            <div className="mt-4 grid gap-3">
+              {guides.map((p) => (
+                <Link key={p.slug} href={`/blog/${p.slug}`} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:border-slate-900 dark:hover:border-white">
+                  <span className="block font-semibold text-slate-900 dark:text-white">{p.title}</span>
+                  <span className="block text-sm text-slate-600 dark:text-slate-300 mt-1">{p.excerpt}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 

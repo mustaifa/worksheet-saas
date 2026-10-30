@@ -12,6 +12,7 @@ import { isFreeMode } from "@/lib/access";
 import { topicDescription, gradeEquivalents, gradeOverview } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, Topic, allGrades, topicsForGrade, groupTopics, generateWorksheet } from "@/lib/subjects";
 import { bookFor, LEVEL_LABEL, LEVEL_BADGE, STANDARDS, type Skill } from "@/lib/curriculum";
+import { guidesForWorksheet, SUBJECT_HUBS } from "@/lib/blogNav";
 
 export const dynamicParams = false;
 
@@ -64,6 +65,8 @@ export default function GradePage({ params }: { params: { subject: string; grade
   const otherSubjects = SUBJECTS.filter((s) => s.id !== sid && topicsForGrade(s.id, grade).length > 0);
 
   const book = bookFor(sid, grade);
+  const guides = guidesForWorksheet(sid, grade, undefined, 4);
+  const hub = SUBJECT_HUBS.find((h) => h.slug === sid);
   const byId = new Map(topics.map((t) => [t.id, t]));
 
   const sample = (topicId: string) => {
@@ -206,6 +209,21 @@ export default function GradePage({ params }: { params: { subject: string; grade
             </div>
           )}
         </div>
+
+        {guides.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">{subject.label} guides for parents & teachers</h2>
+            <div className="mt-3 grid sm:grid-cols-2 gap-3">
+              {guides.map((p) => (
+                <Link key={p.slug} href={`/blog/${p.slug}`} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:border-slate-900 dark:hover:border-white">
+                  <span className="block font-semibold text-slate-900 dark:text-white">{p.title}</span>
+                  <span className="block text-sm text-slate-600 dark:text-slate-300 mt-1 line-clamp-2">{p.excerpt}</span>
+                </Link>
+              ))}
+            </div>
+            {hub && <p className="mt-3 text-sm"><Link href={`/blog/subject/${hub.slug}`} className="font-semibold text-indigo-700 dark:text-indigo-300 hover:underline">All {hub.title} →</Link></p>}
+          </div>
+        )}
 
         <div className="mt-12 rounded-2xl bg-slate-100 dark:bg-slate-900 p-6 sm:p-8 text-center">
           <p className="text-lg font-semibold text-slate-900 dark:text-white">Need more Grade {grade} {lower} practice?</p>

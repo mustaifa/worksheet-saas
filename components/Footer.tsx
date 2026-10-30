@@ -21,7 +21,7 @@ export default function Footer() {
           <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
             <li><Link href="/worksheets" className="hover:text-slate-900 dark:hover:text-white">Browse worksheets</Link></li>
             {!freeMode && <li><Link href="/pricing" className="hover:text-slate-900 dark:hover:text-white">Pricing</Link></li>}
-            <li><Link href="/blog" className="hover:text-slate-900 dark:hover:text-white">Guides</Link></li>
+            <li><Link href="/blog" className="hover:text-slate-900 dark:hover:text-white">Blog</Link></li>
             <li><Link href="/play" className="hover:text-slate-900 dark:hover:text-white">Join a live quiz</Link></li>
             <li><Link href="/worksheets#request" className="hover:text-slate-900 dark:hover:text-white">Request a topic</Link></li>
           </ul>
@@ -32,6 +32,12 @@ export default function Footer() {
             <li><Link href="/teachers" className="hover:text-slate-900 dark:hover:text-white">Teachers</Link></li>
             <li><Link href="/parents" className="hover:text-slate-900 dark:hover:text-white">Parents</Link></li>
             <li><Link href="/students" className="hover:text-slate-900 dark:hover:text-white">Students</Link></li>
+          </ul>
+          <p className="font-semibold text-slate-900 dark:text-white mt-5 mb-2">Guides</p>
+          <ul className="space-y-1.5 text-slate-500 dark:text-slate-400">
+            <li><Link href="/blog/subject/math" className="hover:text-slate-900 dark:hover:text-white">Math guides</Link></li>
+            <li><Link href="/blog/subject/english" className="hover:text-slate-900 dark:hover:text-white">English guides</Link></li>
+            <li><Link href="/blog/subject/science" className="hover:text-slate-900 dark:hover:text-white">Science guides</Link></li>
           </ul>
         </div>
         <div>

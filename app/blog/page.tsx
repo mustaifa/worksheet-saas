@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { BLOG_POSTS, type Audience } from "@/lib/blog";
+import { SUBJECT_HUBS, postsInHub } from "@/lib/blogNav";
 
 export const metadata: Metadata = {
   title: "Guides for Teachers, Parents & Students",
@@ -37,6 +38,14 @@ export default function BlogIndex({ searchParams }: { searchParams: { for?: stri
         <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-2xl">
           Practical guides for teaching, helping at home and studying — each with worked examples and free printable worksheets.
         </p>
+        <nav aria-label="Browse guides by subject" className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {SUBJECT_HUBS.map((h) => (
+            <Link key={h.slug} href={`/blog/subject/${h.slug}`} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 hover:border-slate-900 dark:hover:border-white">
+              <span className="block font-semibold text-slate-900 dark:text-white">{h.title}</span>
+              <span className="block text-xs text-slate-500 dark:text-slate-400 mt-1">{postsInHub(h).length} guides →</span>
+            </Link>
+          ))}
+        </nav>
         <form action="/blog" className="mt-8 grid gap-3 sm:grid-cols-[1fr_180px_auto]">
           {active !== "all" && <input type="hidden" name="for" value={active} />}
           <label className="text-sm font-medium">Search guides<input name="q" defaultValue={query} maxLength={150} placeholder="Try fractions, reading, homework…" className="mt-2 w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white" /></label>

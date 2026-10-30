@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { SUBJECTS, allGrades, topicsForGrade } from "@/lib/subjects";
 import { BLOG_POSTS } from "@/lib/blog";
+import { SUBJECT_HUBS } from "@/lib/blogNav";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_APP_URL || "https://aethelsystems.com";
@@ -19,8 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/privacy`, priority: 0.2 },
   ];
 
+  for (const hub of SUBJECT_HUBS) {
+    entries.push({ url: `${base}/blog/subject/${hub.slug}`, priority: 0.6 });
+  }
   for (const post of BLOG_POSTS) {
-    entries.push({ url: `${base}/blog/${post.slug}`, priority: 0.6 });
+    entries.push({ url: `${base}/blog/${post.slug}`, lastModified: post.updated || post.date, priority: 0.6 });
   }
 
   for (const s of SUBJECTS) {

@@ -1,4 +1,5 @@
 export type Audience = "teachers" | "parents" | "students";
+export type BlogSubject = "Math" | "English" | "Science" | "Learning";
 
 export type BlogPost = {
   slug: string;
@@ -13,6 +14,8 @@ export type BlogPost = {
   content: string[];
   /** Who the post is for — drives the blog filter and the audience pages. */
   audience?: Audience[];
+  /** Blog section; if omitted it is inferred from the slug and title (see blogPresentation). */
+  subject?: BlogSubject;
   /** Worksheet pages to link at the end of the post. */
   worksheets?: { label: string; href: string }[];
 };
@@ -21,8 +24,10 @@ import { PRACTICAL_GUIDES } from "./blogPracticalGuides";
 
 import { POSTS_2026_10 } from "./blogPosts2026";
 import { POSTS_2026_10B } from "./blogPosts2026b";
+import { POSTS_2026_10C } from "./blogPosts2026c";
 
 export const BLOG_POSTS: BlogPost[] = [
+  ...POSTS_2026_10C,
   ...PRACTICAL_GUIDES,
   ...POSTS_2026_10B,
   ...POSTS_2026_10,
