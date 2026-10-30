@@ -9,6 +9,7 @@ import WorksheetSheet from "@/components/WorksheetSheet";
 import SignupCta from "@/components/SignupCta";
 import PinPages from "@/components/PinPages";
 import { pinPageLinks } from "@/lib/pinLinks";
+import { pinItemsFromLayout } from "@/lib/pinItems";
 import { SITE_URL } from "@/lib/site";
 import { layoutWorksheet } from "@/lib/worksheetLayout";
 import { BRAND, brandedFilename } from "@/lib/brand";
@@ -65,7 +66,7 @@ export default function GeneratedWorksheetPage({ params }: { params: Params }) {
   const freeMode = isFreeMode();
   const pinLinks = pinPageLinks({
     origin: SITE_URL, subject: subject.id, subjectLabel: subject.label, grade, topic: topic.id, name,
-    variant: v, questions: questions.map((q) => q.q),
+    variant: v, items: pinItemsFromLayout(layout),
   });
 
   return (
