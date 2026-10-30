@@ -2,14 +2,14 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import TopicRequestBox from "@/components/TopicRequestBox";
 import Footer from "@/components/Footer";
-import { SUBJECTS, allGrades, topicsForGrade, generateWorksheet } from "@/lib/subjects";
+import { SUBJECTS, allGrades, topicsForGrade, generateWorksheet, gradeRangeLabel } from "@/lib/subjects";
 import WorksheetThumb from "@/components/WorksheetThumb";
 import TrustStrip from "@/components/TrustStrip";
 import { subjectStyle } from "@/components/subjectStyles";
 
 export const metadata = {
   title: "Free Printable Worksheets with Answers, Grades 1–12",
-  description: "Browse free printable Math, English and Science worksheets for every grade from 1 to 12. Each one comes with a full answer key and prints or saves as a PDF.",
+  description: "Browse free printable Math, English, Science, Physics, Chemistry, Biology and Computer Science worksheets for grades 1 to 12. Each one comes with a full answer key and prints or saves as a PDF.",
   alternates: { canonical: "/worksheets" },
 };
 
@@ -17,12 +17,20 @@ const PREVIEW: Record<string, { grade: number; topic: string; title: string }> =
   math: { grade: 5, topic: "fractions_add_sub", title: "Adding & Subtracting Fractions" },
   english: { grade: 8, topic: "sentence_types", title: "Sentence Structure" },
   science: { grade: 6, topic: "body_circulatory", title: "Circulatory System" },
+  physics: { grade: 11, topic: "momentum", title: "Momentum & Collisions" },
+  chemistry: { grade: 10, topic: "molar_mass", title: "Moles & Molar Mass" },
+  biology: { grade: 9, topic: "dna_protein", title: "DNA, RNA & Protein Synthesis" },
+  computer: { grade: 8, topic: "binary_numbers", title: "Binary Numbers" },
 };
 
 const SUBJECT_BLURBS: Record<string, string> = {
   math: "Number sense, fractions, decimals, percentages, algebra, geometry, statistics and trigonometry.",
   english: "Phonics, spelling, punctuation, grammar, parts of speech, vocabulary, literary devices and reading comprehension.",
   science: "Living things, the human body, the solar system, matter, forces, earth science, chemistry and genetics.",
+  physics: "Motion, forces, momentum, gravitation, energy, waves, circuits and nuclear decay.",
+  chemistry: "Atoms, the periodic table, bonding, reactions, moles, solutions, acids, bases and gases.",
+  biology: "Cells, biomolecules, DNA and genetics, evolution, ecology and body systems.",
+  computer: "Binary and hex, logic gates, algorithms, Python code tracing, networks, cybersecurity and Big-O.",
 };
 
 export default function WorksheetsHub() {
@@ -37,7 +45,7 @@ export default function WorksheetsHub() {
         </p>
         <div className="mt-5"><TrustStrip compact /></div>
         <div className="grid sm:grid-cols-3 gap-5 mt-10">
-          {SUBJECTS.map((s) => {
+          {SUBJECTS.slice(0, 3).map((s) => {
             const pv = PREVIEW[s.id];
             const lines = generateWorksheet({ subject: s.id, grade: pv.grade, topic: pv.topic, difficulty: "medium", count: 5, seed: 7 }).map((x) => x.q);
             const st = subjectStyle(s.id);
@@ -49,7 +57,32 @@ export default function WorksheetsHub() {
                 <div className="p-6">
                   <p className={`text-lg font-semibold ${st.text}`}>{s.label} worksheets</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Grades 1–12 · {allGrades().reduce((n, g) => n + topicsForGrade(s.id, g).length, 0)} worksheets
+                    {gradeRangeLabel(s.id)} · {allGrades().reduce((n, g) => n + topicsForGrade(s.id, g).length, 0)} worksheets
+                  </p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">{SUBJECT_BLURBS[s.id]}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mt-14">High-school science courses &amp; Computer Science</h2>
+        <p className="text-slate-600 dark:text-slate-300 mt-2 max-w-3xl">
+          Physics, Chemistry and Biology for grades 9–12, each with its own course outline, plus Computer Science from grade 6. The combined Science pages for grades 9–12 are still here too.
+        </p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-6">
+          {SUBJECTS.slice(3).map((s) => {
+            const pv = PREVIEW[s.id];
+            const lines = generateWorksheet({ subject: s.id, grade: pv.grade, topic: pv.topic, difficulty: "medium", count: 5, seed: 7 }).map((x) => x.q);
+            const st = subjectStyle(s.id);
+            return (
+              <Link key={s.id} href={`/worksheets/${s.id}`} className={`group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:shadow-lg transition-all ${st.ring}`}>
+                <div className={`${st.soft} px-5 pt-5 pb-0 h-40 overflow-hidden`}>
+                  <WorksheetThumb subject={s.id} title={pv.title} meta={`Grade ${pv.grade} · ${s.label}`} lines={lines} className="group-hover:-translate-y-1 transition-transform" />
+                </div>
+                <div className="p-5">
+                  <p className={`text-lg font-semibold ${st.text}`}>{s.label}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    {gradeRangeLabel(s.id)} · {allGrades().reduce((n, g) => n + topicsForGrade(s.id, g).length, 0)} worksheets
                   </p>
                   <p className="text-sm text-slate-600 dark:text-slate-300 mt-3">{SUBJECT_BLURBS[s.id]}</p>
                 </div>

@@ -1403,9 +1403,102 @@ Object.assign(SCIENCE, {
   bonding: () => bondingChart(), biology_advanced: () => organelles(), specific_heat: () => specificHeat(), keplers_laws: () => keplerChart(), universe: () => keplerChart(),
 });
 
+
+// ---------------------------------------------------------------- computer science charts
+
+function binaryPlaces(): AnchorChart {
+  const shapes: Shape[] = [], vals = [128, 64, 32, 16, 8, 4, 2, 1], cw = W / 8;
+  vals.forEach((v, i) => { shapes.push(R(i * cw + 2, 0, cw - 4, 24, F[0]), T(i * cw + cw / 2, 16, String(v), 12, "middle", true, BLUE)); });
+  shapes.push(T(W / 2, 44, "Each place is worth double the one to its right. Add the places that hold a 1.", 11, "middle", false, MUTED));
+  shapes.push(T(W / 2, 62, "Example: 0 0 0 0 1 0 1 1  →  8 + 2 + 1 = 11", 12, "middle", true));
+  return { title: "Binary place values", visual: { w: W, h: 68, shapes, alt: "Binary place values 128 to 1" } };
+}
+function hexChart(): AnchorChart {
+  return { title: "Hexadecimal (base 16)", visual: cards([{ head: "Digits", lines: ["0–9, then A=10 … F=15"] }, { head: "Two places", lines: ["16s and 1s", "2F = 2×16 + 15 = 47"] }, { head: "Hex ↔ binary", lines: ["1 hex digit = 4 bits", "F = 1111, A = 1010"] }], 3, 56) };
+}
+function dataUnitsChart(): AnchorChart {
+  return { title: "Data sizes", visual: flow([{ head: "bit", sub: "0 or 1" }, { head: "byte", sub: "8 bits" }, { head: "KB", sub: "1,000 bytes" }, { head: "MB", sub: "1,000 KB" }, { head: "GB", sub: "1,000 MB" }]) };
+}
+function gatesChart(): AnchorChart {
+  return { title: "Logic gates", visual: cards([{ head: "AND", lines: ["1 only if both", "inputs are 1"] }, { head: "OR", lines: ["1 if at least", "one input is 1"] }, { head: "NOT", lines: ["flips the input", "0 → 1, 1 → 0"] }, { head: "XOR", lines: ["1 if the inputs", "are different"] }], 4, 52) };
+}
+function boolChart(): AnchorChart {
+  const shapes: Shape[] = [], heads = ["A", "B", "A and B", "A or B", "not A"], cw = W / 5;
+  heads.forEach((h, i) => shapes.push(R(i * cw, 0, cw, 20, F[4], 0), T(i * cw + cw / 2, 14, h, 11, "middle", true)));
+  [[1, 1], [1, 0], [0, 1], [0, 0]].forEach(([a, b], r) => {
+    const row = [a, b, a & b, a | b, 1 - a].map((v) => (v ? "True" : "False"));
+    row.forEach((v, i) => shapes.push(R(i * cw, 20 + r * 18, cw, 18, "#fff", 0, "#94a3b8", 0.8), T(i * cw + cw / 2, 33 + r * 18, v, 10.5, "middle", false, v === "True" ? "#15803d" : RED)));
+  });
+  return { title: "Truth table", visual: { w: W, h: 94, shapes, alt: "Truth table for and, or, not" } };
+}
+function algorithmChart(): AnchorChart {
+  return { title: "Algorithms", visual: cards([{ head: "Sequence", lines: ["steps in order"] }, { head: "Selection", lines: ["if … else …", "choose a path"] }, { head: "Iteration", lines: ["repeat / loop", "do it again"] }], 3, 50) };
+}
+function flowSymbols(): AnchorChart {
+  const s: Shape[] = [];
+  s.push(R(0, 6, 100, 26, "#bbf7d0", 13), T(50, 23, "Start / Stop", 11, "middle", true), T(50, 48, "oval", 9.5, "middle", false, MUTED));
+  s.push(R(140, 6, 100, 26, F[0], 3), T(190, 23, "Process", 11, "middle", true), T(190, 48, "rectangle", 9.5, "middle", false, MUTED));
+  s.push({ k: "poly", pts: [[292, 6], [392, 6], [380, 32], [280, 32]], closed: true, fill: "#fff", stroke: INK, sw: 1.3 }, T(336, 23, "Input / Output", 10, "middle", true), T(335, 48, "parallelogram", 9.5, "middle", false, MUTED));
+  s.push({ k: "poly", pts: [[465, 0], [515, 19], [465, 38], [415, 19]], closed: true, fill: F[1], stroke: INK, sw: 1.3 }, T(465, 23, "Decision", 10.5, "middle", true), T(465, 52, "diamond: yes / no", 9.5, "middle", false, MUTED));
+  return { title: "Flowchart symbols", visual: { w: W, h: 56, shapes: s, alt: "Flowchart symbols: oval, rectangle, parallelogram, diamond" } };
+}
+function pythonChart(): AnchorChart {
+  return { title: "Reading Python", visual: cards([{ head: "x = 5", lines: ["store 5 in x"] }, { head: "range(1, 4)", lines: ["1, 2, 3", "(stops before 4)"] }, { head: "// and %", lines: ["7 // 2 = 3", "7 % 2 = 1"] }, { head: "Indent", lines: ["indented lines", "belong to the loop/if"] }], 4, 54) };
+}
+function listChart(): AnchorChart {
+  const s: Shape[] = [], vals = ["7", "3", "9", "4", "6"];
+  vals.forEach((v, i) => { s.push(R(120 + i * 46, 4, 42, 28, "#e0f2fe", 3), T(141 + i * 46, 23, v, 13, "middle", true), T(141 + i * 46, 46, String(i), 10, "middle", true, BLUE), T(141 + i * 46, 60, String(i - 5), 10, "middle", false, RED)); });
+  s.push(T(110, 23, "nums =", 12, "end", true), T(110, 46, "index", 10, "end", true, BLUE), T(110, 60, "negative", 10, "end", false, RED));
+  s.push(T(360, 18, "nums[0] → 7   nums[-1] → 6", 10.5, "start"), T(360, 34, "nums[1:3] → [3, 9]", 10.5, "start"), T(360, 50, "len(nums) → 5", 10.5, "start"));
+  return { title: "Lists start at index 0", visual: { w: W, h: 64, shapes: s, alt: "A list with positive and negative indexes" } };
+}
+function searchChart(): AnchorChart {
+  return { title: "Search & sort", visual: cards([{ head: "Linear search", lines: ["check one by one", "up to n checks"] }, { head: "Binary search", lines: ["sorted list: check middle,", "throw away half"] }, { head: "Bubble sort", lines: ["swap neighbours that", "are in the wrong order"] }, { head: "Selection sort", lines: ["find the smallest,", "swap it to the front"] }], 4, 54) };
+}
+function bigOChart(): AnchorChart {
+  const s: Shape[] = [], ox = 30, oy = 110, w = 200, h = 100;
+  s.push(Ln(ox, oy, ox + w, oy), Ln(ox, oy, ox, oy - h), T(ox + w, oy + 14, "n", 10, "end", true, MUTED), T(ox - 4, oy - h + 6, "steps", 9.5, "end", false, MUTED));
+  const curve = (f: (x: number) => number, col: string, label: string) => {
+    const pts = Array.from({ length: 21 }, (_, i) => { const x = i / 20; return [ox + x * w, oy - Math.min(1, f(x)) * h] as [number, number]; });
+    s.push({ k: "poly", pts, stroke: col, sw: 2 });
+    const end = pts.find((p) => p[1] <= oy - h + 1) ?? pts[pts.length - 1];
+    s.push(T(end[0] + 4, end[1] + 4, label, 10.5, "start", true, col));
+  };
+  curve(() => 0.08, "#15803d", "O(1)"); curve((x) => Math.log2(1 + 7 * x) / 3 * 0.45, BLUE, "O(log n)"); curve((x) => x * 0.8, "#b45309", "O(n)"); curve((x) => x * x * 1.6, RED, "O(n²)");
+  s.push(T(300, 30, "One loop over n items → O(n)", 11, "start"), T(300, 50, "A loop inside a loop → O(n²)", 11, "start"), T(300, 70, "Halving each time → O(log n)", 11, "start"), T(300, 90, "Fixed number of steps → O(1)", 11, "start"));
+  return { title: "How fast do steps grow?", visual: { w: W, h: 116, shapes: s, alt: "Growth of O(1), O(log n), O(n) and O(n squared)" } };
+}
+function functionChart(): AnchorChart {
+  return { title: "Functions", visual: flow([{ head: "Call", sub: "f(3)" }, { head: "Parameter", sub: "x = 3" }, { head: "Run body", sub: "2 * x + 1" }, { head: "Return", sub: "sends back 7" }]) };
+}
+function recursionChart(): AnchorChart {
+  return { title: "Recursion", visual: flow([{ head: "fact(3)", sub: "3 × fact(2)" }, { head: "fact(2)", sub: "2 × fact(1)" }, { head: "fact(1)", sub: "base case: 1" }, { head: "Unwind", sub: "2 × 1 = 2, 3 × 2 = 6" }]) };
+}
+function networkChart(): AnchorChart {
+  return { title: "How data travels", visual: flow([{ head: "Your device", sub: "splits data" }, { head: "Packets", sub: "numbered pieces" }, { head: "Routers", sub: "pass them on" }, { head: "Server", sub: "rebuilds the file" }]) };
+}
+function securityChart(): AnchorChart {
+  return { title: "Staying secure", visual: cards([{ head: "Long passwords", lines: ["more characters =", "many more guesses"] }, { head: "Mix characters", lines: ["a–z, A–Z, 0–9, !#", "more choices per slot"] }, { head: "Encryption", lines: ["scrambles data with", "a key"] }, { head: "Phishing", lines: ["fake messages that", "ask for passwords"] }], 4, 54) };
+}
+function spreadsheetChart(): AnchorChart {
+  return { title: "Spreadsheet formulas", visual: cards([{ head: "=B2", lines: ["the value in B2"] }, { head: "=SUM(A1:A4)", lines: ["add A1 to A4"] }, { head: "=AVERAGE(…)", lines: ["sum ÷ how many"] }, { head: "=MAX / =MIN", lines: ["largest / smallest"] }], 4, 46) };
+}
+function dataTypeChart(): AnchorChart {
+  return { title: "Data types", visual: cards([{ head: "integer", lines: ["whole number", "42"] }, { head: "float", lines: ["decimal number", "3.5"] }, { head: "string", lines: ["text in quotes", "\"hello\""] }, { head: "Boolean", lines: ["True or False"] }], 4, 52) };
+}
+
+const COMPUTER: Record<string, Maker> = {
+  binary_numbers: () => binaryPlaces(), challenge_cs: () => binaryPlaces(), hexadecimal: () => hexChart(), data_units: () => dataUnitsChart(),
+  logic_gates: () => gatesChart(), boolean_logic: () => boolChart(), robot_commands: () => algorithmChart(), loops_trace: () => algorithmChart(),
+  flowcharts: () => flowSymbols(), code_tracing: () => pythonChart(), data_types: () => dataTypeChart(), lists_arrays: () => listChart(),
+  search_sort: () => searchChart(), big_o: () => bigOChart(), functions_returns: () => functionChart(), recursion: () => recursionChart(),
+  networks_internet: () => networkChart(), cybersecurity: () => securityChart(), spreadsheet_formulas: () => spreadsheetChart(),
+};
+
 export function anchorChart(subject: string, topic: string, grade: number): AnchorChart | null {
-  const map = subject === "math" ? MATH : subject === "english" ? ENGLISH : subject === "science" ? SCIENCE : null;
+  const sci = subject === "science" || subject === "physics" || subject === "chemistry" || subject === "biology";
+  const map = subject === "math" ? MATH : subject === "english" ? ENGLISH : sci ? SCIENCE : subject === "computer" ? COMPUTER : null;
   return map?.[topic]?.(grade) ?? null;
 }
 
-export const ANCHOR_TOPICS = { math: Object.keys(MATH), english: Object.keys(ENGLISH), science: Object.keys(SCIENCE) };
+export const ANCHOR_TOPICS = { math: Object.keys(MATH), english: Object.keys(ENGLISH), science: Object.keys(SCIENCE), computer: Object.keys(COMPUTER) };

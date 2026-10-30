@@ -6,7 +6,7 @@ import { sendTopicRequestEmail } from "@/lib/email";
 const recent = new Map<string, number[]>();
 const LIMIT = 5, WINDOW_MS = 60 * 60 * 1000;
 
-const SUBJECTS = ["math", "english", "science", "other", ""];
+const SUBJECTS = ["math", "english", "science", "physics", "chemistry", "biology", "computer", "other", ""];
 const ROLES = ["teacher", "parent", "student", "tutor", "other", ""];
 
 export async function POST(req: Request) {

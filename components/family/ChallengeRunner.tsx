@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { SUBJECTS, SubjectId, Difficulty, topicsForGrade, topicLabel, allGrades } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, Difficulty, topicsForGrade, topicLabel, allGrades, gradesFor } from "@/lib/subjects";
 import { FREE_TEXT_TOPICS } from "@/lib/challenge";
 import TopicPicker from "@/components/TopicPicker";
 
@@ -83,11 +83,11 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
         <div className="space-y-5 border border-slate-200 dark:border-slate-700 rounded-xl p-6 bg-white dark:bg-slate-900">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Subject</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {SUBJECTS.map((s) => (
                 <button
-                  key={s.id} onClick={() => { setSubject(s.id); setTopic(""); }}
-                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border ${subject === s.id ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
+                  key={s.id} onClick={() => { setSubject(s.id); setTopic(""); const gs = gradesFor(s.id); if (!gs.includes(grade)) setGrade(gs.reduce((b, x) => (Math.abs(x - grade) < Math.abs(b - grade) ? x : b), gs[0])); }}
+                  className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium border ${subject === s.id ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
                 >
                   {s.label}
                 </button>
@@ -100,8 +100,8 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
             <div className="grid grid-cols-6 gap-1.5">
               {allGrades().map((g) => (
                 <button
-                  key={g} onClick={() => { setGrade(g); setTopic(""); }}
-                  className={`aspect-square rounded-md text-sm font-semibold border ${grade === g ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
+                  key={g} onClick={() => { setGrade(g); setTopic(""); }} disabled={!gradesFor(subject).includes(g)}
+                  className={`aspect-square rounded-md text-sm font-semibold border disabled:opacity-30 disabled:cursor-not-allowed ${grade === g ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
                 >
                   {g}
                 </button>
@@ -120,7 +120,7 @@ export default function ChallengeRunner({ childId, childName, childAvatar, defau
               {(["easy", "medium", "hard"] as Difficulty[]).map((d) => (
                 <button
                   key={d} onClick={() => setDifficulty(d)}
-                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border ${difficulty === d ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
+                  className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium border ${difficulty === d ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"}`}
                 >
                   {d[0].toUpperCase() + d.slice(1)}
                 </button>

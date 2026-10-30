@@ -7,7 +7,7 @@
  *   npx tsx scripts/verify-curriculum.ts            # checks only
  *   npx tsx scripts/verify-curriculum.ts --samples  # also prints 3 sample questions per skill
  */
-import { SUBJECTS, allTopics, generateWorksheet, topicsForGrade, type SubjectId, type Difficulty } from "../lib/subjects";
+import { SUBJECTS, allTopics, generateWorksheet, topicsForGrade, gradesFor, type SubjectId, type Difficulty } from "../lib/subjects";
 import { MATH_TOPICS } from "../lib/subjects/math";
 import { ENGLISH_TOPICS } from "../lib/subjects/english";
 import { SCIENCE_TOPICS } from "../lib/subjects/science";
@@ -29,7 +29,7 @@ for (const { id: subject } of SUBJECTS) {
 
   for (let grade = 1; grade <= 12; grade++) {
     const units = bookFor(subject, grade);
-    if (!units) { errors.push(`${subject} ${grade}: no book for this grade`); continue; }
+    if (!units) { if (gradesFor(subject).includes(grade)) errors.push(`${subject} ${grade}: no book for this grade`); continue; }
     const skills = bookSkills(units);
     leaves += skills.length;
 

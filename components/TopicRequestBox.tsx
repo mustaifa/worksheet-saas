@@ -60,7 +60,7 @@ export default function TopicRequestBox({ subject = "", grade, compact = false }
             <label className="text-sm">
               <span className="block text-slate-700 dark:text-slate-300 mb-1">Subject</span>
               <select value={subj} onChange={(e) => setSubj(e.target.value)} className={field}>
-                <option value="">Choose…</option><option value="math">Math</option><option value="english">English</option><option value="science">Science</option><option value="other">Other</option>
+                <option value="">Choose…</option><option value="math">Math</option><option value="english">English</option><option value="science">Science</option><option value="physics">Physics</option><option value="chemistry">Chemistry</option><option value="biology">Biology</option><option value="computer">Computer Science</option><option value="other">Other</option>
               </select>
             </label>
             <label className="text-sm">

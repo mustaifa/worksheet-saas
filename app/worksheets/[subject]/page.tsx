@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import JsonLd, { breadcrumbLd } from "@/components/seo/JsonLd";
 import { absoluteUrl } from "@/lib/site";
 import { gradeEquivalents } from "@/lib/topicContent";
-import { SUBJECTS, SubjectId, allGrades, topicsForGrade } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, allGrades, topicsForGrade, gradeRangeLabel } from "@/lib/subjects";
 
 export const dynamicParams = false;
 
@@ -18,8 +18,8 @@ export function generateMetadata({ params }: { params: { subject: string } }) {
   const subject = SUBJECTS.find((s) => s.id === params.subject);
   if (!subject) return {};
   return {
-    title: `Free ${subject.label} Worksheets with Answers, Grades 1–12`,
-    description: `Free printable ${subject.label} worksheets for every grade from 1 to 12, each with a full answer key. Print or save as a PDF.`,
+    title: `Free ${subject.label} Worksheets with Answers, ${gradeRangeLabel(subject.id)}`,
+    description: `Free printable ${subject.label} worksheets for every grade from ${gradeRangeLabel(subject.id).replace("Grades ", "").replace("–", " to ")}, each with a full answer key. Print or save as a PDF.`,
     alternates: { canonical: `/worksheets/${subject.id}` },
   };
 }

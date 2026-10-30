@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   SUBJECTS, SubjectId, Difficulty, Question,
-  topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, challengeQuestion, parseCommand, allGrades, allTopics,
+  topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, challengeQuestion, parseCommand, allGrades, allTopics, gradesFor,
 } from "@/lib/subjects";
 import TopicPicker from "@/components/TopicPicker";
 import WorksheetSheet from "@/components/WorksheetSheet";
@@ -92,8 +92,12 @@ export default function WorksheetGenerator() {
   }
 
   function handleSubjectChange(s: SubjectId) {
+    // Physics/Chemistry/Biology start at grade 9 and Computer Science at 6: move to the nearest offered grade.
+    const gs = gradesFor(s);
+    const g = gs.includes(grade) ? grade : gs.reduce((b, x) => (Math.abs(x - grade) < Math.abs(b - grade) ? x : b), gs[0]);
     setSubject(s);
-    setTopic(pickFirstValidTopic(s, grade, topic));
+    if (g !== grade) setGrade(g);
+    setTopic(pickFirstValidTopic(s, g, topic));
     setQuestions([]);
   }
 
@@ -202,12 +206,12 @@ export default function WorksheetGenerator() {
       <aside className="space-y-5">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Subject</p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {SUBJECTS.map((s) => (
               <button
                 key={s.id}
                 onClick={() => handleSubjectChange(s.id)}
-                className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border ${
+                className={`flex-1 whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium border ${
                   subject === s.id ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
               >
@@ -224,9 +228,10 @@ export default function WorksheetGenerator() {
               <button
                 key={g}
                 onClick={() => handleGradeChange(g)}
+                disabled={!gradesFor(subject).includes(g)}
                 aria-pressed={grade === g}
                 aria-label={`Grade ${g}`}
-                className={`aspect-square rounded-md text-sm font-semibold border ${
+                className={`aspect-square rounded-md text-sm font-semibold border disabled:opacity-30 disabled:cursor-not-allowed ${
                   grade === g ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"
                 }`}
               >
