@@ -13,7 +13,9 @@ import TopicRequestBox from "@/components/TopicRequestBox";
 import TrustStrip from "@/components/TrustStrip";
 import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
-import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
+import { absoluteUrl, SITE_NAME } from "@/lib/site";
+import PinButton from "@/components/PinButton";
+import { stableSeed, sharePaths, pinDescription, OG_SIZE } from "@/lib/shareImage";
 import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, challengeQuestion, isScienceFamily } from "@/lib/subjects";
 import { locateSkill, LEVEL_LABEL, LEVEL_BADGE, STANDARDS } from "@/lib/curriculum";
@@ -22,17 +24,6 @@ import { guidesForWorksheet } from "@/lib/blogNav";
 // Number of questions on the free public worksheet (reading comprehension
 // ignores this and uses its passage's own question set).
 const SAMPLE_COUNT = 12;
-
-// deterministic hash so every visitor to the same URL sees the same worksheet —
-// good for SEO (stable, indexable content) and avoids surprising repeat visitors
-function stableSeed(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash) || 1;
-}
 
 type Params = { subject: string; grade: string; topic: string };
 
@@ -63,8 +54,11 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
     title: { absolute: title },
     description,
     alternates: { canonical: path },
-    openGraph: { title, description, url: path, type: "article", images: [OG_IMAGE] },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      title, description, url: path, type: "article",
+      images: [{ url: sharePaths(subject.id, params.grade, params.topic).og, ...OG_SIZE, alt: title }],
+    },
+    twitter: { card: "summary_large_image", title, description, images: [sharePaths(subject.id, params.grade, params.topic).og] },
   };
 }
 
@@ -205,6 +199,11 @@ export default function TopicPage({ params }: { params: Params }) {
             meta={`Grade ${grade} · ${subject.label} · ${questions.length} questions`}
             filename={brandedFilename([`Grade ${grade}`, subject.label, name], "pdf")}
             layout={layout}
+          />
+          <PinButton
+            url={absoluteUrl(path)}
+            media={absoluteUrl(sharePaths(subject.id, grade, topic.id).pin)}
+            description={pinDescription(grade, subject.label, name)}
           />
           <a href="#answer-key" className="px-5 py-2.5 rounded-lg font-medium border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-900">
             Jump to answer key
