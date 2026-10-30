@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { parseVariant } from "@/lib/worksheetVariant";
 import type { PinItem } from "@/lib/pinItems";
-import { shareData, shareFonts, pinPages, PinImage, OgCard, PIN_SIZE, OG_SIZE } from "@/lib/shareImage";
+import { shareData, shareFonts, PinImage, OgCard, PIN_SIZE, OG_SIZE } from "@/lib/shareImage";
 
 // /share/pin/<subject>/<grade>/<topic>  → 1000×1500 Pinterest pin
 // /share/og/<subject>/<grade>/<topic>   → 1200×630 link-preview card
@@ -24,7 +24,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
   // Exact generated worksheets are split into pages (?p=2 …) so no question is cut off.
   let page: { index: number; pages: PinItem[][] } | undefined;
   if (pin && v) {
-    const pages = pinPages(d.items);
+    const pages = d.pages;
     const n = parseInt(sp.get("p") || "1", 10);
     if (isNaN(n) || n < 1 || n > pages.length) return new Response("Not found", { status: 404 });
     page = { index: n - 1, pages };

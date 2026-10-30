@@ -13,7 +13,6 @@ import { DocIcon } from "@/components/Icons";
 import { brandedFilename } from "@/lib/brand";
 import { pinPageLinks, type PinPageLink } from "@/lib/pinLinks";
 import PinPages from "@/components/PinPages";
-import { pinItemsFromLayout } from "@/lib/pinItems";
 
 import { useGradeTheme } from "@/components/GradeThemeProvider";
 
@@ -185,13 +184,14 @@ export default function WorksheetGenerator() {
   // split into several pin pages, shown in a small dialog to pin one by one.
   // Pins link to a public page (/ws/...) since the dashboard needs a login.
   function handlePin() {
+    if (!layout) return;
     const g = gen ?? { subject, grade, topic };
     const links = pinPageLinks({
       origin: window.location.origin,
       subject: g.subject, subjectLabel: SUBJECTS.find((x) => x.id === g.subject)?.label || g.subject,
       grade: g.grade, topic: g.topic, name: topicLabel(g.subject, g.topic).replace(/^The /, ""),
       variant: { difficulty: g.difficulty ?? difficulty, count: g.count ?? count, seed: seedRef.current },
-      items: layout ? pinItemsFromLayout(layout) : [],
+      layout: layout!,
     });
     if (links.length === 1) window.open(links[0].href, "_blank", "noopener,noreferrer,width=760,height=640");
     else setPinLinks(links);
