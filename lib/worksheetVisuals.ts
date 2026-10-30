@@ -932,6 +932,96 @@ export function picVisual(pic: string): Visual | null {
     shapes.push(...iconRow(opts, size, 24, 6, 104));
     return { w: 104 + opts.length * (size + 24), h: 62, shapes, alt: `${target} and three pictures: ${opts.join(", ")}` };
   }
+  if (kind === "col") {
+    const [op, a, b, wrong, who] = rest.split("|");
+    const cw = 16, len = Math.max(a.length, b.length, wrong.length) + 1, W = len * cw + 16;
+    const R = (str: string, row: number, color = INK) => str.split("").reverse().map((ch, i): Shape => ({ k: "text", x: W - 10 - i * cw, y: 22 + row * 24, t: ch, size: 17, anchor: "middle", bold: true, fill: color }));
+    const shapes: Shape[] = [
+      { k: "rect", x: 0, y: 0, w: W + 120, h: 96, r: 6, fill: "#fffbeb", stroke: "#fcd34d", sw: 1.2 },
+      ...R(a, 0), ...R(b, 1), { k: "text", x: W - 10 - (len - 1) * cw, y: 46, t: op, size: 17, anchor: "middle", bold: true, fill: INK },
+      { k: "line", x1: 8, y1: 54, x2: W - 2, y2: 54, stroke: INK, sw: 1.8 },
+      ...R(wrong, 2.6, "#dc2626"),
+      { k: "text", x: W + 12, y: 30, t: `${who}'s work`, size: 11, bold: true, fill: "#92400e" },
+      { k: "text", x: W + 12, y: 50, t: "Is it right?", size: 10.5, fill: "#92400e" },
+      { k: "text", x: W + 12, y: 84, t: "✗ ?", size: 15, bold: true, fill: "#dc2626" },
+    ];
+    return { w: W + 122, h: 98, shapes, alt: `${who}'s column working with the answer ${wrong}`, prompt: `Look at ${who}'s work. Find the mistake and write the correct answer.` };
+  }
+  if (kind === "work") {
+    const [who, ...lines] = rest.split("|");
+    const lh = 22, W = Math.max(...lines.map((l) => l.length)) * 8.6 + 40;
+    const shapes: Shape[] = [{ k: "rect", x: 0, y: 0, w: W + 10, h: 26 + lines.length * lh, r: 6, fill: "#fffbeb", stroke: "#fcd34d", sw: 1.2 }, { k: "text", x: 10, y: 17, t: `${who}'s work`, size: 11, bold: true, fill: "#92400e" }];
+    lines.forEach((l, i) => {
+      const y = 26 + i * lh;
+      shapes.push({ k: "line", x1: 8, y1: y + lh - 2, x2: W, y2: y + lh - 2, stroke: "#fde68a", sw: 1 });
+      shapes.push({ k: "text", x: 14, y: y + 15, t: l, size: 14, fill: i === lines.length - 1 ? "#dc2626" : "#1e3a8a" });
+    });
+    return { w: W + 12, h: 28 + lines.length * lh, shapes, alt: `${who}'s working: ${lines.join(", ")}`, prompt: `Look at ${who}'s work. Find the mistake and write the correct answer${/x =/.test(lines[0] + lines[1]) || /x/.test(lines[0]) && !/×/.test(lines[0]) ? " (the value of x)" : ""}.` };
+  }
+  if (kind === "balance") {
+    const [body, ask] = rest.split("|");
+    const scales = body.split(";").map((sc) => { const [l, r] = sc.split("="); return { left: l.split("+"), right: r }; });
+    const shapes: Shape[] = [];
+    const SW = 200;
+    const drawShape = (k: string, x: number, y: number) => {
+      if (k === "c") shapes.push({ k: "circle", cx: x + 10, cy: y + 10, r: 10, fill: FILL_A, stroke: INK, sw: 1.4 });
+      else if (k === "s") shapes.push({ k: "rect", x: x + 1, y: y + 1, w: 18, h: 18, fill: FILL_B, stroke: INK, sw: 1.4 });
+      else shapes.push({ k: "poly", pts: [[x + 10, y], [x + 20, y + 19], [x, y + 19]], closed: true, fill: FILL_D, stroke: INK, sw: 1.4 });
+    };
+    scales.forEach((sc, i) => {
+      const x0 = i * (SW + 16), base = 92;
+      shapes.push({ k: "poly", pts: [[x0 + SW / 2 - 14, base], [x0 + SW / 2, base - 26], [x0 + SW / 2 + 14, base]], closed: true, fill: "#e2e8f0", stroke: INK, sw: 1.3 });
+      shapes.push({ k: "line", x1: x0 + 8, y1: base - 28, x2: x0 + SW - 8, y2: base - 28, stroke: INK, sw: 3 });
+      const n = sc.left.length, lx = x0 + 8 + (SW / 2 - 16 - n * 22) / 2;
+      sc.left.forEach((k, j) => drawShape(k, lx + j * 22, base - 50));
+      shapes.push({ k: "rect", x: x0 + SW / 2 + 22, y: base - 52, w: 52, h: 22, r: 3, fill: "#475569", stroke: INK, sw: 1.2 });
+      shapes.push({ k: "text", x: x0 + SW / 2 + 48, y: base - 36, t: sc.right, size: 13, bold: true, anchor: "middle", fill: "#fff" });
+      shapes.push({ k: "text", x: x0 + 10, y: base + 14, t: `Scale ${i + 1}`, size: 10, bold: true, fill: "#475569" });
+    });
+    return { w: scales.length * (SW + 16), h: 112, shapes, alt: "Balance scales with shapes and weights", ...(ask ? { prompt: `Each scale balances. What is one ${ask} worth?` } : {}) };
+  }
+  if (kind === "bar") {
+    let spec: { top?: string; total?: string; bars: { label: string; segs: [number, string][] }[] };
+    try { spec = JSON.parse(rest); } catch { return null; }
+    const unitTotal = Math.max(...spec.bars.map((b) => b.segs.reduce((a2, [w]) => a2 + w, 0)));
+    const LW = 54, BW = 260, bh = 26, gap = 12, top = spec.top ? 26 : 6;
+    const shapes: Shape[] = [];
+    spec.bars.forEach((b, i) => {
+      const y = top + i * (bh + gap);
+      shapes.push({ k: "text", x: LW - 6, y: y + 17, t: b.label, size: 11, bold: true, anchor: "end", fill: INK });
+      let x = LW;
+      b.segs.forEach(([w, t], j) => {
+        const sw2 = (w / unitTotal) * BW;
+        const fill = t === "?" || t === " " ? "#fff" : t === "•" || t === "" ? BAR_FILLS[i % BAR_FILLS.length] : BAR_FILLS[(i + j) % BAR_FILLS.length];
+        shapes.push({ k: "rect", x, y, w: sw2, h: bh, fill, stroke: INK, sw: 1.4 });
+        if (t.trim() && t !== "•") shapes.push({ k: "text", x: x + sw2 / 2, y: y + 17, t, size: 12, bold: true, anchor: "middle", fill: t === "?" ? "#dc2626" : INK });
+        x += sw2;
+      });
+    });
+    const h = top + spec.bars.length * (bh + gap) - gap;
+    if (spec.top) {
+      shapes.push({ k: "line", x1: LW, y1: 12, x2: LW + BW, y2: 12, stroke: "#1d4ed8", sw: 1.4 }, { k: "line", x1: LW, y1: 6, x2: LW, y2: 18, stroke: "#1d4ed8", sw: 1.4 }, { k: "line", x1: LW + BW, y1: 6, x2: LW + BW, y2: 18, stroke: "#1d4ed8", sw: 1.4 });
+      shapes.push({ k: "rect", x: LW + BW / 2 - 22, y: 3, w: 44, h: 16, fill: "#fff", stroke: "#fff", sw: 0.1 }, { k: "text", x: LW + BW / 2, y: 16, t: spec.top, size: 12, bold: true, anchor: "middle", fill: "#1d4ed8" });
+    }
+    if (spec.total) {
+      const bx = LW + BW + 8;
+      shapes.push({ k: "poly", pts: [[bx, top], [bx + 8, top + 4], [bx + 8, (top + h) / 2 - 4], [bx + 14, (top + h) / 2], [bx + 8, (top + h) / 2 + 4], [bx + 8, h - 4], [bx, h]], stroke: "#1d4ed8", sw: 1.6 });
+      shapes.push({ k: "text", x: bx + 20, y: (top + h) / 2 + 5, t: spec.total, size: 13, bold: true, fill: spec.total === "?" ? "#dc2626" : "#1d4ed8" });
+    }
+    return { w: LW + BW + 70, h: h + 4, shapes, alt: "A bar model of the problem" };
+  }
+  if (kind === "pyr") {
+    const rows = rest.split("/").map((r) => r.split(","));
+    const n = rows[0].length, bw = 50, bh = 28, shapes: Shape[] = [];
+    rows.forEach((r, i) => {
+      const y = (rows.length - 1 - i) * bh + 2, x0 = 2 + (i * bw) / 2;
+      r.forEach((v, j) => {
+        shapes.push({ k: "rect", x: x0 + j * bw, y, w: bw, h: bh, fill: v === "?" ? "#fff" : v ? FILL_B : "#fff", stroke: INK, sw: 1.5 });
+        if (v) shapes.push({ k: "text", x: x0 + j * bw + bw / 2, y: y + 19, t: v, size: 14, bold: true, anchor: "middle", fill: v === "?" ? "#dc2626" : INK });
+      });
+    });
+    return { w: n * bw + 4, h: rows.length * bh + 4, shapes, alt: "A number pyramid", prompt: "Each brick is the sum of the two bricks below it. What number goes in the ? brick?" };
+  }
   if (kind === "icon") {
     const ic = ICONS[rest];
     return ic ? { w: 48, h: 48, shapes: placeIcon(ic, 0, 0, 48), alt: ic.word } : null;

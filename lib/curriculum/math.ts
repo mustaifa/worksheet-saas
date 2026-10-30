@@ -66,6 +66,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Shapes & Equal Parts", c("shapes", "2.G.A.1"), c("halves_quarters", "2.G.A.3"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 3 Preview", adv("mult_facts", "3.OA.C.7"), adv("time_minute", "3.MD.A.1")),
+      L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
       L("Challenge Puzzles", ch("challenge_mystery_number"), ch("challenge_magic_square"), ch("challenge_missing_digits"))),
   ],
 
@@ -93,6 +94,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Shapes & Quadrilaterals", c("shapes", "3.G.A.1"), c("quadrilaterals", "3.G.A.1"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 4 Preview", adv("mult_multi", "4.NBT.B.5"), adv("long_division", "4.NBT.B.6"), adv("factors_multiples", "4.OA.B.4")),
+      L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
       L("Challenge Puzzles", ch("challenge_missing_digits"), ch("challenge_magic_square"), ch("challenge_mystery_number"))),
   ],
 
@@ -128,6 +130,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Classifying Shapes", c("triangle_classify", "4.G.A.2"), c("quadrilaterals", "4.G.A.2"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 5–6 Preview", adv("powers_of_10", "5.NBT.A.2"), adv("geometry_area_triangle", "6.G.A.1"), adv("geometry", "5.MD.C.5")),
+      L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
       L("Challenge Puzzles", ch("challenge_logic"), ch("challenge_missing_digits"), ch("challenge_magic_square"))),
   ],
 
@@ -156,6 +159,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Classifying Figures", c("triangle_classify", "5.G.B.4"), c("quadrilaterals", "5.G.B.3"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 6 Preview", adv("stats_central_tendency", "6.SP.B.5c"), adv("stats_range", "6.SP.B.5c"), adv("stats", "6.SP.B.5"), adv("geometry_area_triangle", "6.G.A.1")),
+      L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
       L("Challenge Puzzles", ch("challenge_logic"), ch("challenge_missing_digits"), ch("challenge_magic_square"))),
   ],
 
@@ -185,6 +189,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Mixed Review", c("stats", "6.SP.B.5"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 7 Preview", adv("integers_add_sub", "7.NS.A.1"), adv("integers_mul_div", "7.NS.A.2"), adv("integers", "7.NS.A.3"), adv("two_step_equations", "7.EE.B.4a")),
+      L("Thinking & Problem Solving", adv("find_the_mistake"), adv("bar_models"), ch("balance_puzzles"), ch("number_pyramids")),
       L("Challenge Puzzles", ch("challenge_number_theory"), ch("challenge_logic"))),
   ],
 
@@ -214,6 +219,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Comparing Data", c("stats_central_tendency", "7.SP.B.4"), c("stats_range", "7.SP.B.4"), c("stats", "7.SP.B.4"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 8 Preview", adv("slope", "8.EE.B.6"), adv("pythagorean", "8.G.B.7"), adv("scientific_notation", "8.EE.A.4")),
+      L("Thinking & Problem Solving", adv("find_the_mistake"), ch("balance_puzzles")),
       L("Challenge Puzzles", ch("challenge_counting"), ch("challenge_number_theory"), ch("challenge_logic"))),
   ],
 
@@ -244,6 +250,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Algebra Basics", c("algebra_combine_terms"), c("algebra_distribute"), c("algebra_solve"), c("algebra_basics"))),
     U("Going Further", FURTHER,
       L("Advanced: Algebra I Preview", adv("polynomials", "A-APR.A.1"), adv("factoring_trinomials", "A-SSE.A.2"), adv("quadratics", "A-REI.B.4b")),
+      L("Thinking & Problem Solving", adv("find_the_mistake"), ch("balance_puzzles")),
       L("Challenge Puzzles", ch("challenge_counting"), ch("challenge_number_theory"), ch("challenge_algebra"))),
   ],
 

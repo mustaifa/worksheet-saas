@@ -76,6 +76,8 @@ export type WorksheetLayout = {
   example?: { text: string; answer: string };
   /** A "Remember" reference chart for the topic. */
   anchor?: AnchorChart;
+  /** One stretch question for fast finishers (not scored). */
+  challenge?: { text: string; answer: string; visual?: Visual | null };
 };
 
 const norm = (s: string) =>
@@ -247,6 +249,8 @@ export function layoutWorksheet(opts: {
   questions: Question[];
   /** An extra question shown as a worked example (not numbered or scored). */
   example?: Question;
+  /** A stretch question from another (challenge) topic of the same grade. */
+  challenge?: { question: Question; topic: string };
 }): WorksheetLayout {
   const { subject, grade, topic, questions } = opts;
   const isMath = subject === "math";
@@ -433,6 +437,12 @@ export function layoutWorksheet(opts: {
     sections,
     example,
     anchor: passage || diagramSec ? undefined : anchorChart(subject, topic, grade) ?? undefined,
+    challenge: opts.challenge ? (() => {
+      const cq = opts.challenge.question;
+      const v = visualFor(subject, opts.challenge.topic, grade, cq.q, cq.pic);
+      const text = (v?.prompt ? `${cq.q}` : cq.q).replace(BLANK_RE, "____");
+      return { text, answer: cq.a, visual: v };
+    })() : undefined,
   };
 }
 

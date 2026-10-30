@@ -2,7 +2,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   SUBJECTS, SubjectId, Difficulty, Question,
-  topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, parseCommand, allGrades, allTopics,
+  topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, challengeQuestion, parseCommand, allGrades, allTopics,
 } from "@/lib/subjects";
 import TopicPicker from "@/components/TopicPicker";
 import WorksheetSheet from "@/components/WorksheetSheet";
@@ -190,7 +190,8 @@ export default function WorksheetGenerator() {
     if (!questions.length) return null;
     const g = gen ?? { subject, grade, topic };
     const example = exampleQuestion({ subject: g.subject, grade: g.grade, topic: g.topic, seed: seedRef.current, avoid: questions });
-    return layoutWorksheet({ subject: g.subject, subjectLabel: SUBJECTS.find((x) => x.id === g.subject)?.label || g.subject, grade: g.grade, topic: g.topic, title: topicLabel(g.subject, g.topic), questions, example });
+    const challenge = challengeQuestion({ subject: g.subject, grade: g.grade, topic: g.topic, seed: seedRef.current });
+    return layoutWorksheet({ subject: g.subject, subjectLabel: SUBJECTS.find((x) => x.id === g.subject)?.label || g.subject, grade: g.grade, topic: g.topic, title: topicLabel(g.subject, g.topic), questions, example, challenge });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions, gen]);
 

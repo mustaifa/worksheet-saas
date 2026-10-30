@@ -347,6 +347,16 @@ export default function WorksheetSheet({
         <SectionBlock key={si} sec={sec} layout={layout} t={t} show={showAnswers} />
       ))}
 
+      {/* challenge corner */}
+      {layout.challenge && (
+        <div className="mt-6 rounded-xl border-2 border-dashed border-violet-300 bg-violet-50 px-4 py-3 break-inside-avoid">
+          <p className="text-xs font-bold uppercase tracking-wide text-violet-700 mb-1">★ Challenge corner <span className="font-medium normal-case tracking-normal text-violet-500">for fast finishers</span></p>
+          <p className={L ? "text-lg" : ""}>{layout.challenge.text}</p>
+          {layout.challenge.visual && <div className="mt-2"><VisualSvg v={layout.challenge.visual} /></div>}
+          <div className={`mt-2 border-b border-violet-300 h-7 flex items-end ${showAnswers ? "text-red-600 font-semibold" : ""}`}>{showAnswers ? layout.challenge.answer : ""}</div>
+        </div>
+      )}
+
       {/* self-check + teacher box */}
       <div className="mt-6 grid sm:grid-cols-[auto_1fr] print:grid-cols-[auto_1fr] gap-4 items-stretch">
         <div className="rounded-lg border border-slate-300 px-4 py-2">

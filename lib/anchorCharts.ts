@@ -940,6 +940,469 @@ const SCIENCE: Record<string, Maker> = {
   density: () => densityTriangle(),
 };
 
+
+// ---------------------------------------------------------------- round 2: more math
+
+function hundredChart(highlight: "tens" | "fives" | "none"): AnchorChart {
+  const shapes: Shape[] = [];
+  const c = 26;
+  for (let i = 0; i < 50; i++) {
+    const v = i + 1, x = (i % 10) * (c + 1), y = Math.floor(i / 10) * (c + 1);
+    const on = highlight === "tens" ? v % 10 === 0 : highlight === "fives" ? v % 5 === 0 : false;
+    shapes.push({ k: "rect", x, y, w: c, h: c, fill: on ? F[1] : i % 10 === 4 ? "#f8fafc" : "#fff", stroke: "#94a3b8", sw: 0.8 }, T(x + c / 2, y + 17, String(v), 10.5, "middle", on));
+  }
+  shapes.push(...arrow(275, 20, 300, 20, BLUE), T(306, 24, "+1 → one step right", 11, "start", true, BLUE), ...arrow(287, 44, 287, 72, RED), T(306, 62, "+10 → one row down", 11, "start", true, RED));
+  shapes.push(T(306, 100, "−1 left · −10 up", 11, "start", false, MUTED));
+  return { title: "Hundred chart (1–50)", visual: { w: W, h: 5 * (c + 1), shapes, alt: "Numbers 1 to 50 in rows of ten" } };
+}
+
+function numberLineHops(): AnchorChart {
+  const shapes: Shape[] = [];
+  const x0 = 14, step = 34, y = 60;
+  shapes.push(Ln(x0 - 6, y, x0 + 14 * step, y, INK, 1.6));
+  for (let i = 0; i <= 14; i++) shapes.push(Ln(x0 + i * step, y - 5, x0 + i * step, y + 5, INK, 1.1), T(x0 + i * step, y + 18, String(i), 10, "middle", i === 5 || i === 13));
+  for (let i = 5; i < 13; i++) shapes.push({ k: "poly", pts: Array.from({ length: 9 }, (_, k) => [x0 + i * step + (k / 8) * step, y - 4 - Math.sin((k / 8) * Math.PI) * 18] as [number, number]), stroke: BLUE, sw: 1.6 });
+  shapes.push(T(x0 + 9 * step, 18, "5 + ? = 13 → count the hops: 8", 12, "middle", true, BLUE));
+  return { title: "Counting on with a number line", visual: { w: W, h: 84, shapes, alt: "Number line with hops from 5 to 13" } };
+}
+
+function columnRegroup(sub: boolean): AnchorChart {
+  const shapes: Shape[] = [];
+  const cw = 26, X = (i: number) => 60 + i * cw;
+  const top = sub ? ["", "5", "¹2"] : ["", "4", "7"], bot = sub ? ["−", "1", "8"] : ["+", "3", "6"], ans = sub ? ["", "3", "4"] : ["", "8", "3"];
+  if (sub) shapes.push(T(X(1) + 10, 10, "4", 11, "middle", true, RED), Ln(X(1) - 2, 22, X(1) + 8, 14, RED, 1.4));
+  else shapes.push(T(X(1), 12, "1", 11, "middle", true, RED));
+  [top, bot, ans].forEach((row, r) => row.forEach((d, i) => shapes.push(T(X(i), 34 + r * 24, d, 18, "middle", true, r === 2 ? BLUE : INK))));
+  shapes.push(Ln(40, 66, 120, 66, INK, 1.8), T(X(1), 104, "tens", 9.5, "middle", false, MUTED), T(X(2), 104, "ones", 9.5, "middle", false, MUTED));
+  const lines = sub ? ["Start with the ones.", "Not enough ones? Trade 1 ten", "for 10 ones (regroup).", "52 − 18 = 34"] : ["Start with the ones: 7 + 6 = 13.", "Write 3, carry the 1 ten.", "Then the tens: 1 + 4 + 3 = 8.", "47 + 36 = 83"];
+  lines.forEach((t, i) => shapes.push(T(170, 26 + i * 22, t, 12, "start", i === 3, i === 3 ? BLUE : INK)));
+  return { title: sub ? "Subtracting with regrouping" : "Adding with regrouping", visual: { w: W, h: 108, shapes, alt: sub ? "52 minus 18 with regrouping" : "47 plus 36 with carrying" } };
+}
+
+function areaModel(): AnchorChart {
+  const shapes: Shape[] = [R(40, 20, 160, 60, F[0], 0), R(200, 20, 50, 60, F[1], 0), R(40, 80, 160, 26, F[2], 0), R(200, 80, 50, 26, F[3], 0)];
+  shapes.push(T(120, 14, "20", 11, "middle", true, BLUE), T(225, 14, "3", 11, "middle", true, BLUE), T(32, 54, "10", 11, "end", true, BLUE), T(32, 97, "4", 11, "end", true, BLUE));
+  shapes.push(T(120, 55, "200", 13, "middle", true), T(225, 55, "30", 13, "middle", true), T(120, 98, "80", 13, "middle", true), T(225, 98, "12", 13, "middle", true));
+  ["23 × 14", "= 200 + 30 + 80 + 12", "= 322", "Split each number into tens and ones,", "multiply each part, then add."].forEach((t, i) => shapes.push(T(280, 26 + i * 20, t, 12, "start", i < 3, i < 3 ? BLUE : INK)));
+  return { title: "Area model for multiplication", visual: { w: W, h: 110, shapes, alt: "Area model for 23 × 14 = 322" } };
+}
+
+function factorTree(): AnchorChart {
+  const shapes: Shape[] = [];
+  const node = (x: number, y: number, t: string, prime = false) => { shapes.push({ k: "circle", cx: x, cy: y, r: 13, fill: prime ? F[2] : F[0], stroke: INK, sw: 1.3 }, T(x, y + 4.5, t, 12, "middle", true)); };
+  shapes.push(Ln(80, 16, 50, 50, MUTED), Ln(80, 16, 110, 50, MUTED), Ln(110, 50, 85, 86, MUTED), Ln(110, 50, 135, 86, MUTED));
+  node(80, 16, "36"); node(50, 50, "2", true); node(110, 50, "18"); node(85, 86, "2", true); node(135, 86, "9");
+  shapes.push(Ln(135, 86, 120, 118, MUTED), Ln(135, 86, 150, 118, MUTED)); node(120, 118, "3", true); node(150, 118, "3", true);
+  ["36 = 2 × 2 × 3 × 3", "Prime: exactly 2 factors (2, 3, 5, 7, 11…)", "Composite: more than 2 factors", "GCF: biggest factor both share", "LCM: smallest multiple both share"].forEach((t, i) => shapes.push(T(200, 22 + i * 22, t, 11.5, "start", i === 0, i === 0 ? BLUE : INK)));
+  return { title: "Factors and primes", visual: { w: W, h: 134, shapes, alt: "Factor tree of 36" } };
+}
+
+function decimalAlign(): AnchorChart {
+  const shapes: Shape[] = [];
+  [["", "1", "2", ".", "5"], ["+", "", "3", ".", "7", "5"], ["", "1", "6", ".", "2", "5"]].forEach((row, r) => row.forEach((d, i) => shapes.push(T(40 + i * 18, 26 + r * 24, d, 17, "middle", true, r === 2 ? BLUE : d === "." ? RED : INK))));
+  shapes.push(T(40 + 5 * 18, 26, "0", 17, "middle", true, "#94a3b8"), Ln(20, 58, 160, 58, INK, 1.8));
+  ["Line up the decimal points.", "Fill gaps with zeros (12.5 = 12.50).", "Multiplying: count decimal places", "in both numbers: 0.3 × 0.2 = 0.06"].forEach((t, i) => shapes.push(T(190, 22 + i * 22, t, 12, "start", i === 0)));
+  return { title: "Working with decimals", visual: { w: W, h: 96, shapes, alt: "12.50 + 3.75 = 16.25 with decimal points lined up" } };
+}
+
+function wordsToSymbols(): AnchorChart {
+  return { title: "Words into maths", visual: cards([{ head: "+", lines: ["sum, more than,", "increased by, total"] }, { head: "−", lines: ["difference, less than,", "fewer, decreased by"] }, { head: "×", lines: ["product, times,", "of, twice (2×)"] }, { head: "÷", lines: ["quotient, per,", "shared equally, half"] }, { head: "=", lines: ["is, equals, gives"] }, { head: "x", lines: ["a number, an", "unknown amount"] }], 3, 50) };
+}
+
+function likeTerms(): AnchorChart {
+  const shapes: Shape[] = [];
+  const tile = (x: number, t: string, f: string) => { shapes.push(R(x, 6, 40, 30, f, 4), T(x + 20, 26, t, 13, "middle", true)); };
+  tile(14, "3x", F[0]); tile(60, "+2", F[1]); tile(106, "+x", F[0]); tile(152, "+5", F[1]);
+  shapes.push(T(204, 27, "=  4x + 7", 15, "start", true, BLUE), T(330, 27, "same letter & power: like terms", 10.5, "start", false, MUTED));
+  shapes.push(R(30, 58, 40, 40, F[2], 0), R(70, 58, 80, 40, F[3], 0), T(50, 82, "3x", 11, "middle", true), T(110, 82, "12", 11, "middle", true));
+  shapes.push(T(50, 54, "x", 11, "middle", true, BLUE), T(110, 54, "4", 11, "middle", true, BLUE), T(24, 82, "3", 11, "end", true, BLUE));
+  shapes.push(T(170, 84, "3(x + 4) = 3x + 12   (multiply each part)", 12.5, "start", true, BLUE));
+  return { title: "Like terms and distributing", visual: { w: W, h: 102, shapes, alt: "Combining like terms and the distributive property" } };
+}
+
+function percentChange(): AnchorChart {
+  return { title: "Percent change and interest", visual: cards([{ head: "% change", lines: ["(new − old) ÷ old × 100"] }, { head: "Increase by 20%", lines: ["multiply by 1.20"] }, { head: "Decrease by 20%", lines: ["multiply by 0.80"] }, { head: "Simple interest", lines: ["I = P × r × t"] }], 4, 46) };
+}
+
+function scaleChart(): AnchorChart {
+  const shapes: Shape[] = [R(10, 30, 60, 40, F[0], 0), R(150, 10, 120, 80, F[1], 0), ...arrow(80, 50, 140, 50, BLUE)];
+  shapes.push(T(40, 84, "3 cm", 10.5, "middle", true), T(210, 104, "6 cm", 10.5, "middle", true), T(110, 40, "× 2", 12, "middle", true, BLUE));
+  ["Scale factor = new ÷ original", "Scale 1 : 100 → 1 cm on paper", "is 100 cm in real life.", "Similar shapes: same angles,", "sides in proportion."].forEach((t, i) => shapes.push(T(290, 20 + i * 19, t, 11, "start", i === 0)));
+  return { title: "Scale and similar figures", visual: { w: W, h: 108, shapes, alt: "A rectangle enlarged by a scale factor of 2" } };
+}
+
+function numberSets(): AnchorChart {
+  const shapes: Shape[] = [R(0, 0, 330, 120, F[4], 12), R(10, 22, 220, 92, F[0], 10), R(20, 44, 150, 64, F[1], 10), R(30, 66, 90, 36, F[2], 8), R(244, 22, 78, 92, F[3], 10)];
+  shapes.push(T(165, 15, "Real numbers", 11, "middle", true), T(120, 37, "Rational: −2, ½, 0.75", 10, "middle", true), T(95, 59, "Integers: −3, 0, 4", 10, "middle", true), T(75, 88, "Whole: 0, 1, 2", 10, "middle", true), T(283, 54, "Irrational", 10, "middle", true), T(283, 74, "√2, π", 11, "middle", false, BLUE), T(283, 92, "never ends,", 9, "middle", false, MUTED), T(283, 104, "never repeats", 9, "middle", false, MUTED));
+  ["Perfect squares: 1, 4, 9, 16, 25, 36, 49, 64, 81, 100", "Perfect cubes: 1, 8, 27, 64, 125", "√50 = √(25 × 2) = 5√2"].forEach((t, i) => shapes.push(T(340, 22 + i * 40, t.split(": ")[0] + (t.includes(": ") ? ":" : ""), 10.5, "start", true), T(340, 38 + i * 40, t.split(": ")[1] || "", 10, "start", false, BLUE)));
+  return { title: "Number sets, squares and roots", visual: { w: W, h: 122, shapes, alt: "Nested number sets with irrational numbers, and perfect squares" } };
+}
+
+function systemsChart(): AnchorChart {
+  const shapes: Shape[] = [];
+  const o = 8, s = 12, P = (x: number, y: number): [number, number] => [o + (x + 1) * s, 4 + (8 - y) * s];
+  for (let i = 0; i <= 9; i++) shapes.push(Ln(o + i * s, 4, o + i * s, 4 + 9 * s, "#e2e8f0", 0.7), Ln(o, 4 + i * s, o + 9 * s, 4 + i * s, "#e2e8f0", 0.7));
+  shapes.push(Ln(...P(-1, -1), ...P(7, 7), BLUE, 2), Ln(...P(-1, 7), ...P(7, -1), RED, 2), { k: "circle", cx: P(3, 3)[0], cy: P(3, 3)[1], r: 4, fill: INK });
+  shapes.push(T(P(3, 3)[0] + 8, P(3, 3)[1] - 6, "(3, 3)", 10.5, "start", true));
+  ["The solution is where the lines cross.", "Substitution: solve one equation for a", "variable, put it into the other.", "Elimination: add/subtract equations", "so one variable cancels."].forEach((t, i) => shapes.push(T(140, 20 + i * 20, t, 11.5, "start", i === 0)));
+  return { title: "Systems of equations", visual: { w: W, h: 116, shapes, alt: "Two lines crossing at (3, 3)" } };
+}
+
+function twoWayTable(): AnchorChart {
+  const rows = [["", "Cats", "Dogs", "Total"], ["Boys", "8", "12", "20"], ["Girls", "10", "6", "16"], ["Total", "18", "18", "36"]];
+  const shapes: Shape[] = [];
+  rows.forEach((r, i) => r.forEach((v, j) => { shapes.push({ k: "rect", x: j * 62, y: i * 24, w: 62, h: 24, fill: i === 0 || j === 0 ? F[0] : i === 3 || j === 3 ? F[1] : "#fff", stroke: INK, sw: 0.9 }, T(j * 62 + 31, i * 24 + 16, v, 11, "middle", i === 0 || j === 0)); }));
+  ["Each cell counts BOTH groups:", "8 boys prefer cats.", "Totals add along each row and column.", "Relative frequency = cell ÷ total"].forEach((t, i) => shapes.push(T(270, 20 + i * 22, t, 11, "start", i === 0)));
+  return { title: "Two-way tables", visual: { w: W, h: 98, shapes, alt: "A two-way table of boys and girls who prefer cats or dogs" } };
+}
+
+function polyBox(): AnchorChart {
+  const shapes: Shape[] = [];
+  const cells = [["x²", "3x"], ["2x", "6"]];
+  shapes.push(T(60, 14, "x", 12, "middle", true, BLUE), T(120, 14, "+3", 12, "middle", true, BLUE), T(20, 44, "x", 12, "end", true, BLUE), T(20, 84, "+2", 12, "end", true, BLUE));
+  cells.forEach((r, i) => r.forEach((v, j) => shapes.push(R(30 + j * 60, 22 + i * 40, 60, 40, F[i * 2 + j], 0), T(60 + j * 60, 47 + i * 40, v, 13, "middle", true))));
+  ["(x + 2)(x + 3) = x² + 5x + 6", "Factoring x² + bx + c: find two", "numbers that multiply to c and add to b.", "a² − b² = (a + b)(a − b)", "(a + b)² = a² + 2ab + b²"].forEach((t, i) => shapes.push(T(180, 22 + i * 20, t, 11.5, "start", i === 0 || i >= 3, i === 0 ? BLUE : INK)));
+  return { title: "Multiplying and factoring polynomials", visual: { w: W, h: 106, shapes, alt: "Box method for (x + 2)(x + 3)" } };
+}
+
+function absValueEq(): AnchorChart {
+  const shapes: Shape[] = [];
+  const x0 = 20, st = 26, y = 40;
+  shapes.push(Ln(x0 - 6, y, x0 + 16 * st, y, INK, 1.4));
+  for (let i = 0; i <= 16; i++) shapes.push(Ln(x0 + i * st, y - 4, x0 + i * st, y + 4, INK, 1), ...(i % 2 === 0 ? [T(x0 + i * st, y + 17, String(i - 8).replace("-", "−"), 9.5, "middle", i === 8 || i === 3 || i === 13)] : []));
+  shapes.push({ k: "circle", cx: x0 + 3 * st, cy: y, r: 5, fill: BLUE }, { k: "circle", cx: x0 + 13 * st, cy: y, r: 5, fill: BLUE });
+  shapes.push({ k: "poly", pts: Array.from({ length: 13 }, (_, k) => [x0 + 8 * st + (k / 12) * 5 * st, y - 6 - Math.sin((k / 12) * Math.PI) * 18] as [number, number]), stroke: RED, sw: 1.4 }, { k: "poly", pts: Array.from({ length: 13 }, (_, k) => [x0 + 8 * st - (k / 12) * 5 * st, y - 6 - Math.sin((k / 12) * Math.PI) * 18] as [number, number]), stroke: RED, sw: 1.4 });
+  shapes.push(T(W / 2, 80, "|x| = 5 means x is 5 away from 0: x = 5 or x = −5", 12, "middle", true, BLUE), T(W / 2, 98, "|x − a| = b → x − a = b or x − a = −b (two answers)", 10.5, "middle"));
+  return { title: "Absolute value equations", visual: { w: W, h: 104, shapes, alt: "Points −5 and 5 are both 5 away from 0" } };
+}
+
+function growthCurve(): AnchorChart {
+  const shapes: Shape[] = [];
+  const o = 20, base = 100;
+  shapes.push(Ln(o, 6, o, base, INK, 1.3), Ln(o, base, o + 200, base, INK, 1.3));
+  const up: [number, number][] = [], down: [number, number][] = [];
+  for (let t = 0; t <= 5; t += 0.1) { up.push([o + t * 38, base - 8 * Math.pow(1.6, t)]); down.push([o + t * 38, base - 88 * Math.pow(0.6, t)]); }
+  shapes.push({ k: "poly", pts: up.filter(([, yy]) => yy > 4), stroke: BLUE, sw: 2.2 }, { k: "poly", pts: down, stroke: RED, sw: 2.2 });
+  shapes.push(T(150, 30, "growth: b > 1", 10.5, "start", true, BLUE), T(24, 116, "red: decay, 0 < b < 1", 10, "start", true, RED));
+  ["y = a · bˣ", "a = starting amount", "b = growth factor (1 + rate)", "logᵦ(x) = y  means  bʸ = x", "log(ab) = log a + log b", "log(aⁿ) = n · log a"].forEach((t, i) => shapes.push(T(260, 18 + i * 17.5, t, 11, "start", i === 0 || i === 3, i === 0 || i === 3 ? BLUE : INK)));
+  return { title: "Exponentials and logarithms", visual: { w: W, h: 120, shapes, alt: "Exponential growth and decay curves with log rules" } };
+}
+
+function sequencesChart(): AnchorChart {
+  return { title: "Sequences and series", visual: cards([{ head: "Arithmetic: +d each time", lines: ["3, 7, 11, 15… (d = 4)", "aₙ = a₁ + (n − 1)d"] }, { head: "Geometric: ×r each time", lines: ["2, 6, 18, 54… (r = 3)", "aₙ = a₁ · rⁿ⁻¹"] }, { head: "Arithmetic sum", lines: ["Sₙ = n(a₁ + aₙ) ÷ 2"] }, { head: "Geometric sum", lines: ["Sₙ = a₁(1 − rⁿ) ÷ (1 − r)"] }], 2, 50) };
+}
+
+function unitCircle(): AnchorChart {
+  const shapes: Shape[] = [];
+  const cx = 100, cy = 76, r = 56;
+  shapes.push(Ln(cx - r - 10, cy, cx + r + 10, cy, INK, 1.2), Ln(cx, cy - r - 8, cx, cy + r + 8, INK, 1.2), { k: "circle", cx, cy, r, fill: "none", stroke: BLUE, sw: 1.8 });
+  const pts: [number, string][] = [[0, "(1, 0)"], [30, "(√3/2, ½)"], [45, "(√2/2, √2/2)"], [60, "(½, √3/2)"], [90, "(0, 1)"], [180, "(−1, 0)"], [270, "(0, −1)"]];
+  for (const [deg, lab] of pts) {
+    const a = (deg * Math.PI) / 180, x = cx + Math.cos(a) * r, y = cy - Math.sin(a) * r;
+    shapes.push({ k: "circle", cx: x, cy: y, r: 3, fill: RED });
+    if (deg <= 60 && deg > 0) shapes.push(T(x + 6, y - 2, `${deg}° ${lab}`, 8.5, "start", false, MUTED));
+    else shapes.push(T(x + (deg === 180 ? -6 : 6), y + (deg === 90 ? -6 : deg === 270 ? 12 : -4), lab, 8.5, deg === 180 ? "end" : "start", false, MUTED));
+  }
+  ["Point on the circle = (cos θ, sin θ)", "tan θ = sin θ ÷ cos θ", "180° = π radians", "sin² θ + cos² θ = 1", "Law of sines: a/sin A = b/sin B", "Law of cosines: c² = a² + b² − 2ab cos C"].forEach((t, i) => shapes.push(T(250, 18 + i * 19, t, 11, "start", i < 2, i < 2 ? BLUE : INK)));
+  return { title: "Unit circle and trig laws", visual: { w: W, h: 150, shapes, alt: "Unit circle with key angles, and trig identities" } };
+}
+
+function functionsHS(): AnchorChart {
+  return { title: "Function toolkit", visual: cards([{ head: "f(x) + k", lines: ["shift up k"] }, { head: "f(x − h)", lines: ["shift right h"] }, { head: "−f(x)", lines: ["reflect in x-axis"] }, { head: "a·f(x)", lines: ["stretch by a"] }, { head: "Inverse f⁻¹", lines: ["swap x and y, solve for y", "mirror image in y = x"] }, { head: "(f ∘ g)(x)", lines: ["= f(g(x))", "do g first"] }], 3, 48) };
+}
+
+function complexChart(): AnchorChart {
+  const shapes: Shape[] = [];
+  [["i", "i"], ["i²", "−1"], ["i³", "−i"], ["i⁴", "1"]].forEach(([a, b], i) => { const ang = -Math.PI / 2 + (i * Math.PI) / 2, x = 70 + Math.cos(ang) * 44, y = 60 + Math.sin(ang) * 44; shapes.push({ k: "circle", cx: x, cy: y, r: 17, fill: F[i], stroke: INK, sw: 1.2 }, T(x, y - 1, a, 10.5, "middle", true), T(x, y + 11, `= ${b}`, 9, "middle", false, BLUE)); });
+  ["Powers of i repeat every 4.", "a + bi: real part a, imaginary part b", "(a + bi)(a − bi) = a² + b²", "Remainder theorem: f(x) ÷ (x − c)", "leaves remainder f(c).", "If f(c) = 0, then x = c is a zero."].forEach((t, i) => shapes.push(T(160, 18 + i * 19, t, 11, "start", i === 0 || i === 3)));
+  return { title: "Complex numbers and polynomials", visual: { w: W, h: 120, shapes, alt: "The cycle of powers of i" } };
+}
+
+function rationalRadical(): AnchorChart {
+  return { title: "Rational and radical equations", visual: flow([{ head: "Factor", sub: "top and bottom" }, { head: "Restrictions", sub: "denominator ≠ 0" }, { head: "Cancel / isolate", sub: "simplify or get √ alone" }, { head: "Square / clear", sub: "both sides" }, { head: "Check", sub: "reject extra answers" }]) };
+}
+
+function normalCurve(): AnchorChart {
+  const shapes: Shape[] = [];
+  const cx = 150, base = 100, sd = 42;
+  const pts: [number, number][] = [];
+  for (let x = -3.4; x <= 3.4; x += 0.1) pts.push([cx + x * sd, base - 82 * Math.exp(-x * x / 2)]);
+  shapes.push({ k: "poly", pts, stroke: BLUE, sw: 2.2 }, Ln(cx - 3.5 * sd, base, cx + 3.5 * sd, base, INK, 1.2));
+  for (let k = -3; k <= 3; k++) shapes.push(Ln(cx + k * sd, base, cx + k * sd, base - 82 * Math.exp(-k * k / 2), "#94a3b8", 1, true), T(cx + k * sd, base + 13, k === 0 ? "μ" : `${k > 0 ? "+" : "−"}${Math.abs(k)}σ`, 9, "middle"));
+  ["68% within 1σ", "95% within 2σ", "99.7% within 3σ", "z = (x − μ) ÷ σ", "nPr = n! ÷ (n − r)!  (order matters)", "nCr = n! ÷ (r!(n − r)!)"].forEach((t, i) => shapes.push(T(310, 18 + i * 18, t, 11, "start", i === 3, i === 3 ? BLUE : INK)));
+  return { title: "Normal distribution and counting", visual: { w: W, h: 116, shapes, alt: "A normal curve with standard deviations marked" } };
+}
+
+function matrixVector(): AnchorChart {
+  const shapes: Shape[] = [];
+  const br = (x: number, y: number, h: number, right = false) => shapes.push({ k: "poly", pts: right ? [[x - 4, y], [x, y], [x, y + h], [x - 4, y + h]] : [[x + 4, y], [x, y], [x, y + h], [x + 4, y + h]], stroke: INK, sw: 1.4 });
+  br(4, 10, 44); shapes.push(T(20, 28, "1", 12, "middle", true, RED), T(40, 28, "2", 12, "middle", true, RED), T(20, 46, "3", 12), T(40, 46, "4", 12)); br(56, 10, 44, true);
+  br(66, 10, 44); shapes.push(T(80, 28, "5", 12, "middle", true, RED), T(80, 46, "6", 12, "middle", true, RED)); br(94, 10, 44, true);
+  shapes.push(T(104, 36, "=", 13), T(118, 30, "1·5 + 2·6 = 17", 11, "start", true, RED), T(118, 48, "3·5 + 4·6 = 39", 11, "start"));
+  shapes.push(T(10, 80, "Row × column, then add.", 11, "start", true), T(10, 98, "det [a b; c d] = ad − bc", 11, "start", false, BLUE));
+  shapes.push(...arrow(250, 100, 330, 40, BLUE, 2), Ln(250, 100, 330, 100, MUTED, 1.2, true), Ln(330, 100, 330, 40, MUTED, 1.2, true), T(290, 114, "x = 4", 10, "middle"), T(336, 74, "y = 3", 10, "start"), T(282, 62, "|v| = 5", 11, "end", true, BLUE));
+  shapes.push(T(390, 30, "v = ⟨4, 3⟩", 11, "start", true), T(390, 50, "|v| = √(x² + y²)", 11, "start"), T(390, 70, "add: tip to tail", 11, "start"));
+  return { title: "Matrices and vectors", visual: { w: W, h: 120, shapes, alt: "Multiplying a matrix by a vector, and a vector's magnitude" } };
+}
+
+function calculusChart(): AnchorChart {
+  return { title: "Calculus rules", visual: cards([{ head: "Limit", lines: ["value f(x) approaches", "as x → a"] }, { head: "d/dx xⁿ = n xⁿ⁻¹", lines: ["power rule"] }, { head: "d/dx (constant) = 0", lines: ["slope of a flat line"] }, { head: "∫ xⁿ dx = xⁿ⁺¹ ÷ (n + 1) + C", lines: ["n ≠ −1"] }, { head: "Derivative", lines: ["slope of the tangent"] }, { head: "Integral", lines: ["area under the curve"] }], 3, 48) };
+}
+
+function oddEven(): AnchorChart {
+  const shapes: Shape[] = [];
+  const pairs = (x: number, n: number, label: string) => {
+    for (let i = 0; i < n; i++) shapes.push({ k: "circle", cx: x + Math.floor(i / 2) * 22, cy: 20 + (i % 2) * 22, r: 8, fill: i === n - 1 && n % 2 ? F[7] : F[0], stroke: INK, sw: 1.1 });
+    shapes.push(T(x - 4, 66, label, 11.5, "start", true));
+  };
+  pairs(14, 8, "8 is even: every dot has a partner"); pairs(300, 7, "7 is odd: one left over");
+  shapes.push(T(W / 2, 90, "Even numbers end in 0, 2, 4, 6, 8. Odd numbers end in 1, 3, 5, 7, 9.", 10.5, "middle", false, MUTED));
+  return { title: "Odd and even", visual: { w: W, h: 96, shapes, alt: "Dots in pairs for 8 (even) and 7 (odd)" } };
+}
+
+function patternRules(): AnchorChart {
+  const shapes: Shape[] = [];
+  [3, 7, 11, 15, 19].forEach((v, i) => { shapes.push(R(i * 56, 10, 44, 34, F[0], 6), T(i * 56 + 22, 32, String(v), 14, "middle", true)); if (i < 4) shapes.push({ k: "poly", pts: Array.from({ length: 9 }, (_, k) => [i * 56 + 26 + (k / 8) * 50, 8 - Math.sin((k / 8) * Math.PI) * 8] as [number, number]), stroke: RED, sw: 1.4 }, T(i * 56 + 50, -2 + 8, "+4", 9.5, "middle", true, RED)); });
+  ["Find the rule: what happens each time?", "Rule: start at 3, add 4.", "Check the rule works for every step."].forEach((t, i) => shapes.push(T(290, 18 + i * 20, t, 11.5, "start", i === 1, i === 1 ? BLUE : INK)));
+  return { title: "Number patterns", visual: { w: W, h: 64, shapes: shapes.map((sh) => (sh.k === "rect" ? { ...sh, y: sh.y + 8 } : sh.k === "text" && sh.x < 290 ? { ...sh, y: sh.y + 8 } : sh.k === "poly" ? { ...sh, pts: sh.pts.map(([a, b]) => [a, b + 8] as [number, number]) } : sh)), alt: "Pattern 3, 7, 11, 15, 19 adding 4 each time" } };
+}
+
+function wordProblemSteps(): AnchorChart {
+  return { title: "Solving word problems", visual: flow([{ head: "Read", sub: "twice" }, { head: "Find", sub: "what is asked" }, { head: "Draw", sub: "a bar model" }, { head: "Solve", sub: "+ − × ÷" }, { head: "Check", sub: "does it make sense?" }]) };
+}
+
+function compareLengthChart(): AnchorChart {
+  const shapes: Shape[] = [R(10, 14, 300, 26, "#fde68a", 3)];
+  for (let i = 0; i <= 15; i++) shapes.push(Ln(20 + i * 18.5, 14, 20 + i * 18.5, 14 + (i % 5 === 0 ? 12 : 7), INK, 1), ...(i % 5 === 0 ? [T(20 + i * 18.5, 36, String(i), 9, "middle", true)] : []));
+  shapes.push(T(320, 32, "cm", 10, "start", true));
+  ["Start measuring at 0.", "100 cm = 1 m · 12 in = 1 ft", "Longer − shorter = how much longer"].forEach((t, i) => shapes.push(T(10, 64 + i * 18, t, 11, "start", i === 0)));
+  return { title: "Measuring length", visual: { w: W, h: 104, shapes, alt: "A ruler marked in centimetres" } };
+}
+
+// ---------------------------------------------------------------- round 2: more English
+
+function synAnt(): AnchorChart {
+  return { title: "Synonyms and antonyms", visual: cards([{ head: "Synonyms =", lines: ["words that mean the same", "big = large, happy = glad"], fill: F[2] }, { head: "Antonyms ↔", lines: ["words with opposite meanings", "hot ↔ cold, early ↔ late"], fill: F[7] }], 2, 52) };
+}
+
+function shadesChart(): AnchorChart {
+  const shapes: Shape[] = [];
+  const words = ["cool", "warm", "hot", "scorching"];
+  words.forEach((w, i) => { shapes.push(R(i * 128, 40 - i * 10, 120, 30 + i * 10, ["#bae6fd", "#fde68a", "#fdba74", "#f87171"][i], 4), T(i * 128 + 60, 64, w, 13, "middle", true)); });
+  shapes.push(T(W / 2, 90, "Words can mean nearly the same but be stronger or weaker: look → stare → glare", 10.5, "middle", false, MUTED));
+  return { title: "Shades of meaning", visual: { w: W, h: 96, shapes, alt: "cool, warm, hot, scorching from weakest to strongest" } };
+}
+
+function homophonesChart(): AnchorChart {
+  return { title: "Homophones: sound the same, mean different things", visual: cards([{ head: "their", lines: ["belongs to them"] }, { head: "there", lines: ["a place: over there"] }, { head: "they're", lines: ["they are"] }, { head: "to / too / two", lines: ["direction / also / 2"] }, { head: "your / you're", lines: ["belongs to you / you are"] }, { head: "its / it's", lines: ["belongs to it / it is"] }], 3, 44) };
+}
+
+function pronounChart(): AnchorChart {
+  return { title: "Pronouns", visual: cards([{ head: "Subject", lines: ["does the action", "I, he, she, we, they, who"] }, { head: "Object", lines: ["receives the action", "me, him, her, us, them, whom"] }, { head: "Possessive", lines: ["shows owner", "my, his, her, our, their"] }, { head: "Relative", lines: ["who (people), which (things)", "that, whose"] }], 4, 56) };
+}
+
+function conjunctionChart(): AnchorChart {
+  const shapes: Shape[] = [];
+  "FANBOYS".split("").forEach((c, i) => { shapes.push(R(i * 46, 0, 40, 40, F[i % F.length], 6), T(i * 46 + 20, 26, c, 18, "middle", true)); shapes.push(T(i * 46 + 20, 56, ["for", "and", "nor", "but", "or", "yet", "so"][i], 11, "middle", true, BLUE)); });
+  ["FANBOYS join two complete", "sentences (add a comma).", "because, when, although, if", "start a dependent clause."].forEach((t, i) => shapes.push(T(340, 14 + i * 18, t, 10.5, "start", i === 2, i === 2 ? BLUE : INK)));
+  return { title: "Conjunctions", visual: { w: W, h: 66, shapes, alt: "FANBOYS: for, and, nor, but, or, yet, so" } };
+}
+
+function analogyChart(): AnchorChart {
+  const shapes: Shape[] = [T(10, 26, "hot : cold :: up : down", 17, "start", true, BLUE), T(10, 46, "“hot is to cold as up is to down”", 11, "start", false, MUTED)];
+  shapes.push(...cards([{ head: "Opposites", lines: ["big : small"] }, { head: "Same meaning", lines: ["fast : quick"] }, { head: "Part : whole", lines: ["wheel : car"] }, { head: "Tool : job", lines: ["pen : write"] }], 4, 40).shapes.map((sh) => (sh.k === "rect" ? { ...sh, y: sh.y + 58 } : sh.k === "text" ? { ...sh, y: sh.y + 58 } : sh)));
+  return { title: "Analogies", visual: { w: W, h: 100, shapes, alt: "Analogy types" } };
+}
+
+function idiomChart(): AnchorChart {
+  const shapes: Shape[] = [R(0, 6, 240, 70, F[1], 10), T(120, 30, "“It's raining cats and dogs.”", 12, "middle", true), T(120, 54, "What it SAYS: animals falling", 10.5, "middle", false, MUTED)];
+  shapes.push(...arrow(248, 41, 278, 41), R(282, 6, 238, 70, F[2], 10), T(400, 30, "What it MEANS:", 12, "middle", true), T(400, 54, "it's raining very hard", 12, "middle", false, BLUE));
+  shapes.push(T(W / 2, 96, "An idiom's meaning is different from its words. Use the context to work it out.", 10.5, "middle", false, MUTED));
+  return { title: "Idioms", visual: { w: W, h: 102, shapes, alt: "An idiom: what it says versus what it means" } };
+}
+
+function toneChart(): AnchorChart {
+  return { title: "Tone and mood", visual: cards([{ head: "Tone", lines: ["the author's attitude"] }, { head: "Mood", lines: ["how the reader feels"] }, { head: "Positive", lines: ["cheerful, hopeful, playful"] }, { head: "Negative", lines: ["bitter, gloomy, anxious"] }, { head: "Neutral", lines: ["formal, objective, calm"] }, { head: "Clues", lines: ["word choice, details, setting"] }], 3, 44) };
+}
+
+function sourcesChart(): AnchorChart {
+  return { title: "Sources and evidence", visual: cards([{ head: "Primary", lines: ["first-hand: diary, photo,", "interview, original data"] }, { head: "Secondary", lines: ["about the event later:", "textbook, review, article"] }, { head: "Is it credible?", lines: ["Who wrote it? When?", "Evidence? Purpose? Bias?"] }], 3, 54) };
+}
+
+function modifiersChart(): AnchorChart {
+  return { title: "Clear sentences", visual: cards([{ head: "Misplaced modifier ✗", lines: ["I saw a dog running to school.", "✓ Running to school, I saw a dog."] }, { head: "Parallelism ✗", lines: ["I like to swim, biking and to run.", "✓ I like swimming, biking and running."] }, { head: "Active voice", lines: ["The dog chased the ball.", "(the subject does the action)"] }, { head: "Passive voice", lines: ["The ball was chased by the dog.", "(the action is done to the subject)"] }], 2, 50) };
+}
+
+function verbalsMoods(): AnchorChart {
+  return { title: "Verbals and verb moods", visual: cards([{ head: "Gerund (-ing noun)", lines: ["Swimming is fun."] }, { head: "Participle (adjective)", lines: ["the broken vase"] }, { head: "Infinitive (to + verb)", lines: ["I want to win."] }, { head: "Indicative", lines: ["states a fact"] }, { head: "Imperative", lines: ["gives a command"] }, { head: "Subjunctive", lines: ["wish: If I were…"] }], 3, 44) };
+}
+
+function fallacyChart(): AnchorChart {
+  return { title: "Logical fallacies", visual: cards([{ head: "Bandwagon", lines: ["everyone does it"] }, { head: "Ad hominem", lines: ["attacks the person"] }, { head: "Straw man", lines: ["twists the other argument"] }, { head: "Slippery slope", lines: ["one step → disaster"] }, { head: "False choice", lines: ["only two options given"] }, { head: "Hasty generalization", lines: ["too little evidence"] }], 3, 42) };
+}
+
+function confusedWords(): AnchorChart {
+  return { title: "Commonly confused words", visual: cards([{ head: "affect / effect", lines: ["verb / noun (usually)"] }, { head: "then / than", lines: ["time / comparing"] }, { head: "accept / except", lines: ["receive / leave out"] }, { head: "who / whom", lines: ["he → who, him → whom"] }, { head: "fewer / less", lines: ["count / amount"] }, { head: "lie / lay", lines: ["recline / put something"] }], 3, 42) };
+}
+
+function spellingRules(): AnchorChart {
+  return { title: "Spelling rules", visual: cards([{ head: "i before e", lines: ["except after c", "friend, receive"] }, { head: "Drop the e", lines: ["make → making", "before -ing, -ed"] }, { head: "Double it", lines: ["run → running", "short vowel + 1 consonant"] }, { head: "y → i", lines: ["happy → happier", "before -er, -es, -ed"] }], 4, 52) };
+}
+
+function vocabMap(): AnchorChart {
+  const shapes: Shape[] = [];
+  const spots: [number, number, string][] = [[80, 18, "Meaning"], [440, 18, "Synonym"], [80, 98, "Use it in a sentence"], [440, 98, "Draw it"]];
+  spots.forEach(([x, y]) => shapes.push(Ln(260, 58, x, y, MUTED, 1.2)));
+  spots.forEach(([x, y, t], i) => shapes.push(R(x - 74, y - 14, 148, 28, F[[0, 2, 3, 4][i]], 6), T(x, y + 4, t, 11, "middle", true)));
+  shapes.push(R(200, 40, 120, 36, F[1], 18), T(260, 63, "new word", 12, "middle", true));
+  return { title: "Learning a new word", visual: { w: W, h: 114, shapes, alt: "A word map: meaning, synonym, sentence, picture" } };
+}
+
+// ---------------------------------------------------------------- round 2: more science
+
+function energyFormsChart(): AnchorChart {
+  return { title: "Forms of energy", visual: cards([{ head: "Light", lines: ["sun, bulb"] }, { head: "Heat (thermal)", lines: ["fire, warm hands"] }, { head: "Sound", lines: ["drum, voice"] }, { head: "Motion (kinetic)", lines: ["rolling ball"] }, { head: "Electrical", lines: ["battery, wires"] }, { head: "Stored (potential)", lines: ["stretched band, food"] }], 3, 42) };
+}
+
+function structuresChart(): AnchorChart {
+  return { title: "Structures that help living things survive", visual: cards([{ head: "Roots", lines: ["take in water"] }, { head: "Thorns", lines: ["protect a plant"] }, { head: "Fur / feathers", lines: ["keep warm"] }, { head: "Claws / beaks", lines: ["catch and eat food"] }, { head: "Shells", lines: ["protection"] }, { head: "Camouflage", lines: ["hide from predators"] }], 3, 40) };
+}
+
+function gravityChart(): AnchorChart {
+  return { title: "Gravity, mass and weight", visual: cards([{ head: "Gravity", lines: ["pulls objects toward", "each other (and down)"] }, { head: "Mass", lines: ["amount of matter (kg)", "same everywhere"] }, { head: "Weight", lines: ["pull of gravity (N)", "less on the Moon"] }, { head: "F = G m₁m₂ ÷ r²", lines: ["bigger masses pull more,", "distance weakens it"] }], 4, 54) };
+}
+
+function conservationChart(): AnchorChart {
+  const shapes: Shape[] = [R(10, 10, 200, 50, F[0], 6), T(110, 32, "Before: 50 g + 20 g", 12, "middle", true), T(110, 50, "= 70 g", 12, "middle", true, BLUE), ...arrow(216, 35, 296, 35), T(256, 24, "reaction", 10, "middle", false, MUTED), R(300, 10, 210, 50, F[2], 6), T(405, 32, "After: products", 12, "middle", true), T(405, 50, "= 70 g", 12, "middle", true, BLUE)];
+  shapes.push(T(W / 2, 84, "Mass is never created or destroyed: total mass before = total mass after.", 11, "middle", true));
+  return { title: "Conservation of mass", visual: { w: W, h: 92, shapes, alt: "Mass before a reaction equals mass after" } };
+}
+
+function carbonCycle(): AnchorChart {
+  return { title: "Cycles of matter", visual: flow([{ head: "Plants", sub: "take in CO₂" }, { head: "Animals", sub: "eat plants" }, { head: "Respiration", sub: "gives out CO₂" }, { head: "Decomposers", sub: "return nutrients" }, { head: "Burning fuels", sub: "adds CO₂" }], true) };
+}
+
+function spheresChart(): AnchorChart {
+  return { title: "Earth's spheres", visual: cards([{ head: "Geosphere", lines: ["rocks, soil, land"], fill: "#fed7aa" }, { head: "Hydrosphere", lines: ["all water"], fill: "#bfdbfe" }, { head: "Atmosphere", lines: ["air around Earth"], fill: "#e0f2fe" }, { head: "Biosphere", lines: ["all living things"], fill: "#bbf7d0" }], 4, 46) };
+}
+
+function waterDistribution(): AnchorChart {
+  const shapes: Shape[] = [{ k: "rect", x: 0, y: 14, w: 500, h: 30, fill: "#60a5fa", stroke: INK, sw: 1 }, { k: "rect", x: 485, y: 14, w: 10, h: 30, fill: "#e0f2fe", stroke: INK, sw: 1 }, { k: "rect", x: 495, y: 14, w: 5, h: 30, fill: "#4ade80", stroke: INK, sw: 1 }];
+  shapes.push(T(240, 34, "97% salt water (oceans)", 12, "middle", true, "#fff"), T(470, 62, "2% ice", 10.5, "end", true), T(500, 78, "1% fresh liquid water", 10.5, "end", true, "#16a34a"));
+  shapes.push(T(10, 70, "Only a tiny part of Earth's water is fresh water we can use.", 11, "start"));
+  return { title: "Where Earth's water is", visual: { w: W, h: 86, shapes, alt: "97 percent salt water, 2 percent ice, 1 percent fresh water" } };
+}
+
+function greenhouse(): AnchorChart {
+  const shapes: Shape[] = [{ k: "circle", cx: 30, cy: 30, r: 18, fill: "#fde047", stroke: "#d97706", sw: 1.6 }];
+  shapes.push({ k: "rect", x: 0, y: 90, w: 300, h: 24, fill: "#bbf7d0", stroke: INK, sw: 1 }, T(150, 106, "Earth", 11, "middle", true));
+  shapes.push(Ln(0, 60, 300, 60, BLUE, 3, true), T(296, 54, "greenhouse gases (CO₂, methane)", 9.5, "end", false, BLUE));
+  shapes.push(...arrow(50, 44, 120, 88, "#f59e0b", 2), ...arrow(150, 88, 190, 64, RED, 2), ...arrow(196, 62, 230, 86, RED, 2));
+  ["Sunlight passes through the air.", "Earth gives off heat.", "Greenhouse gases trap some heat.", "More gases trap more heat", "→ global warming."].forEach((t, i) => shapes.push(T(320, 20 + i * 20, t, 11, "start", i >= 3, i >= 3 ? RED : INK)));
+  return { title: "The greenhouse effect", visual: { w: W, h: 116, shapes, alt: "Sunlight in, heat trapped by greenhouse gases" } };
+}
+
+function microscopeChart(): AnchorChart {
+  return { title: "Using a microscope", visual: cards([{ head: "Eyepiece", lines: ["look through (10×)"] }, { head: "Objective lens", lines: ["4×, 10×, 40×"] }, { head: "Stage", lines: ["holds the slide"] }, { head: "Light", lines: ["shines up through"] }, { head: "Focus knobs", lines: ["coarse, then fine"] }, { head: "Magnification", lines: ["eyepiece × objective"] }], 3, 40) };
+}
+
+function reproductionChart(): AnchorChart {
+  return { title: "Reproduction", visual: cards([{ head: "Sexual", lines: ["two parents", "offspring are different", "(variation)"], fill: F[3] }, { head: "Asexual", lines: ["one parent", "offspring are identical", "budding, runners, cuttings"], fill: F[0] }], 2, 66) };
+}
+
+function naturalSelection(): AnchorChart {
+  return { title: "Natural selection", visual: flow([{ head: "Variation", sub: "traits differ" }, { head: "Too many young", sub: "not all survive" }, { head: "Competition", sub: "food, space" }, { head: "Best-suited survive", sub: "and reproduce" }, { head: "Traits spread", sub: "over generations" }]) };
+}
+
+function chemBasics(): AnchorChart {
+  const shapes: Shape[] = [T(10, 30, "H₂O", 26, "start", true, BLUE)];
+  shapes.push(T(84, 22, "2 hydrogen atoms (the small 2)", 11, "start"), T(84, 40, "1 oxygen atom (no number = 1)", 11, "start"));
+  shapes.push(...cards([{ head: "Atom", lines: ["smallest piece"] }, { head: "Element", lines: ["one kind of atom: O"] }, { head: "Molecule", lines: ["atoms bonded: O₂"] }, { head: "Compound", lines: ["different elements: CO₂"] }, { head: "Mixture", lines: ["not bonded: salt water"] }], 5, 40).shapes.map((sh) => (sh.k === "rect" ? { ...sh, y: sh.y + 56 } : sh.k === "text" ? { ...sh, y: sh.y + 56 } : sh)));
+  return { title: "Atoms, elements and compounds", visual: { w: W, h: 98, shapes, alt: "Reading the formula H2O, and key chemistry words" } };
+}
+
+function biomolecules(): AnchorChart {
+  return { title: "Molecules of life", visual: cards([{ head: "Carbohydrates", lines: ["quick energy", "sugar, starch"] }, { head: "Lipids", lines: ["stored energy", "fats, oils"] }, { head: "Proteins", lines: ["build & repair", "enzymes, muscle"] }, { head: "Nucleic acids", lines: ["genetic info", "DNA, RNA"] }], 4, 54) };
+}
+
+function transportChart(): AnchorChart {
+  const shapes: Shape[] = [Ln(170, 4, 170, 90, INK, 3, true), T(176, 10, "membrane", 9.5, "start", false, MUTED)];
+  [[30, 20], [60, 50], [40, 70], [100, 30], [120, 64], [80, 14], [140, 44], [20, 46]].forEach(([x, y]) => shapes.push({ k: "circle", cx: x, cy: y, r: 6, fill: F[0], stroke: INK, sw: 1 }));
+  [[220, 30], [260, 64]].forEach(([x, y]) => shapes.push({ k: "circle", cx: x, cy: y, r: 6, fill: F[0], stroke: INK, sw: 1 }));
+  shapes.push(...arrow(130, 20, 230, 20, BLUE, 2), T(80, 100, "high concentration", 9.5, "middle", true), T(250, 100, "low", 9.5, "middle", true));
+  ["Diffusion: high → low, no energy", "Osmosis: water across a membrane", "Active transport: low → high,", "needs energy (ATP)"].forEach((t, i) => shapes.push(T(300, 22 + i * 22, t, 11, "start", i === 0)));
+  return { title: "Moving across membranes", visual: { w: W, h: 110, shapes, alt: "Particles diffusing from high to low concentration" } };
+}
+
+function populationCurve(): AnchorChart {
+  const shapes: Shape[] = [];
+  const o = 40, base = 100;
+  shapes.push(Ln(o, 6, o, base, INK, 1.3), Ln(o, base, o + 200, base, INK, 1.3), Ln(o, 24, o + 200, 24, RED, 1.4, true), T(o + 202, 28, "carrying capacity", 9.5, "start", true, RED));
+  const pts: [number, number][] = [];
+  for (let t = 0; t <= 10; t += 0.2) pts.push([o + t * 20, base - 76 / (1 + Math.exp(-(t - 4)))]);
+  shapes.push({ k: "poly", pts, stroke: BLUE, sw: 2.2 }, T(o + 110, base + 14, "time", 9.5, "middle"), T(o - 6, 56, "pop.", 9.5, "end"));
+  ["Limiting factors: food, water,", "space, predators, disease.", "Births + immigration add;", "deaths + emigration remove."].forEach((t, i) => shapes.push(T(340, 50 + i * 17, t, 10.5, "start")));
+  return { title: "Population growth", visual: { w: W, h: 116, shapes, alt: "S-shaped population curve levelling off at carrying capacity" } };
+}
+
+function bondingChart(): AnchorChart {
+  return { title: "Chemical bonds", visual: cards([{ head: "Ionic", lines: ["metal + non-metal", "electrons transferred: NaCl"] }, { head: "Covalent", lines: ["non-metals", "electrons shared: H₂O"] }, { head: "Metallic", lines: ["metal atoms", "sea of electrons: Cu"] }], 3, 54) };
+}
+
+function organelles(): AnchorChart {
+  return { title: "Cell parts and jobs", visual: cards([{ head: "Nucleus", lines: ["control centre, DNA"] }, { head: "Mitochondria", lines: ["release energy"] }, { head: "Ribosomes", lines: ["make proteins"] }, { head: "Cell membrane", lines: ["controls what enters"] }, { head: "Chloroplasts", lines: ["photosynthesis (plants)"] }, { head: "Cell wall", lines: ["support (plants)"] }], 3, 40) };
+}
+
+function specificHeat(): AnchorChart {
+  return { title: "Heat energy", visual: formulaTriangle("q", "m", "cΔT", ["q = m × c × ΔT", "q = heat energy (J)", "c = specific heat (J/g°C)", "Water: c = 4.18 J/g°C"]) };
+}
+
+function keplerChart(): AnchorChart {
+  const shapes: Shape[] = [];
+  const pts: [number, number][] = [];
+  for (let i = 0; i <= 40; i++) { const a = (i / 40) * Math.PI * 2; pts.push([110 + Math.cos(a) * 90, 56 + Math.sin(a) * 46]); }
+  shapes.push({ k: "poly", pts, closed: true, stroke: BLUE, sw: 1.8 }, { k: "circle", cx: 70, cy: 56, r: 10, fill: "#fde047", stroke: "#d97706", sw: 1.4 }, { k: "circle", cx: 196, cy: 44, r: 5, fill: "#60a5fa", stroke: INK, sw: 1 });
+  ["1. Orbits are ellipses, Sun at one focus.", "2. Planets move faster near the Sun.", "3. T² ∝ a³ (farther = longer year)", "Stars: nebula → star → red giant", "→ white dwarf (or supernova)"].forEach((t, i) => shapes.push(T(230, 20 + i * 20, t, 11, "start", i < 3)));
+  return { title: "Orbits and stars", visual: { w: W, h: 110, shapes, alt: "An elliptical orbit with the Sun at one focus" } };
+}
+
+// ---------------------------------------------------------------- round 2 map additions
+
+Object.assign(MATH, {
+  counting: () => hundredChart("tens"), count_120: () => hundredChart("none"), ten_more_less: () => hundredChart("tens"), add_tens: () => hundredChart("tens"), skip_counting: () => hundredChart("fives"),
+  missing_addend: () => numberLineHops(), three_addends: () => numberLineHops(), equal_sign: () => balanceChart(), add_2d_1d: () => columnRegroup(false),
+  add_2d: () => columnRegroup(false), add_3d: () => columnRegroup(false), add_sub_multi: () => columnRegroup(false), sub_2d: () => columnRegroup(true),
+  mult_multi: () => areaModel(), mult_comparison: () => arrayChart(), factors_multiples: () => factorTree(), prime_composite: () => factorTree(), gcf_lcm: () => factorTree(),
+  decimals_add_sub: () => decimalAlign(), decimals_mul_div: () => decimalAlign(), decimals: () => decimalAlign(), fractions_mul_div: () => fractionWall(),
+  write_expressions: () => wordsToSymbols(), write_expressions_alg: () => wordsToSymbols(), expressions: () => wordsToSymbols(), algebra_basics: () => likeTerms(),
+  algebra_combine_terms: () => likeTerms(), algebra_distribute: () => likeTerms(), factor_linear: () => likeTerms(),
+  percent_change: () => percentChange(), simple_interest: () => percentChange(), scale_drawings: () => scaleChart(), similar_triangles: () => scaleChart(),
+  irrational_numbers: () => numberSets(), square_cube_roots: () => numberSets(), radicals: () => numberSets(),
+  systems: () => systemsChart(), systems_word: () => systemsChart(), two_way_tables: () => twoWayTable(),
+  polynomials: () => polyBox(), factoring_trinomials: () => polyBox(), special_factoring: () => polyBox(),
+  absolute_value_equations: () => absValueEq(), exponential: () => growthCurve(), exp_equations: () => growthCurve(), logarithms: () => growthCurve(), log_properties: () => growthCurve(),
+  sequences: () => sequencesChart(), series_sum: () => sequencesChart(), unit_circle: () => unitCircle(), law_sines_cosines: () => unitCircle(), trig_equations: () => unitCircle(),
+  inverse_functions: () => functionsHS(), function_transformations: () => functionsHS(), complex_numbers: () => complexChart(), poly_remainder: () => complexChart(), poly_zeros: () => complexChart(),
+  rational_expressions: () => rationalRadical(), radical_equations: () => rationalRadical(), std_dev_zscore: () => normalCurve(), permutations_combinations: () => normalCurve(),
+  matrices: () => matrixVector(), vectors: () => matrixVector(), limits: () => calculusChart(), derivatives_power: () => calculusChart(), integrals_basic: () => calculusChart(),
+  odd_even: () => oddEven(), number_patterns: () => patternRules(), wordproblems: (g: number) => (g >= 2 ? wordProblemSteps() : null), two_step_word: () => wordProblemSteps(), compare_length: () => compareLengthChart(),
+  bar_models: () => wordProblemSteps(), balance_puzzles: () => balanceChart(),
+});
+Object.assign(ENGLISH, {
+  just_synonyms: () => synAnt(), just_antonyms: () => synAnt(), synonyms_antonyms: () => synAnt(), shades_meaning: () => shadesChart(), homophones: () => homophonesChart(),
+  relative_pronouns: () => pronounChart(), pronoun_usage: () => pronounChart(), conjunctions: () => conjunctionChart(), analogies: () => analogyChart(), idioms: () => idiomChart(),
+  tone_mood: () => toneChart(), sources: () => sourcesChart(), misplaced_modifiers: () => modifiersChart(), parallelism: () => modifiersChart(), active_passive: () => modifiersChart(),
+  verbals: () => verbalsMoods(), verb_moods: () => verbalsMoods(), fallacies: () => fallacyChart(), confused_words: () => confusedWords(), grammar_advanced: () => confusedWords(),
+  spelling: () => spellingRules(), vocabulary: () => vocabMap(),
+});
+Object.assign(SCIENCE, {
+  energy_forms: () => energyFormsChart(), structures_survival: () => structuresChart(), adaptations: () => structuresChart(), gravity_basic: () => gravityChart(), gravitation: () => gravityChart(),
+  conservation_mass: () => conservationChart(), matter_cycles: () => carbonCycle(), earth_spheres: () => spheresChart(), earth_systems_hs: () => spheresChart(), earth_water: () => waterDistribution(),
+  climate_change: () => greenhouse(), microscope: () => microscopeChart(), reproduction: () => reproductionChart(), natural_selection: () => naturalSelection(),
+  chemistry_compounds: () => chemBasics(), chemistry_basics: () => chemBasics(), biomolecules: () => biomolecules(), cell_transport: () => transportChart(), ecology_populations: () => populationCurve(),
+  bonding: () => bondingChart(), biology_advanced: () => organelles(), specific_heat: () => specificHeat(), keplers_laws: () => keplerChart(), universe: () => keplerChart(),
+});
+
 export function anchorChart(subject: string, topic: string, grade: number): AnchorChart | null {
   const map = subject === "math" ? MATH : subject === "english" ? ENGLISH : subject === "science" ? SCIENCE : null;
   return map?.[topic]?.(grade) ?? null;

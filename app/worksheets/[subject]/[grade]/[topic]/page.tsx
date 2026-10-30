@@ -15,7 +15,7 @@ import JsonLd, { breadcrumbLd, faqLd } from "@/components/seo/JsonLd";
 import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
 import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
-import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet, exampleQuestion } from "@/lib/subjects";
+import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet, exampleQuestion, challengeQuestion } from "@/lib/subjects";
 import { locateSkill, LEVEL_LABEL, LEVEL_BADGE, STANDARDS } from "@/lib/curriculum";
 import { guidesForWorksheet } from "@/lib/blogNav";
 
@@ -86,7 +86,8 @@ export default function TopicPage({ params }: { params: Params }) {
   const questions = generateWorksheet({ subject: subjectId, grade, topic: topic.id, difficulty: "medium", count: SAMPLE_COUNT, seed })
     .filter((item) => (seenQ.has(item.q) ? false : (seenQ.add(item.q), true)));
   const example = exampleQuestion({ subject: subjectId, grade, topic: topic.id, seed, avoid: questions });
-  const layout = layoutWorksheet({ subject: subjectId, subjectLabel: subject.label, grade, topic: topic.id, title: topic.label, questions, example });
+  const challenge = challengeQuestion({ subject: subjectId, grade, topic: topic.id, seed });
+  const layout = layoutWorksheet({ subject: subjectId, subjectLabel: subject.label, grade, topic: topic.id, title: topic.label, questions, example, challenge });
 
   const description = topicDescription(subjectId, topic.id);
   const name = topic.label.replace(/^The /, ""); // used after "Grade N" and in sentences
@@ -221,6 +222,7 @@ export default function TopicPage({ params }: { params: Params }) {
                   <span>{item.letter ? `${item.letter} — ` : ""}{item.answer}</span>
                 </li>
               ))}
+              {layout.challenge && <li className="flex gap-3 py-1.5 text-sm"><span className="text-violet-500 w-6 shrink-0">★</span><span>{layout.challenge.answer}</span></li>}
             </ol>
           </div>
         </WorksheetSheet>
@@ -236,6 +238,7 @@ export default function TopicPage({ params }: { params: Params }) {
                 <span>{item.letter ? `${item.letter} — ` : ""}{item.answer}</span>
               </li>
             ))}
+            {layout.challenge && <li className="flex gap-3 py-2 text-slate-700 dark:text-slate-200"><span className="text-violet-500 text-sm w-6 shrink-0">★</span><span>{layout.challenge.answer} <span className="text-xs text-slate-400">(challenge corner)</span></span></li>}
           </ol>
         </details>
 
