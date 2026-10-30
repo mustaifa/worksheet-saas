@@ -14,13 +14,13 @@ export function authErrorMessage(code: string | null): string {
   return "Sign-in didn't work just now. Please use your email and password below.";
 }
 
-export function GoogleButton({ label }: { label: string }) {
+export function GoogleButton({ label, callbackUrl = "/dashboard" }: { label: string; callbackUrl?: string }) {
   const [busy, setBusy] = useState(false);
   if (!GOOGLE_ENABLED) return null;
   return (
     <button
       type="button"
-      onClick={() => { setBusy(true); signIn("google", { callbackUrl: "/dashboard" }); }}
+      onClick={() => { setBusy(true); signIn("google", { callbackUrl }); }}
       disabled={busy}
       className="w-full border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 py-3 rounded-lg font-medium hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-2 disabled:opacity-60"
     >

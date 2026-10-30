@@ -14,6 +14,9 @@ function LoginForm() {
   // NextAuth sends failed Google sign-ins back here as ?error=…
   const [error, setError] = useState(authErrorMessage(params.get("error")));
   const [loading, setLoading] = useState(false);
+  // Where to go after logging in: the page the visitor asked for (same site only), else the dashboard.
+  const asked = params.get("callbackUrl") || "";
+  const next = asked.startsWith("/") && !asked.startsWith("//") ? asked : "/dashboard";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,7 +24,7 @@ function LoginForm() {
     setLoading(true);
     try {
       const result = await signIn("credentials", { email: form.email.trim(), password: form.password, redirect: false });
-      if (result?.ok) router.push("/dashboard");
+      if (result?.ok) router.push(next);
       else setError(`That email and password don't match.${GOOGLE_ENABLED ? " If you signed up with Google, use the Google button above." : ""}`);
     } catch {
       setError("We couldn't reach the server. Check your internet connection and try again.");
@@ -37,7 +40,7 @@ function LoginForm() {
         <p className="text-slate-600 dark:text-slate-300 mt-1 text-sm">Log in to your Practice Sheet account.</p>
 
         <div className="mt-6">
-          <GoogleButton label="Log in with Google" />
+          <GoogleButton label="Log in with Google" callbackUrl={next} />
         </div>
         <OrDivider text="or log in with email" />
 
