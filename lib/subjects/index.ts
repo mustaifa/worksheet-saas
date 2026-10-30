@@ -222,3 +222,11 @@ export function parseCommand(
     count: count ?? current.count,
   };
 }
+
+/** One extra question (not on the sheet) to show as a worked example. */
+export function exampleQuestion(opts: { subject: SubjectId; grade: number; topic: string; seed: number; avoid: Question[] }): Question | undefined {
+  if (opts.subject === "english" && opts.topic === "reading_comprehension") return undefined;
+  const pool = generateWorksheet({ subject: opts.subject, grade: opts.grade, topic: opts.topic, difficulty: "easy", count: 8, seed: (opts.seed ^ 0x9e3779b9) >>> 0 });
+  const seen = new Set(opts.avoid.map((q) => q.q));
+  return pool.find((q) => !seen.has(q.q));
+}

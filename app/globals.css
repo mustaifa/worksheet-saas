@@ -11,12 +11,17 @@
   }
 }
 
+/* Keep the soft colour bands and pictures when printing worksheets. */
+.worksheet-sheet { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
 @media print {
   @page { size: A4; margin: 14mm; }
   body * { visibility: hidden !important; }
   #worksheet-print-area, #worksheet-print-area * { visibility: visible !important; }
   #worksheet-print-area {
     position: absolute; left: 0; top: 0; width: 100%;
-    box-shadow: none !important; border-radius: 0 !important;
+    box-shadow: none !important; border-radius: 0 !important; border: none !important; padding: 0 !important;
   }
 }
+
+.font-hand { font-family: "Comic Sans MS", "Chalkboard SE", "Comic Neue", "Segoe Print", cursive; }
