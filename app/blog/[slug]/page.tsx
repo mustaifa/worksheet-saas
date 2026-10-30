@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { coverOf, subjectOf, headingId } from "@/lib/blogPresentation";
+import { coverOf, headingId } from "@/lib/blogPresentation";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -10,6 +10,7 @@ import JsonLd, { breadcrumbLd } from "@/components/seo/JsonLd";
 import { BLOG_POSTS, getPostBySlug } from "@/lib/blog";
 import { OG_IMAGE, absoluteUrl, SITE_NAME } from "@/lib/site";
 import { isFreeMode } from "@/lib/access";
+import { hubFor, relatedPosts, neighbours } from "@/lib/blogNav";
 
 export const dynamicParams = false;
 
@@ -32,7 +33,11 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
   const post = getPostBySlug(params.slug);
   if (!post) notFound();
   const freeMode = isFreeMode();
-  const more = BLOG_POSTS.filter((p) => p.slug !== post.slug).sort((a, b) => Number(subjectOf(b) === subjectOf(post)) - Number(subjectOf(a) === subjectOf(post)) || b.date.localeCompare(a.date)).slice(0, 3);
+  const hub = hubFor(post);
+  const { newer, older } = neighbours(post);
+  // don't repeat the previous/next guides in "Keep reading"
+  const more = relatedPosts(post, 5).filter((p) => p.slug !== newer?.slug && p.slug !== older?.slug).slice(0, 3);
+  const fmt = (d: string) => new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
   return (
     <main>
@@ -53,15 +58,20 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           },
           breadcrumbLd([
             { name: "Blog", url: absoluteUrl("/blog") },
+            { name: hub.title, url: absoluteUrl(`/blog/subject/${hub.slug}`) },
             { name: post.title, url: absoluteUrl(`/blog/${post.slug}`) },
           ]),
         ]}
       />
       <article className="max-w-2xl mx-auto px-6 py-16">
-        <p className="text-sm text-slate-500 dark:text-slate-400"><Link href="/blog" className="hover:underline">Blog</Link></p>
+        <nav aria-label="Breadcrumb" className="text-sm text-slate-500 dark:text-slate-400">
+          <Link href="/blog" className="hover:underline">Blog</Link> /{" "}
+          <Link href={`/blog/subject/${hub.slug}`} className="hover:underline">{hub.title}</Link>
+        </nav>
         <h1 className="text-3xl sm:text-4xl font-bold mt-2 text-slate-900 dark:text-white">{post.title}</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-3">
-          {new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+          {fmt(post.date)}
+          {post.updated && post.updated !== post.date ? ` · Updated ${fmt(post.updated)}` : ""}
           {post.readMinutes ? ` · ${post.readMinutes} min read` : ""}
         </p>
         <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">{post.excerpt}</p>
@@ -89,14 +99,35 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           <SignupCta label={freeMode ? "Create a free account" : "Start your free trial"} className="mt-4" />
         </div>
 
+        {(newer || older) && (
+          <nav aria-label={`More ${hub.title.toLowerCase()}`} className="mt-12 grid sm:grid-cols-2 gap-3">
+            {older ? (
+              <Link href={`/blog/${older.slug}`} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:border-slate-900 dark:hover:border-white">
+                <span className="block text-xs text-slate-500 dark:text-slate-400">← Previous in {hub.title}</span>
+                <span className="block mt-1 font-semibold text-slate-900 dark:text-white">{older.title}</span>
+              </Link>
+            ) : <span />}
+            {newer && (
+              <Link href={`/blog/${newer.slug}`} className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 text-right hover:border-slate-900 dark:hover:border-white">
+                <span className="block text-xs text-slate-500 dark:text-slate-400">Next in {hub.title} →</span>
+                <span className="block mt-1 font-semibold text-slate-900 dark:text-white">{newer.title}</span>
+              </Link>
+            )}
+          </nav>
+        )}
+
         {more.length > 0 && (
           <div className="mt-12">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-white">More from the blog</h2>
-            <ul className="mt-3 space-y-2">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white">Keep reading</h2>
+            <div className="mt-4 grid sm:grid-cols-3 gap-4">
               {more.map((p) => (
-                <li key={p.slug}><Link href={`/blog/${p.slug}`} className="text-slate-700 dark:text-slate-300 hover:underline">{p.title}</Link></li>
+                <Link key={p.slug} href={`/blog/${p.slug}`} className="block rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-slate-900 dark:hover:border-white">
+                  <Image src={coverOf(p).src} alt="" width={360} height={203} className="w-full aspect-video object-cover" />
+                  <span className="block p-3 text-sm font-semibold text-slate-900 dark:text-white">{p.title}</span>
+                </Link>
               ))}
-            </ul>
+            </div>
+            <p className="mt-4 text-sm"><Link href={`/blog/subject/${hub.slug}`} className="font-semibold text-indigo-700 dark:text-indigo-300 hover:underline">See all {hub.title} →</Link></p>
           </div>
         )}
       </article>

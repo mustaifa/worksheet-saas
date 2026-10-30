@@ -4,10 +4,10 @@ import { headingId } from "@/lib/blogPresentation";
 
 // Renders blog content written as an array of lightweight-markdown blocks:
 //   "## Heading", "### Subheading", "- list item" (consecutive items group),
-//   "> tip", and inline [text](/path) links and **bold**.
+//   "> tip", and inline [text](/path) links, **bold** and *italic*.
 function inline(text: string, key: string): React.ReactNode[] {
   const out: React.ReactNode[] = [];
-  const re = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*/g;
+  const re = /\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|\*([^*\s][^*]*?)\*/g;
   let last = 0, m: RegExpExecArray | null, i = 0;
   while ((m = re.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
@@ -16,7 +16,8 @@ function inline(text: string, key: string): React.ReactNode[] {
       out.push(href.startsWith("/")
         ? <Link key={`${key}-${i++}`} href={href} className="text-slate-900 dark:text-white underline underline-offset-2 decoration-slate-400 hover:decoration-slate-900 dark:hover:decoration-white">{m[1]}</Link>
         : <a key={`${key}-${i++}`} href={href} rel="noopener" className="underline underline-offset-2">{m[1]}</a>);
-    } else out.push(<strong key={`${key}-${i++}`} className="font-semibold text-slate-900 dark:text-white">{m[3]}</strong>);
+    } else if (m[3]) out.push(<strong key={`${key}-${i++}`} className="font-semibold text-slate-900 dark:text-white">{m[3]}</strong>);
+    else out.push(<em key={`${key}-${i++}`}>{m[4]}</em>);
     last = re.lastIndex;
   }
   if (last < text.length) out.push(text.slice(last));

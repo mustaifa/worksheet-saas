@@ -1,7 +1,8 @@
 import type { BlogPost } from "./blog";
 export function subjectOf(post: BlogPost): string {
+ if (post.subject) return post.subject;
  const text = `${post.slug} ${post.title}`.toLowerCase();
- if (/fraction|math|times-tables|word-problem|decimal|percent/.test(text)) return "Math";
+ if (/fraction|math|times-tables|multiplication|division|word-problem|decimal|percent|geometry|algebra/.test(text)) return "Math";
  if (/reading|literary|sentence|synonym|antonym|vocabulary/.test(text)) return "English";
  if (/science|circulatory|punnett|experiment/.test(text)) return "Science";
  return "Learning";
