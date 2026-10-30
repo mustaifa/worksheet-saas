@@ -4,7 +4,7 @@
  * PDF builds.   npx tsx scripts/verify-layout.ts
  */
 import { readFileSync } from "fs";
-import { SUBJECTS, topicsForGrade, generateWorksheet, exampleQuestion, type Difficulty } from "../lib/subjects";
+import { SUBJECTS, topicsForGrade, generateWorksheet, exampleQuestion, challengeQuestion, type Difficulty } from "../lib/subjects";
 import { layoutWorksheet } from "../lib/worksheetLayout";
 import { buildWorksheetPdf } from "../lib/brandedPdf";
 const fonts = { regular: readFileSync("public/fonts/DejaVuSans.ttf").toString("base64"), bold: readFileSync("public/fonts/DejaVuSans-Bold.ttf").toString("base64"), logo: null };
@@ -15,8 +15,11 @@ const errs: string[] = []; const stats: Record<string, Record<string, number>> =
     for (let g = 1; g <= 12; g++) for (const t of topicsForGrade(s, g)) for (const [d, seed] of [["easy", 1], ["medium", 7], ["hard", 99]] as [Difficulty, number][]) {
       const qs = generateWorksheet({ subject: s, grade: g, topic: t.id, difficulty: d, count: 10, seed });
       const ex = exampleQuestion({ subject: s, grade: g, topic: t.id, seed, avoid: qs });
-      const L = layoutWorksheet({ subject: s, subjectLabel: label, grade: g, topic: t.id, title: t.label, questions: qs, example: ex });
+      const challenge = challengeQuestion({ subject: s, grade: g, topic: t.id, seed });
+      const L = layoutWorksheet({ subject: s, subjectLabel: label, grade: g, topic: t.id, title: t.label, questions: qs, example: ex, challenge });
+      if (L.challenge) (stats[s] as any).challenge = ((stats[s] as any).challenge || 0) + (d === "medium" ? 1 : 0);
       const tag = `${s}/${g}/${t.id}/${d}`;
+      if (challenge && (!L.challenge || !L.challenge.text || !L.challenge.answer)) errs.push(`${tag}: challenge missing`);
       const nLabel = L.sections.filter((x) => x.kind === "label").reduce((a, x) => a + x.nums.length, 0);
       if (L.questions.length !== qs.length + nLabel) errs.push(`${tag}: count ${L.questions.length} vs ${qs.length}+${nLabel}`);
       L.questions.forEach((q, i) => { if (q.n !== i + 1) errs.push(`${tag}: numbering`); });

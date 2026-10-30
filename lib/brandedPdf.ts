@@ -525,6 +525,25 @@ export async function buildWorksheetPdf(o: WorksheetPdfOptions, preloaded?: { re
     y += 2;
   }
 
+  // ---- Challenge corner
+  if (L.challenge) {
+    doc.setFont("DejaVu", "normal"); doc.setFontSize(qSize);
+    const lines: string[] = doc.splitTextToSize(L.challenge.text, CONTENT_W - 8);
+    const v = L.challenge.visual, vs = v ? Math.min(0.25, (CONTENT_W - 8) / v.w) : 0, vh = v ? v.h * vs + 2 : 0;
+    const h = 8 + lines.length * lh(qSize) + vh + 9;
+    ensure(h + 3);
+    y += 2;
+    doc.setFillColor(245, 243, 255); doc.setDrawColor(196, 181, 253); doc.setLineWidth(0.5); doc.setLineDashPattern([1.5, 1.2], 0);
+    doc.roundedRect(M, y, CONTENT_W, h, 2.5, 2.5, "FD"); doc.setLineDashPattern([], 0);
+    doc.setFont("DejaVu", "bold"); doc.setFontSize(7.5); doc.setTextColor(109, 40, 217); doc.text("★ CHALLENGE CORNER", M + 4, y + 5);
+    doc.setFont("DejaVu", "normal"); doc.setFontSize(qSize); doc.setTextColor(...INK);
+    doc.text(lines, M + 4, y + 10.5, { lineHeightFactor: 1.38 });
+    let cy = y + 10.5 + lines.length * lh(qSize);
+    if (v) { drawVisual(doc, v, M + 4, cy - 2, vs); cy += vh; }
+    doc.setDrawColor(196, 181, 253); doc.setLineWidth(0.3); doc.line(M + 4, cy + 3, PAGE_W - M - 4, cy + 3);
+    y += h + 3;
+  }
+
   // ---- Self-check + teacher's comments
   ensure(20);
   y += 3;
@@ -554,6 +573,15 @@ export async function buildWorksheetPdf(o: WorksheetPdfOptions, preloaded?: { re
       doc.setFont("DejaVu", "normal"); doc.setTextColor(...INK); doc.text(lines, M + 9, y);
       y += lines.length * 5 + 3;
     });
+    if (L.challenge) {
+      doc.setFontSize(10);
+      const lines: string[] = doc.splitTextToSize(L.challenge.answer, CONTENT_W - 30);
+      ensure(lines.length * 5 + 5);
+      y += 2;
+      doc.setFont("DejaVu", "bold"); doc.setTextColor(109, 40, 217); doc.text("★ Challenge:", M, y);
+      doc.setFont("DejaVu", "normal"); doc.setTextColor(...INK); doc.text(lines, M + 26, y);
+      y += lines.length * 5 + 3;
+    }
   }
 
   drawFooters(doc);

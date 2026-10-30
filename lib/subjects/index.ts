@@ -9,6 +9,7 @@ import { ENGLISH_SKILL_TOPICS, ENGLISH_SKILL_GENERATORS } from "./englishSkills"
 import { SCIENCE_TOPICS, SCIENCE_GENERATORS } from "./science";
 import { SCIENCE_SKILL_TOPICS, SCIENCE_SKILL_GENERATORS } from "./scienceSkills";
 import { pickPassageForGrade } from "./comprehension";
+import { THINKING_TOPICS, THINKING_GENERATORS } from "./thinkingSkills";
 import { PICTURE_MATH_TOPICS, PICTURE_ENGLISH_TOPICS, PICTURE_SCIENCE_TOPICS, PICTURE_GENERATORS } from "./pictureSkills";
 
 export type { Difficulty, Question, Topic };
@@ -37,13 +38,13 @@ function withBookGrades(subject: SubjectId, topics: Topic[]): Topic[] {
 }
 
 const TOPICS_BY_SUBJECT: Record<SubjectId, Topic[]> = {
-  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS]),
+  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS, ...THINKING_TOPICS]),
   english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS, ...PICTURE_ENGLISH_TOPICS]),
   science: withBookGrades("science", [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS]),
 };
 
 const GENERATORS_BY_SUBJECT: Record<SubjectId, Record<string, any>> = {
-  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS },
+  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS, ...THINKING_GENERATORS },
   english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS, ...PICTURE_GENERATORS },
   science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...PICTURE_GENERATORS },
 };
@@ -230,4 +231,18 @@ export function exampleQuestion(opts: { subject: SubjectId; grade: number; topic
   const pool = generateWorksheet({ subject: opts.subject, grade: opts.grade, topic: opts.topic, difficulty: "easy", count: 8, seed: (opts.seed ^ 0x9e3779b9) >>> 0 });
   const seen = new Set(opts.avoid.map((q) => q.q));
   return pool.find((q) => !seen.has(q.q));
+}
+
+/** A stretch question for the "Challenge corner": one of the grade's challenge skills (not the sheet's own topic). */
+export function challengeQuestion(opts: { subject: SubjectId; grade: number; topic: string; seed: number }): { question: Question; topic: string } | undefined {
+  const units = bookFor(opts.subject, opts.grade);
+  if (!units) return undefined;
+  const skills = bookSkills(units);
+  if (skills.some((s) => s.topic === opts.topic && s.level === "challenge")) return undefined;
+  const pool = skills.filter((s) => s.level === "challenge" && s.topic !== opts.topic && GENERATORS_BY_SUBJECT[opts.subject]?.[s.topic]);
+  if (!pool.length) return undefined;
+  const pick = pool[(opts.seed >>> 3) % pool.length];
+  const qs = generateWorksheet({ subject: opts.subject, grade: opts.grade, topic: pick.topic, difficulty: "medium", count: 6, seed: (opts.seed ^ 0x5bd1e995) >>> 0 });
+  const q = qs.find((x) => x.a.length <= 60 && x.q.length <= 260);
+  return q ? { question: q, topic: pick.topic } : undefined;
 }
