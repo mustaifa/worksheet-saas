@@ -186,6 +186,7 @@ type Tpl = { key: string; heading: string; item: string; em?: string; boxed?: bo
 /** Recognises "same instruction, different item" questions so the instruction can be written once. */
 function templateOf(q: LaidOutQuestion, orig: string): Tpl | null {
   let m: RegExpMatchArray | null;
+  if (q.visual) return null; // keep pictures with their questions
   const ch = q.choices;
   if (ch && q.mode === "choice") {
     if ((m = orig.match(new RegExp(`^In (?:the sentence )?${QO}(.+?)${QC},? is ${QO}(.+?)${QC} (an? [\\w-]+(?:,? (?:or )?an? [\\w-]+)+)\\?$`)))) {

@@ -69,6 +69,7 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("Light & Sound", c("light_sound", "4-PS4-2"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 4 Preview", adv("energy_forms", "4-PS3-2"), adv("rocks_erosion", "4-ESS2-1")),
+      L("Investigations", adv("science_investigations")),
       L("Challenge Puzzles", ch("challenge_science_riddles"))),
   ],
 
@@ -93,6 +94,7 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("The Solar System", c("solar_system_planets"), c("solar_system_earth_moon"), c("solar_system"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 5 Preview", adv("matter_particles", "5-PS1-1"), adv("gravity_basic", "5-PS2-1")),
+      L("Investigations", adv("science_investigations")),
       L("Challenge Puzzles", ch("challenge_science_riddles"))),
   ],
 
@@ -117,6 +119,7 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("Electricity, Magnets & Machines", c("electricity"), c("magnetism"), c("simple_machines"), c("light_sound"))),
     U("Going Further", FURTHER,
       L("Advanced: Middle School Preview", adv("density", "MS-PS1-2"), adv("sci_method"), adv("cell_biology", "MS-LS1-2")),
+      L("Investigations", adv("science_investigations")),
       L("Challenge Puzzles", ch("challenge_science_riddles"))),
   ],
 
@@ -146,6 +149,7 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("Ecosystems", c("food_chain"), c("ecosystem_roles", "MS-LS2-3"), c("ecosystem_relationships", "MS-LS2-2"), c("ecosystems"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 7–8 Preview", adv("microscope"), adv("phys_chem_changes", "MS-PS1-2"), adv("kinetic_potential", "MS-PS3-1")),
+      L("Investigations", adv("science_investigations")),
       L("Challenge Puzzles", ch("challenge_science_thinking"))),
   ],
 
@@ -169,6 +173,7 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("Earth & Space", c("earth_rocks_tectonics"), c("earth_weather"), c("earth_science"), c("solar_system_planets"), c("solar_system_earth_moon"), c("solar_system"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 8–9 Preview", adv("genetics_vocabulary", "MS-LS3-1"), adv("wave_equation", "MS-PS4-1"), adv("chemistry_atoms", "MS-PS1-1")),
+      L("Investigations", adv("science_investigations")),
       L("Challenge Puzzles", ch("challenge_science_thinking"))),
   ],
 
@@ -194,6 +199,7 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("Earth's History & Surface", c("geologic_time", "MS-ESS1-4"), c("earth_rocks_tectonics"), c("earth_weather"), c("earth_science"))),
     U("Going Further", FURTHER,
       L("Advanced: High School Preview", adv("atomic_structure", "HS-PS1-1"), adv("newton_second_law", "HS-PS2-1"), adv("genetics_punnett", "HS-LS3-3")),
+      L("Investigations", adv("science_investigations")),
       L("Challenge Puzzles", ch("challenge_science_thinking"))),
   ],
 

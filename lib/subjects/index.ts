@@ -10,6 +10,7 @@ import { SCIENCE_TOPICS, SCIENCE_GENERATORS } from "./science";
 import { SCIENCE_SKILL_TOPICS, SCIENCE_SKILL_GENERATORS } from "./scienceSkills";
 import { pickPassageForGrade } from "./comprehension";
 import { THINKING_TOPICS, THINKING_GENERATORS } from "./thinkingSkills";
+import { CREATIVE_MATH_TOPICS, CREATIVE_ENGLISH_TOPICS, CREATIVE_SCIENCE_TOPICS, CREATIVE_GENERATORS } from "./creativeSkills";
 import { PICTURE_MATH_TOPICS, PICTURE_ENGLISH_TOPICS, PICTURE_SCIENCE_TOPICS, PICTURE_GENERATORS } from "./pictureSkills";
 
 export type { Difficulty, Question, Topic };
@@ -38,15 +39,15 @@ function withBookGrades(subject: SubjectId, topics: Topic[]): Topic[] {
 }
 
 const TOPICS_BY_SUBJECT: Record<SubjectId, Topic[]> = {
-  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS, ...THINKING_TOPICS]),
-  english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS, ...PICTURE_ENGLISH_TOPICS]),
-  science: withBookGrades("science", [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS]),
+  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS, ...THINKING_TOPICS, ...CREATIVE_MATH_TOPICS]),
+  english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS, ...PICTURE_ENGLISH_TOPICS, ...CREATIVE_ENGLISH_TOPICS]),
+  science: withBookGrades("science", [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS, ...CREATIVE_SCIENCE_TOPICS]),
 };
 
 const GENERATORS_BY_SUBJECT: Record<SubjectId, Record<string, any>> = {
-  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS, ...THINKING_GENERATORS },
-  english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS, ...PICTURE_GENERATORS },
-  science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...PICTURE_GENERATORS },
+  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS, ...THINKING_GENERATORS, ...CREATIVE_GENERATORS },
+  english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS },
+  science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS },
 };
 
 export function allGrades(): number[] {
@@ -239,7 +240,9 @@ export function challengeQuestion(opts: { subject: SubjectId; grade: number; top
   if (!units) return undefined;
   const skills = bookSkills(units);
   if (skills.some((s) => s.topic === opts.topic && s.level === "challenge")) return undefined;
-  const pool = skills.filter((s) => s.level === "challenge" && s.topic !== opts.topic && GENERATORS_BY_SUBJECT[opts.subject]?.[s.topic]);
+  // Puzzle topics added later stay out of the pool so existing sheets keep the same challenge question.
+  const LATER = new Set(["logic_grids", "mini_sudoku", "secret_codes", "word_ladders"]);
+  const pool = skills.filter((s) => s.level === "challenge" && s.topic !== opts.topic && !LATER.has(s.topic) && GENERATORS_BY_SUBJECT[opts.subject]?.[s.topic]);
   if (!pool.length) return undefined;
   const pick = pool[(opts.seed >>> 3) % pool.length];
   const qs = generateWorksheet({ subject: opts.subject, grade: opts.grade, topic: pick.topic, difficulty: "medium", count: 6, seed: (opts.seed ^ 0x5bd1e995) >>> 0 });

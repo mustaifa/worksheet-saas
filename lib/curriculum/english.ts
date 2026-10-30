@@ -64,6 +64,7 @@ export const ENGLISH_BOOK: SubjectBook = {
       L("Reading Comprehension", c("reading_comprehension", "RL.2.10"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 3–4 Preview", adv("homophones", "L.4.1g"), adv("fact_opinion"), adv("subject_verb", "L.3.1f")),
+      L("Word Puzzles", ch("secret_codes"), ch("word_ladders")),
       L("Challenge Puzzles", ch("challenge_riddles"), ch("challenge_anagrams"))),
   ],
 
@@ -92,6 +93,7 @@ export const ENGLISH_BOOK: SubjectBook = {
       L("Reading Comprehension", c("reading_comprehension", "RI.3.10"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 4 Preview", adv("figurative_language", "L.4.5a"), adv("relative_pronouns", "L.4.1a"), adv("homophones", "L.4.1g")),
+      L("Word Puzzles", ch("secret_codes"), ch("word_ladders")),
       L("Challenge Puzzles", ch("challenge_riddles"), ch("challenge_anagrams"))),
   ],
 
@@ -124,6 +126,7 @@ export const ENGLISH_BOOK: SubjectBook = {
       L("Transitions", c("transitions", "W.4.2c"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 5 Preview", adv("idioms", "L.5.5b"), adv("rhyme_scheme", "RL.5.5"), adv("conjunctions", "L.5.1e")),
+      L("Word Puzzles", ch("secret_codes"), ch("word_ladders")),
       L("Challenge Puzzles", ch("challenge_anagrams"), ch("challenge_riddles"))),
   ],
 
@@ -153,6 +156,7 @@ export const ENGLISH_BOOK: SubjectBook = {
       L("Transitions", c("transitions", "W.5.2c"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 6 Preview", adv("pronoun_usage", "L.6.1"), adv("analogies", "L.6.5b"), adv("argument_claims", "RI.6.8")),
+      L("Word Puzzles", ch("secret_codes"), ch("word_ladders")),
       L("Challenge Puzzles", ch("challenge_anagrams"), ch("challenge_riddles"))),
   ],
 
@@ -185,6 +189,7 @@ export const ENGLISH_BOOK: SubjectBook = {
       L("Sources & Credibility", c("sources", "W.6.8"))),
     U("Going Further", FURTHER,
       L("Advanced: Grade 7 Preview", adv("phrases_clauses", "L.7.1a"), adv("sentence_types", "L.7.1b"), adv("misplaced_modifiers", "L.7.1c")),
+      L("Word Puzzles", ch("secret_codes")),
       L("Challenge Puzzles", ch("challenge_anagrams"), ch("challenge_riddles"))),
   ],
 
