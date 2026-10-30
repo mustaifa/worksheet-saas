@@ -270,8 +270,8 @@ function solid(kind: "cylinder" | "cone" | "sphere", rLabel: string, hLabel: str
   };
   if (kind === "sphere") {
     shapes.push({ k: "circle", cx: 55, cy: 55, r: 45, fill: FILL_A, stroke: INK, sw: 1.8 }, ell(55, 55, 45, 12, undefined, true));
-    shapes.push({ k: "line", x1: 55, y1: 55, x2: 100, y2: 55, stroke: "#1d4ed8", sw: 1.6 }, dimLabel(78, 72, rLabel));
-    return { w: 140, h: 110, shapes, alt: `A sphere with radius ${rLabel}` };
+    shapes.push({ k: "line", x1: 55, y1: 55, x2: 100, y2: 55, stroke: "#1d4ed8", sw: 1.6 }, dimLabel(55, 118, rLabel));
+    return { w: 140, h: 124, shapes, alt: `A sphere with radius ${rLabel}` };
   }
   const cx = 55, top = 18, bot = 110, rx = 38, ry = 10;
   if (kind === "cylinder") {
@@ -284,6 +284,65 @@ function solid(kind: "cylinder" | "cone" | "sphere", rLabel: string, hLabel: str
   shapes.push({ k: "line", x1: cx, y1: bot, x2: cx + rx, y2: bot, stroke: "#1d4ed8", sw: 1.6 }, dimLabel(cx + rx / 2, bot + 24, rLabel));
   shapes.push({ k: "line", x1: cx + rx + 12, y1: kind === "cone" ? top - 6 : top, x2: cx + rx + 12, y2: bot, stroke: "#1d4ed8", sw: 1.2, dash: true }, dimLabel(cx + rx + 18, (top + bot) / 2, hLabel, "start"));
   return { w: cx + rx + 30 + hLabel.length * 7, h: bot + 30, shapes, alt: `A ${kind} with ${rLabel} and ${hLabel}` };
+}
+
+
+function ellipseShape(cx: number, cy: number, rx: number, ry: number, fill: string): Shape {
+  const pts: [number, number][] = [];
+  for (let i = 0; i < 32; i++) { const a = (i / 32) * Math.PI * 2; pts.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]); }
+  return { k: "poly", pts, closed: true, fill, stroke: INK, sw: 1.4 };
+}
+
+/** Arrows (or points) from the origin on a ±10 grid. */
+function planeVectors(items: [[number, number], string][], xName: string, yName: string, alt: string, arrows = true): Visual {
+  const lo = -10, cell = 7, o = 14, size = 20 * cell;
+  const X = (v: number) => o + (v - lo) * cell, Y = (v: number) => o + (10 - v) * cell;
+  const shapes: Shape[] = [];
+  for (let v = lo; v <= 10; v++) shapes.push({ k: "line", x1: X(v), y1: Y(lo), x2: X(v), y2: Y(10), stroke: "#e2e8f0", sw: 0.6 }, { k: "line", x1: X(lo), y1: Y(v), x2: X(10), y2: Y(v), stroke: "#e2e8f0", sw: 0.6 });
+  shapes.push({ k: "line", x1: X(lo), y1: Y(0), x2: X(10), y2: Y(0), stroke: INK, sw: 1.3 }, { k: "line", x1: X(0), y1: Y(lo), x2: X(0), y2: Y(10), stroke: INK, sw: 1.3 });
+  shapes.push({ k: "text", x: X(10) + 2, y: Y(0) - 4, t: xName, size: 9, bold: true, anchor: "end", fill: "#475569" }, { k: "text", x: X(0) + 4, y: Y(10) + 8, t: yName, size: 9, bold: true, fill: "#475569" });
+  const cols = ["#2563eb", "#dc2626"];
+  items.forEach(([[a, b], name], i) => {
+    const c = cols[i % 2];
+    if (arrows || true) {
+      const ang = Math.atan2(Y(b) - Y(0), X(a) - X(0)), hx = X(a), hy = Y(b);
+      shapes.push({ k: "line", x1: X(0), y1: Y(0), x2: hx - Math.cos(ang) * 4, y2: hy - Math.sin(ang) * 4, stroke: c, sw: 2 });
+      shapes.push({ k: "poly", pts: [[hx, hy], [hx - Math.cos(ang) * 8 + Math.sin(ang) * 4, hy - Math.sin(ang) * 8 - Math.cos(ang) * 4], [hx - Math.cos(ang) * 8 - Math.sin(ang) * 4, hy - Math.sin(ang) * 8 + Math.cos(ang) * 4]], closed: true, fill: c });
+    }
+    shapes.push({ k: "text", x: X(a) + (a >= 0 ? 5 : -5), y: Y(b) + (b >= 0 ? -4 : 12), t: name, size: 11, bold: true, anchor: a >= 0 ? "start" : "end", fill: c });
+  });
+  return { w: size + o * 2, h: size + o * 2, shapes, alt };
+}
+
+/** An angle drawn on the unit circle. */
+function unitCircleAngle(deg: number, label?: string): Visual {
+  const cx = 70, cy = 70, r = 54, a = (deg * Math.PI) / 180;
+  const shapes: Shape[] = [
+    { k: "line", x1: cx - r - 10, y1: cy, x2: cx + r + 10, y2: cy, stroke: INK, sw: 1.2 }, { k: "line", x1: cx, y1: cy - r - 10, x2: cx, y2: cy + r + 10, stroke: INK, sw: 1.2 },
+    { k: "circle", cx, cy, r, stroke: "#94a3b8", sw: 1.4 },
+    { k: "line", x1: cx, y1: cy, x2: cx + Math.cos(a) * r, y2: cy - Math.sin(a) * r, stroke: "#2563eb", sw: 2.2 },
+    { k: "circle", cx: cx + Math.cos(a) * r, cy: cy - Math.sin(a) * r, r: 3.5, fill: "#dc2626" },
+    angleArc(cx, cy, 16, 0, deg % 360 === 0 && deg > 0 ? 359 : deg % 360, "#dc2626"),
+  ];
+  shapes.push({ k: "text", x: cx + 22, y: cy - 22, t: label || `${deg}°`, size: 11, bold: true, fill: "#dc2626" });
+  for (const [d, t] of [[0, "0°"], [90, "90°"], [180, "180°"], [270, "270°"]] as [number, string][]) {
+    const x = cx + Math.cos((d * Math.PI) / 180) * (r + 4), y = cy - Math.sin((d * Math.PI) / 180) * (r + 4);
+    shapes.push({ k: "text", x: d === 180 ? x - 2 : x + 2, y: d === 90 ? y - 2 : d === 270 ? y + 10 : y - 3, t, size: 8.5, anchor: d === 180 ? "end" : "start", fill: "#475569" });
+  }
+  return { w: 160, h: 150, shapes, alt: `An angle of ${label || `${deg}°`} on the unit circle` };
+}
+
+/** A triangle with two sides and the angle between (or other given parts) labelled. */
+function sasTriangle(side1: string, side2: string, angle: string, unknown: string): Visual {
+  const A: [number, number] = [20, 110], B: [number, number] = [230, 110], C: [number, number] = [90, 20];
+  const shapes: Shape[] = [
+    { k: "poly", pts: [A, B, C], closed: true, fill: FILL_B, stroke: INK, sw: 1.8 },
+    { k: "text", x: C[0], y: C[1] - 6, t: "C", size: 11, bold: true, anchor: "middle", fill: INK }, { k: "text", x: A[0] - 6, y: A[1] + 4, t: "A", size: 11, bold: true, anchor: "end", fill: INK }, { k: "text", x: B[0] + 6, y: B[1] + 4, t: "B", size: 11, bold: true, fill: INK },
+    dimLabel((C[0] + B[0]) / 2 + 10, (C[1] + B[1]) / 2 - 4, side1, "start"), dimLabel((C[0] + A[0]) / 2 - 8, (C[1] + A[1]) / 2, side2, "end"),
+    angle.length > 8 ? { k: "text", x: 300, y: A[1] + 18, t: angle, size: 10.5, bold: true, anchor: "end", fill: "#be185d" } : { k: "text", x: C[0] + 2, y: C[1] + 26, t: angle, size: 10.5, bold: true, anchor: "middle", fill: "#be185d" },
+  ];
+  if (unknown) shapes.push({ k: "text", x: (A[0] + B[0]) / 2, y: A[1] + 18, t: unknown, size: 12, bold: true, anchor: "middle", fill: "#dc2626" });
+  return { w: 300, h: 134, shapes, alt: "A triangle with its sides and angles labelled" };
 }
 
 // ---------------------------------------------------------------- matchers
@@ -835,6 +894,182 @@ function mathVisual(topic: string, grade: number, q: string): Visual | null {
     }
   }
 
+  // ---- Similar triangles
+  if ((m = q.match(/^Triangle ABC ~ triangle DEF\. AB = (\d+), BC = (\d+), DE = (\d+)\. Find EF\.$/))) {
+    const [ab, bc, de] = [+m[1], +m[2], +m[3]], k = de / ab;
+    const tri = (x: number, y: number, sc: number, labs: [string, string], names: string[], fill: string): Shape[] => {
+      const B: [number, number] = [x, y], A: [number, number] = [x, y - 46 * sc], C: [number, number] = [x + 70 * sc, y];
+      return [
+        { k: "poly", pts: [A, B, C], closed: true, fill, stroke: INK, sw: 1.8 },
+        { k: "text", x: A[0] - 6, y: A[1] + 4, t: names[0], size: 11, bold: true, anchor: "end", fill: INK },
+        { k: "text", x: B[0] - 6, y: B[1] + 4, t: names[1], size: 11, bold: true, anchor: "end", fill: INK },
+        { k: "text", x: C[0] + 6, y: C[1] + 4, t: names[2], size: 11, bold: true, fill: INK },
+        dimLabel(x - 18, y - 23 * sc + 4, labs[0], "end"),
+        dimLabel(x + 35 * sc, y + 16, labs[1]),
+      ];
+    };
+    const sc2 = Math.min(1.9, Math.max(1.2, k > 1 ? 1.6 : 0.8));
+    const shapes = [...tri(40, 70, 1, [String(ab), String(bc)], ["A", "B", "C"], FILL_A), ...tri(190, 70 + 0, sc2, [String(de), "?"], ["D", "E", "F"], FILL_B)];
+    const minY = Math.min(...shapes.flatMap((sh) => (sh.k === "poly" ? sh.pts.map((p2) => p2[1]) : sh.k === "text" ? [sh.y - 12] : [0])));
+    for (const sh of shapes) shift(sh, 0, 8 - minY);
+    return { w: 190 + 70 * sc2 + 30, h: 70 + 8 - minY + 24, shapes, alt: "Two similar triangles with matching sides labelled" };
+  }
+
+  // ---- Circle on a grid (equation given the centre and radius)
+  if ((m = q.match(/^Write the equation of the circle with center \((-?\d+), (-?\d+)\) and radius (\d+)\.$/))) {
+    const [h, k, r] = [+m[1], +m[2], +m[3]];
+    if (Math.abs(h) + r <= 10 && Math.abs(k) + r <= 10) {
+      const lo = -10, cell = 7, o = 14, size = 20 * cell;
+      const X = (v: number) => o + (v - lo) * cell, Y = (v: number) => o + (10 - v) * cell;
+      const shapes: Shape[] = [];
+      for (let v = lo; v <= 10; v++) shapes.push({ k: "line", x1: X(v), y1: Y(lo), x2: X(v), y2: Y(10), stroke: "#e2e8f0", sw: 0.6 }, { k: "line", x1: X(lo), y1: Y(v), x2: X(10), y2: Y(v), stroke: "#e2e8f0", sw: 0.6 });
+      shapes.push({ k: "line", x1: X(lo), y1: Y(0), x2: X(10), y2: Y(0), stroke: INK, sw: 1.3 }, { k: "line", x1: X(0), y1: Y(lo), x2: X(0), y2: Y(10), stroke: INK, sw: 1.3 });
+      shapes.push({ k: "circle", cx: X(h), cy: Y(k), r: r * cell, stroke: "#2563eb", sw: 2 }, { k: "circle", cx: X(h), cy: Y(k), r: 3, fill: "#dc2626" }, { k: "line", x1: X(h), y1: Y(k), x2: X(h + r), y2: Y(k), stroke: "#dc2626", sw: 1.5 });
+      shapes.push({ k: "text", x: X(h) + (r * cell) / 2, y: Y(k) - 4, t: `r = ${r}`, size: 9.5, bold: true, anchor: "middle", fill: "#dc2626" });
+      return { w: size + o * 2, h: size + o * 2, shapes, alt: `A circle with centre (${h}, ${k}) and radius ${r}` };
+    }
+  }
+
+  // ---- Factor box for x² + bx + c
+  if ((m = q.match(/^Solve by factoring: x² ([+-]) (\d+)x ([+-]) (\d+) = 0$/))) {
+    const c = `${m[3] === "-" ? "−" : ""}${m[4]}`;
+    const shapes: Shape[] = [];
+    const cells = [["x²", "?x"], ["?x", c]];
+    shapes.push({ k: "text", x: 70, y: 14, t: "x", size: 12, bold: true, anchor: "middle", fill: "#1d4ed8" }, { k: "text", x: 130, y: 14, t: "?", size: 12, bold: true, anchor: "middle", fill: "#dc2626" }, { k: "text", x: 30, y: 46, t: "x", size: 12, bold: true, anchor: "end", fill: "#1d4ed8" }, { k: "text", x: 30, y: 86, t: "?", size: 12, bold: true, anchor: "end", fill: "#dc2626" });
+    cells.forEach((r, i) => r.forEach((v, j) => shapes.push({ k: "rect", x: 40 + j * 60, y: 22 + i * 40, w: 60, h: 40, fill: [FILL_A, FILL_B, FILL_B, FILL_C][i * 2 + j], stroke: INK, sw: 1.3 }, { k: "text", x: 70 + j * 60, y: 47 + i * 40, t: v, size: 13, bold: true, anchor: "middle", fill: INK })));
+    shapes.push({ k: "text", x: 175, y: 46, t: `two numbers that multiply to ${c}`, size: 10.5, fill: "#475569" }, { k: "text", x: 175, y: 64, t: `and add to ${m[1] === "-" ? "−" : ""}${m[2]}`, size: 10.5, fill: "#475569" });
+    return { w: 360, h: 106, shapes, alt: "A factor box for the quadratic" };
+  }
+
+  // ---- Exponential growth or decay as bars
+  if ((m = q.match(/^A population of (\d+) (doubles|triples) every year\. What will it be after (\d) years\?$/)) || (m = q.match(/^A sample of (\d+)mg (decays) to half its amount every cycle\. How much remains after (\d) cycles\?$/))) {
+    const start = +m[1], f = m[2] === "doubles" ? 2 : m[2] === "triples" ? 3 : 0.5, n = +m[3];
+    const shapes: Shape[] = [];
+    const maxV = Math.max(start, start * Math.pow(f, n));
+    const bw = 40, gap = 14, H = 90;
+    for (let i = 0; i <= n; i++) {
+      const v = start * Math.pow(f, i), h = Math.max(4, (v / maxV) * (H - 14)), x = 10 + i * (bw + gap);
+      shapes.push({ k: "rect", x, y: 10 + H - h, w: bw, h, fill: i === 0 ? FILL_A : i === n ? "#fff" : FILL_C, stroke: INK, sw: 1.2, dash: i === n });
+      shapes.push({ k: "text", x: x + bw / 2, y: 10 + H - h - 4, t: i === 0 ? String(start) : i === n ? "?" : i === 1 ? String(start * f) : "", size: 10, bold: true, anchor: "middle", fill: i === n ? "#dc2626" : INK });
+      shapes.push({ k: "text", x: x + bw / 2, y: 10 + H + 14, t: String(i), size: 9.5, anchor: "middle", fill: "#475569" });
+      if (i > 0) shapes.push({ k: "text", x: x - gap / 2, y: 10 + H / 2, t: f === 0.5 ? "÷2" : `×${f}`, size: 9, bold: true, anchor: "middle", fill: "#2563eb" });
+    }
+    shapes.push({ k: "text", x: 10 + ((n + 1) * (bw + gap)) / 2, y: 10 + H + 28, t: f === 0.5 ? "cycles" : "years", size: 9.5, bold: true, anchor: "middle", fill: "#475569" });
+    return { w: 20 + (n + 1) * (bw + gap), h: H + 44, shapes, alt: "Bars that grow (or shrink) by the same factor each step" };
+  }
+
+  // ---- Functions: mapping diagram and function machine
+  if ((m = q.match(/^Is \{((?:\(-?\d+, -?\d+\)(?:, )?)+)\} a function\?/))) {
+    const pairs = [...m[1].matchAll(/\((-?\d+), (-?\d+)\)/g)].map((x) => [x[1], x[2]]);
+    const xs = [...new Set(pairs.map((p2) => p2[0]))], ys = [...new Set(pairs.map((p2) => p2[1]))];
+    const shapes: Shape[] = [ellipseShape(50, 60, 32, 54, FILL_A), ellipseShape(190, 60, 32, 54, FILL_C)];
+    const Y = (i: number, n: number) => 60 + (i - (n - 1) / 2) * 26;
+    xs.forEach((x, i) => shapes.push({ k: "text", x: 50, y: Y(i, xs.length) + 4, t: x, size: 11, bold: true, anchor: "middle", fill: INK }));
+    ys.forEach((y, i) => shapes.push({ k: "text", x: 190, y: Y(i, ys.length) + 4, t: y, size: 11, bold: true, anchor: "middle", fill: INK }));
+    pairs.forEach(([x, y]) => { const y1 = Y(xs.indexOf(x), xs.length), y2 = Y(ys.indexOf(y), ys.length); shapes.push({ k: "line", x1: 64, y1, x2: 172, y2, stroke: "#64748b", sw: 1.2 }, { k: "poly", pts: [[176, y2], [168, y2 - 4], [168, y2 + 4]], closed: true, fill: "#64748b" }); });
+    shapes.push({ k: "text", x: 50, y: 128, t: "input x", size: 9.5, bold: true, anchor: "middle", fill: "#475569" }, { k: "text", x: 190, y: 128, t: "output y", size: 9.5, bold: true, anchor: "middle", fill: "#475569" });
+    return { w: 240, h: 134, shapes, alt: "A mapping diagram from inputs to outputs" };
+  }
+  if ((m = q.match(/^f\(x\) = (.+)\. Find f\((-?\d+)\)\.$/))) {
+    const shapes: Shape[] = [
+      { k: "rect", x: 0, y: 22, w: 56, h: 34, r: 6, fill: FILL_A, stroke: INK, sw: 1.3 }, { k: "text", x: 28, y: 44, t: `x = ${m[2]}`, size: 11.5, bold: true, anchor: "middle", fill: INK },
+      { k: "line", x1: 60, y1: 39, x2: 84, y2: 39, stroke: "#64748b", sw: 2 }, { k: "poly", pts: [[90, 39], [82, 34], [82, 44]], closed: true, fill: "#64748b" },
+      { k: "rect", x: 94, y: 8, w: 130, h: 62, r: 10, fill: FILL_B, stroke: INK, sw: 1.5 }, { k: "text", x: 159, y: 30, t: "rule", size: 9.5, anchor: "middle", fill: "#475569" }, { k: "text", x: 159, y: 50, t: `f(x) = ${m[1]}`, size: 11.5, bold: true, anchor: "middle", fill: "#1d4ed8" },
+      { k: "line", x1: 228, y1: 39, x2: 252, y2: 39, stroke: "#64748b", sw: 2 }, { k: "poly", pts: [[258, 39], [250, 34], [250, 44]], closed: true, fill: "#64748b" },
+      { k: "rect", x: 262, y: 22, w: 46, h: 34, r: 6, fill: "#fff", stroke: INK, sw: 1.3, dash: true }, { k: "text", x: 285, y: 45, t: "?", size: 14, bold: true, anchor: "middle", fill: "#dc2626" },
+    ];
+    return { w: 312, h: 76, shapes, alt: "A function machine" };
+  }
+
+  // ---- Composite shape: rectangle with a triangle on top
+  if ((m = q.match(/^A shape is a (\d+) × (\d+) (\w+) rectangle with a triangle on top\. The triangle has base \d+ \w+ and height (\d+) \w+\./))) {
+    const [L, Wd, u, th] = [+m[1], +m[2], m[3], +m[4]];
+    const sc = 150 / L, rh = Math.max(30, Math.min(80, Wd * sc)), thh = Math.max(24, Math.min(70, th * sc));
+    const x = 40, y = 10 + thh;
+    const shapes: Shape[] = [
+      { k: "rect", x, y, w: 150, h: rh, fill: FILL_A, stroke: INK, sw: 1.8 },
+      { k: "poly", pts: [[x, y], [x + 150, y], [x + 75, y - thh]], closed: true, fill: FILL_B, stroke: INK, sw: 1.8 },
+      { k: "line", x1: x + 75, y1: y - thh, x2: x + 75, y2: y, stroke: "#dc2626", sw: 1.2, dash: true },
+      dimLabel(x + 75, y + rh + 16, `${L} ${u}`), dimLabel(x - 6, y + rh / 2 + 4, `${Wd} ${u}`, "end"), { k: "text", x: x + 80, y: y - thh / 2 + 4, t: `${th} ${u}`, size: 11, bold: true, fill: "#dc2626" },
+    ];
+    return { w: 240, h: y + rh + 24, shapes, alt: "A rectangle with a triangle on top" };
+  }
+
+  // ---- Percent bar: what is p% of n?
+  if ((m = q.match(/^What is (\d+)% of (\d+(?:\.\d+)?)\?$/)) && +m[1] <= 100) {
+    const p = +m[1], n = m[2];
+    const W2 = 300, shapes: Shape[] = [];
+    shapes.push({ k: "rect", x: 10, y: 24, w: W2, h: 26, fill: "#fff", stroke: INK, sw: 1.4 }, { k: "rect", x: 10, y: 24, w: (W2 * p) / 100, h: 26, fill: FILL_A, stroke: INK, sw: 1.4 });
+    for (let i = 1; i < 10; i++) shapes.push({ k: "line", x1: 10 + (W2 * i) / 10, y1: 24, x2: 10 + (W2 * i) / 10, y2: 50, stroke: "#94a3b8", sw: 0.6 });
+    shapes.push({ k: "text", x: 10, y: 18, t: "0%", size: 9.5, anchor: "middle", fill: "#475569" }, { k: "text", x: 10 + W2, y: 18, t: "100%", size: 9.5, anchor: "middle", fill: "#475569" }, { k: "text", x: 10 + (W2 * p) / 100, y: 18, t: `${p}%`, size: 10, bold: true, anchor: "middle", fill: "#1d4ed8" });
+    shapes.push({ k: "text", x: 10, y: 66, t: "0", size: 9.5, anchor: "middle", fill: "#475569" }, { k: "text", x: 10 + W2, y: 66, t: n, size: 10.5, bold: true, anchor: "middle", fill: INK }, { k: "text", x: 10 + (W2 * p) / 100, y: 66, t: "?", size: 12, bold: true, anchor: "middle", fill: "#dc2626" });
+    return { w: W2 + 30, h: 72, shapes, alt: `A percent bar showing ${p}% of ${n}` };
+  }
+
+  // ---- Ratio table: a : b = c : ?
+  if ((m = q.match(/^(\d+) : (\d+) = (\d+) : \?$/))) {
+    const shapes: Shape[] = [];
+    const col = (x: number, top: string, bot: string, f: string) => shapes.push({ k: "rect", x, y: 4, w: 50, h: 26, fill: f, stroke: INK, sw: 1.2 }, { k: "rect", x, y: 30, w: 50, h: 26, fill: f, stroke: INK, sw: 1.2 }, { k: "text", x: x + 25, y: 22, t: top, size: 13, bold: true, anchor: "middle", fill: INK }, { k: "text", x: x + 25, y: 48, t: bot, size: 13, bold: true, anchor: "middle", fill: bot === "?" ? "#dc2626" : INK });
+    col(10, m[1], m[2], FILL_A); col(130, m[3], "?", FILL_B);
+    const k = +m[3] / +m[1];
+    shapes.push({ k: "line", x1: 62, y1: 17, x2: 126, y2: 17, stroke: "#2563eb", sw: 1.6 }, { k: "line", x1: 62, y1: 43, x2: 126, y2: 43, stroke: "#2563eb", sw: 1.6 }, { k: "text", x: 94, y: 13, t: Number.isInteger(k) ? `× ${k}` : "× ?", size: 10, bold: true, anchor: "middle", fill: "#2563eb" }, { k: "text", x: 94, y: 56, t: "same ×", size: 9, anchor: "middle", fill: "#2563eb" });
+    return { w: 190, h: 62, shapes, alt: "A ratio table" };
+  }
+
+  // ---- Complex numbers on the plane (addition)
+  if ((m = q.match(/^Simplify: \((-?\d+) ([+-]) (\d+)i\) ([+-]) \((-?\d+) ([+-]) (\d+)i\)$/))) {
+    const z1: [number, number] = [+m[1], (m[2] === "-" ? -1 : 1) * +m[3]], z2: [number, number] = [+m[5], (m[6] === "-" ? -1 : 1) * +m[7]];
+    if ([...z1, ...z2].every((v) => Math.abs(v) <= 10)) return planeVectors([[z1, "z₁"], [z2, "z₂"]], "Real", "Imaginary", "Two complex numbers plotted as points");
+  }
+  // ---- Vectors on a grid
+  if ((m = q.match(/^u = <(-?\d+), (-?\d+)>, v = <(-?\d+), (-?\d+)>\. Find u [+-] v\.$/))) {
+    const u: [number, number] = [+m[1], +m[2]], v: [number, number] = [+m[3], +m[4]];
+    if ([...u, ...v].every((x) => Math.abs(x) <= 10)) return planeVectors([[u, "u"], [v, "v"]], "x", "y", "Vectors u and v drawn from the origin", true);
+  }
+
+  // ---- Unit circle: an angle in standard position
+  if ((m = q.match(/(?:sin|cos|tan)\((\d+)°\)/)) || (m = q.match(/^Convert (\d+)° to radians\.$/))) {
+    return unitCircleAngle(+m[1]);
+  }
+  if ((m = q.match(/^Convert (\d*)π\/(\d+) radians to degrees\.$/)) || (m = q.match(/^Convert (\d*)π radians to degrees\.$/))) {
+    const num = m[1] ? +m[1] : 1, den = m[2] ? +m[2] : 1;
+    return unitCircleAngle((180 * num) / den, `${m[1] || ""}π${m[2] ? "/" + m[2] : ""}`);
+  }
+
+  // ---- Triangle for the law of sines / cosines / area
+  if ((m = q.match(/a = (\d+), b = (\d+) and C = (\d+)°/))) return sasTriangle(`a = ${m[1]}`, `b = ${m[2]}`, `C = ${m[3]}°`, "c = ?");
+  if ((m = q.match(/A = (\d+)°, B = (\d+)° and a = (\d+)/))) return sasTriangle(`a = ${m[3]}`, "b = ?", `A = ${m[1]}°, B = ${m[2]}°`, "");
+  if ((m = q.match(/^Find the area of a triangle with sides (\d+) and (\d+) and an included angle of (\d+)°/))) return sasTriangle(m[1], m[2], `${m[3]}°`, "");
+
+  // ---- Surface area of solids
+  if ((m = q.match(/surface area of an? (cylinder|cone|sphere) with radius (\d+) ?(\w+)(?: and height (\d+) ?(\w+))?/))) {
+    return solid(m[1] as "cylinder" | "cone" | "sphere", `r = ${m[2]} ${m[3]}`, m[4] ? `h = ${m[4]} ${m[5]}` : "");
+  }
+  if ((m = q.match(/^A cone has radius (\d+) (\w+) and height (\d+) \w+\./))) return solid("cone", `r = ${m[1]} ${m[2]}`, `h = ${m[3]} ${m[2]}`);
+
+  // ---- Scale drawings and maps
+  if ((m = q.match(/(?:1 cm represents|1 inch :) (\d+) (\w+)/)) && /scale/i.test(q)) {
+    const unit = /inch/.test(q) ? "in" : "cm";
+    const shapes: Shape[] = [];
+    for (let i = 0; i < 5; i++) shapes.push({ k: "rect", x: 10 + i * 30, y: 20, w: 30, h: 10, fill: i % 2 ? "#fff" : INK, stroke: INK, sw: 1 });
+    shapes.push({ k: "text", x: 10, y: 14, t: "0", size: 9.5, anchor: "middle", fill: INK }, { k: "text", x: 40, y: 14, t: `1 ${unit}`, size: 9.5, anchor: "middle", fill: INK });
+    shapes.push({ k: "text", x: 40, y: 46, t: `= ${m[1]} ${m[2]}`, size: 11, bold: true, anchor: "middle", fill: "#1d4ed8" }, { k: "text", x: 190, y: 30, t: "scale bar", size: 10, fill: "#475569" });
+    return { w: 260, h: 54, shapes, alt: `A scale bar: 1 ${unit} = ${m[1]} ${m[2]}` };
+  }
+
+  // ---- Balance scale for one- and two-step equations (grades 6–8)
+  if (grade <= 8 && (m = q.match(/^Solve(?: for x)?: (\d)x \+ (\d+) = (\d+)$/)) && +m[2] <= 12) {
+    const [a, b, c] = [+m[1], +m[2], +m[3]];
+    const cubesW = Math.min(b, 6) * 12, leftEnd = 24 + a * 28 + cubesW, bx = Math.max(196, leftEnd + 24), right = bx + 92 + 16;
+    const mid = (20 + right) / 2;
+    const shapes: Shape[] = [{ k: "poly", pts: [[mid - 14, 112], [mid, 88], [mid + 14, 112]], closed: true, fill: "#e2e8f0", stroke: INK, sw: 1.3 }, { k: "line", x1: 20, y1: 86, x2: right, y2: 86, stroke: INK, sw: 3 }];
+    for (let i = 0; i < a; i++) shapes.push({ k: "rect", x: 24 + i * 28, y: 58, w: 24, h: 26, r: 3, fill: FILL_A, stroke: INK, sw: 1.2 }, { k: "text", x: 36 + i * 28, y: 76, t: "x", size: 12, bold: true, anchor: "middle", fill: INK });
+    for (let i = 0; i < b; i++) shapes.push({ k: "rect", x: 24 + a * 28 + (i % 6) * 12, y: 74 - Math.floor(i / 6) * 12, w: 10, h: 10, fill: FILL_B, stroke: INK, sw: 0.8 });
+    shapes.push({ k: "rect", x: bx, y: 56, w: 92, h: 28, r: 3, fill: "#475569", stroke: INK, sw: 1.2 }, { k: "text", x: bx + 46, y: 75, t: String(c), size: 14, bold: true, anchor: "middle", fill: "#fff" });
+    shapes.push({ k: "text", x: mid, y: 20, t: "Take the same from both sides to keep it balanced.", size: 10, anchor: "middle", fill: "#475569" });
+    return { w: right + 10, h: 116, shapes, alt: `A balance: ${a} x-boxes and ${b} ones balance ${c}` };
+  }
+
   // ---- Integer number line
   if (/integers|absolute_value/.test(topic) && grade <= 8) {
     const nums = [...q.matchAll(/(?<![\d.])-?\d+(?![\d.])/g)].map((x) => +x[0]);
@@ -848,8 +1083,10 @@ function mathVisual(topic: string, grade: number, q: string): Visual | null {
 
 function scienceVisual(topic: string, q: string): Visual | null {
   let m: RegExpMatchArray | null;
+  const extra = physicsChemVisual(topic, q);
+  if (extra) return extra;
   // Empty Punnett square with the parents' alleles on the edges
-  if (/punnett/.test(topic) && (m = q.match(/\b([A-Za-z])([A-Za-z]) × ([A-Za-z])([A-Za-z])\b/))) {
+  if (/punnett|genetics/.test(topic) && (m = q.match(/\b([A-Za-z])([A-Za-z]) × ([A-Za-z])([A-Za-z])\b/))) {
     const s = 40, x = 26, y = 26, shapes: Shape[] = [];
     for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) shapes.push({ k: "rect", x: x + j * s, y: y + i * s, w: s, h: s, fill: "#fff", stroke: INK, sw: 1.6 });
     shapes.push(
@@ -1271,6 +1508,257 @@ export function questionIcon(subject: string, grade: number, q: string): Visual 
   if (found.size !== 1) return null;
   const ic = ICONS[[...found][0]];
   return { w: 48, h: 48, shapes: placeIcon(ic, 0, 0, 48), alt: ic.word };
+}
+
+
+// ---------------------------------------------------------------- physics & chemistry pictures
+
+const BLUE_T = "#1d4ed8", RED_T = "#dc2626";
+const lbl = (x: number, y: number, t: string, color = BLUE_T, anchor: "start" | "middle" | "end" = "middle", size = 11.5): Shape => ({ k: "text", x, y, t, size, bold: true, anchor, fill: t.includes("?") ? RED_T : color });
+function arrowR(x1: number, y1: number, x2: number, y2: number, color: string, sw = 2.4): Shape[] {
+  const a = Math.atan2(y2 - y1, x2 - x1), h = 8;
+  return [{ k: "line", x1, y1, x2: x2 - Math.cos(a) * h * 0.6, y2: y2 - Math.sin(a) * h * 0.6, stroke: color, sw }, { k: "poly", pts: [[x2, y2], [x2 - Math.cos(a) * h + Math.sin(a) * h * 0.55, y2 - Math.sin(a) * h - Math.cos(a) * h * 0.55], [x2 - Math.cos(a) * h - Math.sin(a) * h * 0.55, y2 - Math.sin(a) * h + Math.cos(a) * h * 0.55]], closed: true, fill: color }];
+}
+function cart(x: number, y: number, w: number, label: string, fill = FILL_B): Shape[] {
+  return [{ k: "rect", x, y, w, h: 30, r: 4, fill, stroke: INK, sw: 1.6 }, { k: "circle", cx: x + 12, cy: y + 34, r: 6, fill: "#475569", stroke: INK, sw: 1 }, { k: "circle", cx: x + w - 12, cy: y + 34, r: 6, fill: "#475569", stroke: INK, sw: 1 }, lbl(x + w / 2, y + 20, label, INK)];
+}
+const ground = (y: number, w: number): Shape[] => [{ k: "line", x1: 0, y1: y, x2: w, y2: y, stroke: "#94a3b8", sw: 2 }];
+
+/** Formula-in-a-picture for common physics and chemistry questions. */
+function physicsChemVisual(topic: string, q: string): Visual | null {
+  let m: RegExpMatchArray | null;
+  const num = (x: string) => x.replace(/,/g, "");
+
+  // ---- distance, speed, time on a track
+  let d = "", v = "", t = "";
+  if ((m = q.match(/(?:rides|travels|moves|runs) at (\d+(?:\.\d+)?) m\/s for (\d+) s(?:econds)?/))) { v = m[1]; t = m[2]; d = "?"; }
+  else if ((m = q.match(/travels (\d+) (?:meters|m) in (\d+) s(?:econds)?\.? What is its (?:average )?speed/))) { d = m[1]; t = m[2]; v = "?"; }
+  else if ((m = q.match(/covers (\d+) meters at a steady (\d+) m\/s/))) { d = m[1]; v = m[2]; t = "?"; }
+  let du = "m", vu = "m/s", tu = "s";
+  if (!d && (m = q.match(/travels (\d+) km in (\d+) hours/))) { d = m[1]; t = m[2]; v = "?"; du = "km"; vu = "km/h"; tu = "h"; }
+  if (d) {
+    const shapes: Shape[] = [...ground(70, 330), ...cart(10, 34, 60, "", "#bfdbfe"), ...arrowR(76, 46, 130, 46, BLUE_T)];
+    shapes.push({ k: "line", x1: 40, y1: 84, x2: 310, y2: 84, stroke: INK, sw: 1.2 }, { k: "line", x1: 40, y1: 78, x2: 40, y2: 90, stroke: INK, sw: 1.2 }, { k: "line", x1: 310, y1: 78, x2: 310, y2: 90, stroke: INK, sw: 1.2 });
+    shapes.push({ k: "line", x1: 310, y1: 20, x2: 310, y2: 70, stroke: INK, sw: 1.6 }, { k: "poly", pts: [[310, 20], [334, 27], [310, 34]], closed: true, fill: RED_T });
+    shapes.push(lbl(102, 34, `v = ${v === "?" ? "?" : `${v} ${vu}`}`), lbl(175, 100, `d = ${d === "?" ? "?" : `${d} ${du}`}`), lbl(230, 46, `t = ${t === "?" ? "?" : `${t} ${tu}`}`, "#7c3aed"));
+    return { w: 340, h: 106, shapes, alt: "An object moving along a track with distance, speed and time" };
+  }
+  // ---- acceleration: changing speed
+  if ((m = q.match(/moving at (\d+) m\/s brakes to a stop in (\d+) s/))) {
+    const shapes: Shape[] = [...ground(64, 340), ...cart(10, 28, 56, "start"), ...cart(250, 28, 56, "stopped", FILL_D), ...arrowR(80, 44, 236, 44, "#94a3b8", 1.6)];
+    shapes.push(lbl(38, 84, `${m[1]} m/s`), lbl(278, 84, "0 m/s"), lbl(158, 36, `t = ${m[2]} s`, "#7c3aed"), lbl(158, 84, "a = ?"));
+    return { w: 340, h: 92, shapes, alt: "A cart braking to a stop" };
+  }
+  if ((m = q.match(/speeds up from (\d+) m\/s to (\d+) m\/s in (\d+) s/)) || (m = q.match(/moving at (\d+) m\/s accelerates at (\d+) m\/s² for (\d+) s/))) {
+    const isA = /speeds up/.test(q);
+    const shapes: Shape[] = [...ground(64, 340), ...cart(10, 28, 56, "start"), ...cart(250, 28, 56, "later", FILL_C), ...arrowR(80, 44, 236, 44, "#94a3b8", 1.6)];
+    shapes.push(lbl(38, 84, `${m[1]} m/s`), lbl(278, 84, isA ? `${m[2]} m/s` : "v = ?"), lbl(158, 36, `t = ${m[3]} s`, "#7c3aed"), lbl(158, 84, isA ? "a = ?" : `a = ${m[2]} m/s²`));
+    return { w: 340, h: 92, shapes, alt: "A cart speeding up between two moments" };
+  }
+  // ---- force, mass, acceleration
+  let F = "", M = "", A = "";
+  if ((m = q.match(/accelerate an? (\d+) kg object at (\d+) m\/s²/)) || (m = q.match(/force on an object with mass (\d+) kg accelerating at (\d+) m\/s²/))) { M = m[1]; A = m[2]; F = "?"; }
+  else if ((m = q.match(/net force of (\d+) N acts on an? (\d+) kg object/))) { F = m[1]; M = m[2]; A = "?"; }
+  else if ((m = q.match(/net force of (\d+) N gives an object an acceleration of (\d+) m\/s²/))) { F = m[1]; A = m[2]; M = "?"; }
+  if (F) {
+    const shapes: Shape[] = [...ground(78, 320), { k: "rect", x: 130, y: 30, w: 70, h: 48, r: 4, fill: FILL_B, stroke: INK, sw: 1.8 }, lbl(165, 59, M === "?" ? "m = ?" : `${M} kg`, INK)];
+    shapes.push(...arrowR(30, 54, 126, 54, RED_T, 3.2), lbl(78, 46, F === "?" ? "F = ?" : `F = ${F} N`, RED_T), ...arrowR(210, 20, 290, 20, BLUE_T, 2), lbl(250, 14, A === "?" ? "a = ?" : `a = ${A} m/s²`));
+    return { w: 320, h: 86, shapes, alt: "A box pushed by a force, accelerating" };
+  }
+  if ((m = q.match(/An? (\d+) kg box is pushed with (\d+) N while friction pushes back with (\d+) N/))) {
+    const shapes: Shape[] = [...ground(78, 340), { k: "rect", x: 140, y: 30, w: 70, h: 48, r: 4, fill: FILL_B, stroke: INK, sw: 1.8 }, lbl(175, 59, `${m[1]} kg`, INK)];
+    shapes.push(...arrowR(40, 54, 136, 54, RED_T, 3.2), lbl(88, 46, `push ${m[2]} N`, RED_T), ...arrowR(290, 70, 214, 70, "#7c3aed", 2.4), lbl(256, 62, `friction ${m[3]} N`, "#7c3aed", "middle", 10), lbl(175, 18, "net force → a = ?", INK, "middle", 10.5));
+    return { w: 340, h: 86, shapes, alt: "A box pushed against friction" };
+  }
+  // ---- momentum
+  if ((m = q.match(/momentum of an? (\d+) kg object moving at (\d+) m\/s/)) || (m = q.match(/An? (\d+) kg object has a momentum of (\d+) kg·m\/s/))) {
+    const asksV = /How fast/.test(q);
+    const shapes: Shape[] = [...ground(64, 300), ...cart(80, 28, 70, `${m[1]} kg`), ...arrowR(160, 40, 240, 40, BLUE_T)];
+    shapes.push(lbl(200, 32, asksV ? "v = ?" : `v = ${m[2]} m/s`), lbl(150, 86, asksV ? `p = ${m[2]} kg·m/s` : "p = m × v = ?", INK));
+    return { w: 300, h: 92, shapes, alt: "A moving cart with its mass and velocity" };
+  }
+  if ((m = q.match(/An? (\d+) kg cart moving at (\d+) m\/s hits an? (\d+) kg cart at rest/))) {
+    const shapes: Shape[] = [...ground(64, 360), ...cart(20, 28, 64, `${m[1]} kg`), ...arrowR(90, 40, 150, 40, BLUE_T), ...cart(200, 28, 64, `${m[3]} kg`, FILL_C)];
+    shapes.push(lbl(120, 30, `${m[2]} m/s`), lbl(232, 86, "at rest", "#475569"), lbl(330, 46, "stick → v = ?", RED_T, "end", 10.5));
+    return { w: 360, h: 92, shapes, alt: "A moving cart about to hit a cart at rest" };
+  }
+  // ---- work and power
+  if ((m = q.match(/(?:A force of|An?) (\d+) N (?:force )?pushes a box (\d+) m/))) {
+    const shapes: Shape[] = [...ground(70, 340), { k: "rect", x: 60, y: 30, w: 54, h: 40, r: 3, fill: FILL_B, stroke: INK, sw: 1.6 }, { k: "rect", x: 250, y: 30, w: 54, h: 40, r: 3, fill: "#fff", stroke: "#94a3b8", sw: 1.2, dash: true }, ...arrowR(10, 50, 56, 50, RED_T, 3)];
+    shapes.push(lbl(30, 40, `${m[1]} N`, RED_T), { k: "line", x1: 87, y1: 84, x2: 277, y2: 84, stroke: INK, sw: 1.2 }, ...arrowR(87, 84, 277, 84, INK, 1.2), lbl(182, 100, `d = ${m[2]} m`), lbl(182, 22, "W = F × d = ?", INK));
+    return { w: 340, h: 106, shapes, alt: "A box pushed a distance by a force" };
+  }
+  if ((m = q.match(/^(\d+) J of work is done with a force of (\d+) N\. How far/))) {
+    const shapes: Shape[] = [...ground(70, 340), { k: "rect", x: 60, y: 30, w: 54, h: 40, r: 3, fill: FILL_B, stroke: INK, sw: 1.6 }, { k: "rect", x: 250, y: 30, w: 54, h: 40, r: 3, fill: "#fff", stroke: "#94a3b8", sw: 1.2, dash: true }, ...arrowR(10, 50, 56, 50, RED_T, 3)];
+    shapes.push(lbl(30, 40, `${m[2]} N`, RED_T), ...arrowR(87, 84, 277, 84, INK, 1.2), lbl(182, 100, "d = ?"), lbl(182, 22, `W = ${m[1]} J`, INK));
+    return { w: 340, h: 106, shapes, alt: "A box pushed an unknown distance" };
+  }
+  // ---- circuits
+  if ((m = q.match(/^(\d+) V drives a current of (\d+) A\. What is the resistance\?/))) return circuitPic([`R = ?`], `${m[1]} V`, `${m[2]} A`);
+  if ((m = q.match(/^(\d+) V is applied across an? (\d+) Ω resistor\. What is the current\?/))) return circuitPic([`${m[2]} Ω`], `${m[1]} V`, "I = ?");
+  if ((m = q.match(/^A current of (\d+) A flows through an? (\d+) Ω resistor\. What is the voltage\?/))) return circuitPic([`${m[2]} Ω`], "V = ?", `I = ${m[1]} A`);
+  if ((m = q.match(/^Resistors of ((?:\d+ Ω, )+\d+ Ω|(?:\d+ Ω and \d+ Ω)(?: and \d+ Ω)?) are connected in series/))) return circuitPic(m[1].split(/, | and /), "", "R total = ?");
+  // ---- gas laws: piston
+  if ((m = q.match(/volume of (\d+) L at (\d+) K\. At constant pressure it is heated to (\d+) K/))) return pistons(`V₁ = ${m[1]} L`, `T₁ = ${m[2]} K`, "V₂ = ?", `T₂ = ${m[3]} K`, false);
+  if ((m = q.match(/gas at (\d+) kPa has a volume of (\d+) L\. At constant temperature, the volume grows to (\d+) L/))) return pistons(`P₁ = ${m[1]} kPa`, `V₁ = ${m[2]} L`, "P₂ = ?", `V₂ = ${m[3]} L`, false);
+  if ((m = q.match(/gas at (\d+) kPa has a volume of (\d+) L\. At constant temperature, the pressure rises to (\d+) kPa/))) return pistons(`P₁ = ${m[1]} kPa`, `V₁ = ${m[2]} L`, `P₂ = ${m[3]} kPa`, "V₂ = ?", true);
+  // ---- density
+  if ((m = q.match(/mass of (\d+(?:\.\d+)?) g and a volume of (\d+(?:\.\d+)?) cm³/)) || (m = q.match(/mass of (\d+(?:\.\d+)?) g and a density of (\d+(?:\.\d+)?) g\/cm³/))) {
+    const askV = /density of/.test(m[0]);
+    const shapes: Shape[] = [{ k: "poly", pts: [[20, 30], [40, 14], [110, 14], [90, 30]], closed: true, fill: "#dbeafe", stroke: INK, sw: 1.4 }, { k: "poly", pts: [[90, 30], [110, 14], [110, 74], [90, 90]], closed: true, fill: "#93c5fd", stroke: INK, sw: 1.4 }, { k: "rect", x: 20, y: 30, w: 70, h: 60, fill: FILL_A, stroke: INK, sw: 1.4 }];
+    shapes.push(lbl(130, 34, `m = ${m[1]} g`, BLUE_T, "start"), lbl(130, 56, askV ? `D = ${m[2]} g/cm³` : `V = ${m[2]} cm³`, BLUE_T, "start"), lbl(130, 78, askV ? "V = ?" : "D = ?", RED_T, "start"));
+    return { w: 260, h: 96, shapes, alt: "A block with its mass and volume" };
+  }
+  if ((m = q.match(/density of (\d+(?:\.\d+)?) g\/cm³\. What is the mass of (\d+) cm³/))) {
+    const shapes: Shape[] = [{ k: "poly", pts: [[20, 30], [40, 14], [110, 14], [90, 30]], closed: true, fill: "#dbeafe", stroke: INK, sw: 1.4 }, { k: "poly", pts: [[90, 30], [110, 14], [110, 74], [90, 90]], closed: true, fill: "#93c5fd", stroke: INK, sw: 1.4 }, { k: "rect", x: 20, y: 30, w: 70, h: 60, fill: FILL_A, stroke: INK, sw: 1.4 }];
+    shapes.push(lbl(130, 34, `D = ${m[1]} g/cm³`, BLUE_T, "start"), lbl(130, 56, `V = ${m[2]} cm³`, BLUE_T, "start"), lbl(130, 78, "m = ?", RED_T, "start"));
+    return { w: 260, h: 96, shapes, alt: "A block with its density and volume" };
+  }
+  if ((m = q.match(/density of (\d+(?:\.\d+)?) g\/cm³\. Will it sink or float in water/))) {
+    const shapes: Shape[] = [{ k: "poly", pts: [[20, 10], [20, 100], [180, 100], [180, 10]], fill: "none", stroke: INK, sw: 2 }, { k: "rect", x: 21, y: 34, w: 158, h: 65, fill: "#bfdbfe", stroke: "#bfdbfe", sw: 0.1 }, { k: "rect", x: 85, y: 16, w: 30, h: 30, fill: FILL_B, stroke: INK, sw: 1.4 }, lbl(100, 36, "?", RED_T)];
+    shapes.push(lbl(196, 40, `object: ${m[1]} g/cm³`, BLUE_T, "start", 10.5), lbl(196, 64, "water: 1 g/cm³", BLUE_T, "start", 10.5));
+    return { w: 320, h: 106, shapes, alt: "An object about to be placed in water" };
+  }
+  // ---- specific heat
+  if ((m = q.match(/raise (\d+) g of (\w+) by (\d+) °C\? \(c = ([\d.]+)/)) || (m = q.match(/^(\d+) J of heat is added to (\d+) g of (\w+) \(c = ([\d.]+)/))) {
+    const askT = /J of heat is added/.test(q);
+    const mass = askT ? m[2] : m[1], mat = askT ? m[3] : m[2];
+    const shapes: Shape[] = [{ k: "rect", x: 40, y: 20, w: 70, h: 60, r: 4, fill: mat === "water" ? "#bfdbfe" : "#cbd5e1", stroke: INK, sw: 1.6 }, lbl(75, 54, `${mass} g ${mat}`, INK, "middle", 10)];
+    [55, 75, 95].forEach((x) => shapes.push({ k: "poly", pts: [[x - 7, 100], [x, 84], [x + 7, 100]], closed: true, fill: "#fb923c", stroke: "#c2410c", sw: 1 }));
+    shapes.push({ k: "rect", x: 120, y: 10, w: 10, h: 66, r: 5, fill: "#fff", stroke: INK, sw: 1.2 }, { k: "circle", cx: 125, cy: 80, r: 8, fill: RED_T, stroke: INK, sw: 1 }, { k: "rect", x: 122, y: 40, w: 6, h: 38, fill: RED_T, stroke: RED_T, sw: 0.1 });
+    shapes.push(lbl(146, 30, askT ? `q = ${m[1]} J` : "q = ?", askT ? BLUE_T : RED_T, "start"), lbl(146, 52, `c = ${m[4]} J/g°C`, BLUE_T, "start"), lbl(146, 74, askT ? "ΔT = ?" : `ΔT = ${m[3]} °C`, askT ? RED_T : BLUE_T, "start"), lbl(146, 96, "q = m × c × ΔT", INK, "start", 10.5));
+    return { w: 290, h: 104, shapes, alt: `Heating ${mass} g of ${mat}` };
+  }
+  // ---- waves
+  if ((m = q.match(/frequency of (\d+) Hz and a wavelength of (\d+) m/)) || (m = q.match(/travels at (\d+) m\/s with a (wavelength|frequency) of (\d+) (m|Hz)/))) {
+    const pts: [number, number][] = [];
+    for (let i = 0; i <= 80; i++) { const x = 10 + i * 3.5; pts.push([x, 50 - Math.sin((i / 40) * Math.PI * 2) * 26]); }
+    const shapes: Shape[] = [{ k: "line", x1: 10, y1: 50, x2: 290, y2: 50, stroke: "#94a3b8", sw: 1, dash: true }, { k: "poly", pts, stroke: "#2563eb", sw: 2.4 }];
+    shapes.push({ k: "line", x1: 45, y1: 14, x2: 185, y2: 14, stroke: INK, sw: 1.2 }, { k: "line", x1: 45, y1: 8, x2: 45, y2: 20, stroke: INK, sw: 1.2 }, { k: "line", x1: 185, y1: 8, x2: 185, y2: 20, stroke: INK, sw: 1.2 });
+    let lam = "λ = ?", f = "f = ?", vv = "v = ?";
+    if (m.length === 3) { f = `f = ${m[1]} Hz`; lam = `λ = ${m[2]} m`; }
+    else { vv = `v = ${m[1]} m/s`; if (m[2] === "wavelength") lam = `λ = ${m[3]} m`; else f = `f = ${m[3]} Hz`; }
+    shapes.push(lbl(115, 10, lam), lbl(300, 40, f, BLUE_T, "start"), lbl(300, 62, vv, BLUE_T, "start"), lbl(300, 86, "v = f × λ", INK, "start", 10.5));
+    return { w: 400, h: 94, shapes, alt: "A wave with its wavelength marked" };
+  }
+  // ---- half-life
+  if ((m = q.match(/An? (\d+) g sample has a half-life of (\d+) (days|years|hours|minutes)\. How much remains after (\d+) \3/))) {
+    const start = +m[1], hl = +m[2], n = Math.round(+m[4] / hl);
+    if (n >= 1 && n <= 5) {
+      const shapes: Shape[] = [];
+      for (let i = 0; i <= n; i++) {
+        const h = Math.max(6, 70 / Math.pow(2, i)), x = 10 + i * 58;
+        shapes.push({ k: "rect", x, y: 90 - h, w: 40, h, fill: i === 0 ? "#a7f3d0" : i === n ? "#fff" : "#d1fae5", stroke: INK, sw: 1.2, dash: i === n });
+        shapes.push(lbl(x + 20, 86 - h, i === 0 ? `${start} g` : i === n ? "?" : "", INK, "middle", 10), lbl(x + 20, 104, `${i * hl}`, "#475569", "middle", 9.5));
+      }
+      shapes.push(lbl(10 + (n * 58 + 40) / 2, 118, `${m[3]} (half-life = ${hl})`, "#475569", "middle", 9.5));
+      return { w: 30 + (n + 1) * 58, h: 124, shapes, alt: "Bars halving each half-life" };
+    }
+  }
+  // ---- energy pyramid
+  if ((m = q.match(/^Producers have ([\d,]+) kJ of energy\. About how much reaches the (primary|secondary) consumers\?/))) {
+    const levels = ["producers", "primary consumers", "secondary consumers"];
+    const ask = m[2] === "primary" ? 1 : 2;
+    const shapes: Shape[] = [];
+    const fills = ["#bbf7d0", "#fde68a", "#fed7aa"];
+    for (let i = 0; i < 3; i++) {
+      const w = 240 - i * 70, x = (240 - w) / 2 + 10, y = 80 - i * 32;
+      shapes.push({ k: "rect", x, y, w, h: 30, fill: fills[i], stroke: INK, sw: 1.3 }, lbl(x + w / 2, y + 19, i === 0 ? `${m[1]} kJ` : i === ask ? "?" : "", INK, "middle", 11));
+      shapes.push(lbl(262, y + 19, levels[i], "#475569", "start", 10));
+    }
+    shapes.push(lbl(262, 16, "about 10% passes up", RED_T, "start", 10));
+    return { w: 440, h: 114, shapes, alt: "An energy pyramid" };
+  }
+  // ---- potential and kinetic energy
+  if ((m = q.match(/An? (\d+) kg object is (\d+) m above the ground/))) {
+    const shapes: Shape[] = [...ground(110, 200), { k: "rect", x: 100, y: 30, w: 70, h: 8, fill: "#a16207", stroke: INK, sw: 1 }, { k: "rect", x: 120, y: 6, w: 28, h: 24, r: 3, fill: FILL_B, stroke: INK, sw: 1.4 }, lbl(134, 23, `${m[1]}kg`, INK, "middle", 9)];
+    shapes.push({ k: "line", x1: 186, y1: 34, x2: 186, y2: 110, stroke: INK, sw: 1.2 }, ...arrowR(186, 72, 186, 36, INK, 1.2), ...arrowR(186, 72, 186, 108, INK, 1.2), lbl(194, 76, `h = ${m[2]} m`, BLUE_T, "start"), lbl(30, 60, "PE = m g h", INK, "start", 10.5), lbl(30, 80, "g = 10 m/s²", "#475569", "start", 10));
+    return { w: 280, h: 116, shapes, alt: "An object on a shelf above the ground" };
+  }
+  if ((m = q.match(/An? (\d+) kg object moves at (\d+) m\/s/))) {
+    const shapes: Shape[] = [...ground(64, 300), ...cart(70, 28, 64, `${m[1]} kg`), ...arrowR(144, 40, 224, 40, BLUE_T)];
+    shapes.push(lbl(184, 32, `v = ${m[2]} m/s`), lbl(150, 86, "KE = ½ m v² = ?", INK));
+    return { w: 300, h: 92, shapes, alt: "A moving object" };
+  }
+  // ---- electron shells
+  if ((m = q.match(/(?:for |does |a )(\w+)(?: \((\w+), atomic number| atom \(atomic number|, atomic number) (\d+)/)) && /electron|valence|shell/.test(q) && +m[3] <= 20) {
+    const Z = +m[3], name = m[1].charAt(0).toUpperCase() + m[1].slice(1);
+    const shapes: Shape[] = [{ k: "circle", cx: 70, cy: 70, r: 15, fill: "#fca5a5", stroke: INK, sw: 1.2 }, lbl(70, 74, `${Z}p⁺`, INK, "middle", 9.5)];
+    [28, 44, 60].forEach((r) => shapes.push({ k: "circle", cx: 70, cy: 70, r, stroke: "#94a3b8", sw: 1.1, dash: true } as Shape));
+    shapes.push(lbl(150, 50, name, INK, "start", 13), lbl(150, 72, `atomic number ${Z}`, BLUE_T, "start", 11), lbl(150, 92, "shells hold 2, 8, 8…", "#475569", "start", 10));
+    return { w: 300, h: 140, shapes, alt: `A nucleus with ${Z} protons and empty electron shells` };
+  }
+  // ---- balancing equations: atom models
+  if ((m = q.match(/^Balance the equation: (.+)$/))) return moleculeModels(m[1]);
+  // ---- molar mass: element tiles
+  if ((m = q.match(/\(((?:[A-Z][a-z]? = [\d.]+(?:, )?)+)\)$/)) && /mol/.test(q)) {
+    const els = m[1].split(", ").map((x) => x.split(" = "));
+    const shapes: Shape[] = [];
+    els.forEach(([e, mass], i) => { shapes.push({ k: "rect", x: i * 64, y: 0, w: 58, h: 58, r: 4, fill: ["#bfdbfe", "#fde68a", "#bbf7d0", "#fbcfe8"][i % 4], stroke: INK, sw: 1.4 }, lbl(i * 64 + 29, 32, e, INK, "middle", 18), lbl(i * 64 + 29, 50, num(mass), "#475569", "middle", 10)); });
+    return { w: els.length * 64, h: 60, shapes, alt: "Element tiles with atomic masses" };
+  }
+  // ---- gravitation: two masses
+  if (/gravitational force/.test(q) && (m = q.match(/(mass of one object|distance between two objects) is multiplied by (\d+)/))) {
+    const dist = /distance/.test(m[1]);
+    const shapes: Shape[] = [{ k: "circle", cx: 40, cy: 40, r: 22, fill: FILL_A, stroke: INK, sw: 1.4 }, { k: "circle", cx: 240, cy: 40, r: 16, fill: FILL_C, stroke: INK, sw: 1.4 }, ...arrowR(64, 40, 110, 40, RED_T, 2), ...arrowR(222, 40, 176, 40, RED_T, 2)];
+    shapes.push({ k: "line", x1: 40, y1: 76, x2: 240, y2: 76, stroke: INK, sw: 1.1 }, lbl(140, 92, dist ? `r × ${m[2]}` : "r", BLUE_T), lbl(40, 46, dist ? "m₁" : `m₁ × ${m[2]}`, INK, "middle", 10), lbl(240, 45, "m₂", INK, "middle", 10), lbl(140, 30, "F = ?", RED_T));
+    return { w: 280, h: 98, shapes, alt: "Two masses pulling on each other" };
+  }
+  return null;
+}
+
+function circuitPic(resistors: string[], volts: string, current: string): Visual {
+  const W2 = 120 + resistors.length * 70, shapes: Shape[] = [];
+  shapes.push({ k: "line", x1: 30, y1: 20, x2: W2 - 20, y2: 20, stroke: "#475569", sw: 2.4 }, { k: "line", x1: W2 - 20, y1: 20, x2: W2 - 20, y2: 100, stroke: "#475569", sw: 2.4 }, { k: "line", x1: W2 - 20, y1: 100, x2: 30, y2: 100, stroke: "#475569", sw: 2.4 }, { k: "line", x1: 30, y1: 100, x2: 30, y2: 74, stroke: "#475569", sw: 2.4 }, { k: "line", x1: 30, y1: 46, x2: 30, y2: 20, stroke: "#475569", sw: 2.4 });
+  shapes.push({ k: "line", x1: 16, y1: 50, x2: 44, y2: 50, stroke: INK, sw: 2.4 }, { k: "line", x1: 22, y1: 58, x2: 38, y2: 58, stroke: INK, sw: 4 }, { k: "line", x1: 16, y1: 66, x2: 44, y2: 66, stroke: INK, sw: 2.4 }, { k: "line", x1: 22, y1: 72, x2: 38, y2: 72, stroke: INK, sw: 4 });
+  if (volts) shapes.push(lbl(52, 64, volts, BLUE_T, "start"));
+  resistors.forEach((r, i) => {
+    const x = 80 + i * 70;
+    shapes.push({ k: "rect", x, y: 12, w: 48, h: 16, fill: "#fde68a", stroke: INK, sw: 1.4 }, lbl(x + 24, 46, r.trim(), r.includes("?") ? RED_T : BLUE_T, "middle", 10.5));
+  });
+  shapes.push(lbl(W2 / 2, 118, current, current.includes("?") ? RED_T : BLUE_T));
+  return { w: W2 + 10, h: 124, shapes, alt: "A circuit with a battery and resistors" };
+}
+
+function pistons(a1: string, b1: string, a2: string, b2: string, squeeze: boolean): Visual {
+  const shapes: Shape[] = [];
+  const cyl = (x: number, h: number, l1: string, l2: string) => {
+    shapes.push({ k: "poly", pts: [[x, 10], [x, 110], [x + 70, 110], [x + 70, 10]], stroke: INK, sw: 2 }, { k: "rect", x: x + 1, y: 110 - h, w: 68, h: h - 1, fill: "#dbeafe", stroke: "#dbeafe", sw: 0.1 }, { k: "rect", x: x + 1, y: 110 - h - 8, w: 68, h: 8, fill: "#94a3b8", stroke: INK, sw: 1.2 }, { k: "line", x1: x + 35, y1: 110 - h - 8, x2: x + 35, y2: 2, stroke: INK, sw: 2.4 });
+    shapes.push(lbl(x + 35, 128, l1, l1.includes("?") ? RED_T : BLUE_T, "middle", 10.5), lbl(x + 35, 144, l2, l2.includes("?") ? RED_T : BLUE_T, "middle", 10.5));
+  };
+  cyl(20, 50, a1, b1); cyl(190, squeeze ? 28 : 80, a2, b2);
+  shapes.push(...arrowR(110, 60, 176, 60, "#64748b", 1.8));
+  return { w: 290, h: 150, shapes, alt: "A gas in a cylinder before and after" };
+}
+
+const ATOM_COLORS: Record<string, string> = { H: "#f1f5f9", O: "#fca5a5", C: "#475569", N: "#93c5fd", Fe: "#fdba74", Mg: "#d9f99d", Na: "#c4b5fd", Cl: "#86efac", K: "#ddd6fe", Ca: "#fde68a", S: "#fde047", Al: "#cbd5e1" };
+const SUBS: Record<string, string> = { "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9" };
+
+/** Ball models of each molecule in an unbalanced equation, one copy each. */
+function moleculeModels(eq: string): Visual | null {
+  const [lhs, rhs] = eq.split(" → ");
+  if (!rhs) return null;
+  const parse = (f: string) => { const out: [string, number][] = []; for (const mm of f.trim().replace(/[₀-₉]/g, (c) => SUBS[c]).matchAll(/([A-Z][a-z]?)(\d*)/g)) out.push([mm[1], mm[2] ? +mm[2] : 1]); return out; };
+  const shapes: Shape[] = [];
+  let x = 6;
+  const drawSide = (side: string) => side.split(" + ").forEach((sp, i, arr) => {
+    const atoms = parse(sp).flatMap(([e, n]) => Array(n).fill(e) as string[]);
+    if (atoms.length > 8) return;
+    const start = x;
+    atoms.forEach((e, k) => {
+      const ax = x + (k % 4) * 15, ay = 30 + Math.floor(k / 4) * 15;
+      shapes.push({ k: "circle", cx: ax + 7, cy: ay, r: 8, fill: ATOM_COLORS[e] || "#e2e8f0", stroke: INK, sw: 1 }, { k: "text", x: ax + 7, y: ay + 3, t: e, size: e.length > 1 ? 6.5 : 8, bold: true, anchor: "middle", fill: e === "C" ? "#fff" : INK });
+    });
+    const w = Math.min(4, atoms.length) * 15 + 4;
+    shapes.push({ k: "text", x: start + w / 2, y: 70, t: sp.trim(), size: 10.5, bold: true, anchor: "middle", fill: "#1d4ed8" });
+    x += w + 10;
+    if (i < arr.length - 1) { shapes.push({ k: "text", x: x, y: 34, t: "+", size: 14, bold: true, anchor: "middle", fill: INK }); x += 14; }
+  });
+  drawSide(lhs);
+  shapes.push({ k: "text", x: x + 8, y: 35, t: "→", size: 16, bold: true, anchor: "middle", fill: INK }); x += 24;
+  drawSide(rhs);
+  shapes.push({ k: "text", x: 6, y: 92, t: "Count each kind of atom on both sides, then add numbers in front.", size: 9.5, fill: "#475569" });
+  return { w: Math.max(x + 10, 340), h: 98, shapes, alt: `Atom models for ${eq}` };
 }
 
 // ---------------------------------------------------------------- decorations
