@@ -25,6 +25,9 @@ async function sendEmail(to: string, subject: string, html: string) {
   }
 }
 
+// Topic requests and contact-form messages always go to this inbox.
+const FEEDBACK_TO = "aethelsystems@gmail.com";
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 /** Visitor-typed text must never be inserted into email HTML as-is. */
@@ -84,7 +87,7 @@ export async function sendTrialEndedEmail(to: string, name: string | null) {
 }
 
 export async function sendContactFormEmail(fromName: string, fromEmail: string, message: string) {
-  const to = process.env.CONTACT_EMAIL_TO || process.env.EMAIL_FROM || "";
+  const to = FEEDBACK_TO;
   const html = wrapper(`
     <h2 style="color: #0f172a;">New contact form message</h2>
     <p style="color: #334155;"><strong>From:</strong> ${escapeHtml(fromName)} (${escapeHtml(fromEmail)})</p>
@@ -94,7 +97,7 @@ export async function sendContactFormEmail(fromName: string, fromEmail: string, 
 }
 
 export async function sendTopicRequestEmail(r: { topic: string; subject: string; grade: string; role: string; email?: string; page?: string }) {
-  const to = process.env.CONTACT_EMAIL_TO || process.env.EMAIL_FROM || "";
+  const to = FEEDBACK_TO;
   const row = (k: string, v: string) => `<p style="color: #334155; margin: 4px 0;"><strong>${k}:</strong> ${escapeHtml(v)}</p>`;
   const html = wrapper(`
     <h2 style="color: #0f172a;">New worksheet topic request</h2>
