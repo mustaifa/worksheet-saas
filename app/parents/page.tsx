@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AudiencePage, { AudienceConfig } from "@/components/AudiencePage";
+import { AI_FEATURES_ENABLED } from "@/lib/features";
 
 export const metadata: Metadata = {
   title: "For Parents — Practice at Home with Answer Keys",
@@ -20,7 +21,7 @@ const c: AudienceConfig = {
     { title: "Check answers in seconds", body: "Every worksheet comes with an answer key, so you can mark work quickly and focus on the questions your child got wrong.", href: "/blog/help-child-with-math-homework", linkLabel: "How to help without taking over" },
     { title: "Family challenges and rewards", body: "Create a profile for each child, set a challenge, and choose rewards for doing well. Profiles are protected with a PIN.", href: "/dashboard/family", linkLabel: "Open Family" },
     { title: "Stop the summer slide", body: "Ten minutes a day over the holidays keeps skills fresh for the new school year.", href: "/blog/prevent-summer-learning-loss", linkLabel: "A simple holiday plan" },
-    { title: "Homework help that makes them think", body: "When your child is stuck, the homework helper gives one hint at a time and checks their working — it won't just hand over answers or write assignments.", href: "/dashboard/tutor", linkLabel: "Try homework help" },
+    ...(AI_FEATURES_ENABLED ? [{ title: "Homework help that makes them think", body: "When your child is stuck, the homework helper gives one hint at a time and checks their working — it won't just hand over answers or write assignments.", href: "/dashboard/tutor", linkLabel: "Try homework help" }] : []),
     { title: "Know what's taught when", body: "A plain-English guide to the topics usually covered in each grade, so you know where to focus.", href: "/blog/grade-by-grade-guide-to-math-topics", linkLabel: "Grade-by-grade guide" },
   ],
   routine: {

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import JsonLd, { faqLd } from "@/components/seo/JsonLd";
+import { AI_FEATURES_ENABLED } from "@/lib/features";
 import { BRAND } from "@/lib/brand";
 
 export const metadata: Metadata = {
@@ -81,6 +82,11 @@ export default function AiPage() {
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Where we do — and how</h2>
+        {!AI_FEATURES_ENABLED && (
+          <p className="mt-3 text-sm rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 px-4 py-2">
+            Both AI features are currently paused, so right now nothing on Practice Sheet uses AI.
+          </p>
+        )}
         <div className="mt-5 space-y-5">
           {WITH_AI.map((x) => (
             <div key={x.t}>

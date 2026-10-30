@@ -3,10 +3,13 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasAccess } from "@/lib/access";
 import Navbar from "@/components/Navbar";
+import AiPaused from "@/components/AiPaused";
+import { AI_FEATURES_ENABLED } from "@/lib/features";
 import UploadAndList from "@/components/worksheetscan/UploadAndList";
 import UpgradeButtons from "@/components/UpgradeButtons";
 
 export default async function WorksheetScanHome() {
+  if (!AI_FEATURES_ENABLED) return <AiPaused name="Worksheet Scanner" />;
   const session = await getServerSession(authOptions);
   const user = await prisma.user.findUnique({ where: { id: (session!.user as any).id } });
 
