@@ -225,7 +225,7 @@ export default function WorksheetGenerator() {
 
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">Topic</p>
-          <TopicPicker topics={availableTopics} selected={topic} onSelect={setTopic} maxHeight="18rem" />
+          <TopicPicker topics={availableTopics} selected={topic} onSelect={setTopic} maxHeight="24rem" subject={subject} grade={grade} />
         </div>
 
         <div>

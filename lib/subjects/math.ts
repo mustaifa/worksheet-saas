@@ -1,5 +1,12 @@
 import { Topic, Gen, Difficulty, RNG, makeHelpers } from "./types";
 
+/** n·v written the way a teacher would: 1x → x, -1x → -x, 0x → 0 */
+const term = (n: number, v = "x") => (n === 0 ? "0" : n === 1 ? v : n === -1 ? `-${v}` : `${n}${v}`);
+/** " + 3x", " - x", "" for a middle term */
+const midTerm = (n: number, v = "x") => (n === 0 ? "" : ` ${n < 0 ? "-" : "+"} ${term(Math.abs(n), v)}`);
+/** v^n with v^1 → v */
+const pow = (v: string, n: number) => (n === 1 ? v : `${v}^${n}`);
+
 export const MATH_TOPICS: Topic[] = [
   { id: "addsub", label: "Addition & Subtraction", grades: [1, 2], aliases: ["addition", "subtraction", "add and subtract"] },
   { id: "counting", label: "Counting & Sequences", grades: [1], aliases: ["counting", "number sequence", "skip counting"] },
@@ -598,7 +605,7 @@ const genExponents: Gen = (grade, diff, rng) => {
     return { q: `Evaluate: ${base}^${exp}`, a: `${Math.pow(base, exp)}` };
   }
   if (kind === "product") { const m = randInt(2, 9), n = randInt(2, 9); return { q: `Simplify: ${v}^${m} × ${v}^${n}`, a: `${v}^${m + n}` }; }
-  if (kind === "quotient") { const n = randInt(2, 6), m = n + randInt(1, 7); return { q: `Simplify: ${v}^${m} ÷ ${v}^${n}`, a: `${v}^${m - n}` }; }
+  if (kind === "quotient") { const n = randInt(2, 6), m = n + randInt(1, 7); return { q: `Simplify: ${v}^${m} ÷ ${v}^${n}`, a: pow(v, m - n) }; }
   if (kind === "power") { const m = randInt(2, 5), n = randInt(2, 4); return { q: `Simplify: (${v}^${m})^${n}`, a: `${v}^${m * n}` }; }
   if (kind === "zero") { const b = randInt(2, 99); return { q: `Evaluate: ${b}^0`, a: "1" }; }
   if (kind === "negative") {
@@ -611,7 +618,7 @@ const genExponents: Gen = (grade, diff, rng) => {
     return { q: `Write ${n.toLocaleString("en-US")} in scientific notation.`, a: `${mant} × 10^${e}` };
   }
   const c = randInt(2, 5), m = randInt(2, 5), n = randInt(1, 4);
-  return { q: `Simplify: (${c}${v}^${m})^2 × ${v}^${n}`, a: `${c * c}${v}^${2 * m + n}` };
+  return { q: `Simplify: (${c}${v}^${m})^2 × ${pow(v, n)}`, a: `${c * c}${v}^${2 * m + n}` };
 };
 // ---------- grades 9-12 (new) ----------
 const genAlgebraBasics: Gen = (grade, diff, rng) => {
@@ -619,7 +626,7 @@ const genAlgebraBasics: Gen = (grade, diff, rng) => {
   const kind = pick(["combine", "distribute", "solve"]);
   if (kind === "combine") {
     const a = randInt(2, 9), b = randInt(2, 9), c = randInt(2, 9);
-    return { q: `Simplify: ${a}x + ${b}x - ${c}x`, a: `${a + b - c}x` };
+    return { q: `Simplify: ${a}x + ${b}x - ${c}x`, a: term(a + b - c) };
   }
   if (kind === "distribute") {
     const a = randInt(2, 6), b = randInt(1, 9), c = randInt(1, 9);
@@ -632,7 +639,7 @@ const genAlgebraBasics: Gen = (grade, diff, rng) => {
 const genAlgebraCombineTerms: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);
   const a = randInt(2, diff === "hard" ? 15 : 9), b = randInt(2, diff === "hard" ? 15 : 9), c = randInt(2, diff === "hard" ? 15 : 9);
-  return { q: `Simplify: ${a}x + ${b}x - ${c}x`, a: `${a + b - c}x` };
+  return { q: `Simplify: ${a}x + ${b}x - ${c}x`, a: term(a + b - c) };
 };
 const genAlgebraDistribute: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);
@@ -652,17 +659,16 @@ const genSystems: Gen = (grade, diff, rng) => {
   const a1 = randInt(1, 5), b1 = randInt(1, 5);
   const a2 = randInt(1, 5), b2 = randInt(1, 5);
   const c1 = a1 * x + b1 * y, c2 = a2 * x + b2 * y;
-  return { q: `Solve the system: ${a1}x + ${b1}y = ${c1}  and  ${a2}x + ${b2}y = ${c2}`, a: `x = ${x}, y = ${y}` };
+  return { q: `Solve the system: ${term(a1)} + ${term(b1, "y")} = ${c1}  and  ${term(a2)} + ${term(b2, "y")} = ${c2}`, a: `x = ${x}, y = ${y}` };
 };
 const genQuadratics: Gen = (grade, diff, rng) => {
   const { randInt } = makeHelpers(rng);
   // (x - r1)(x - r2) = x^2 - (r1+r2)x + r1*r2, always integer roots
   const r1 = randInt(-8, 8), r2 = randInt(-8, 8);
   const b = -(r1 + r2), c = r1 * r2;
-  const bStr = b >= 0 ? `+ ${b}x` : `- ${Math.abs(b)}x`;
-  const cStr = c >= 0 ? `+ ${c}` : `- ${Math.abs(c)}`;
+  const cStr = c === 0 ? "" : c > 0 ? ` + ${c}` : ` - ${Math.abs(c)}`;
   const roots = r1 === r2 ? `x = ${r1}` : `x = ${Math.min(r1, r2)} or x = ${Math.max(r1, r2)}`;
-  return { q: `Solve by factoring: x² ${bStr} ${cStr} = 0`, a: roots };
+  return { q: `Solve by factoring: x²${midTerm(b)}${cStr} = 0`, a: roots };
 };
 const genRadicals: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);
@@ -802,7 +808,7 @@ const genPolynomials: Gen = (grade, diff, rng) => {
   const x2 = a * c, xCoeff = a * d + b * c, constant = b * d;
   const bSign = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`, dSign = d >= 0 ? `+ ${d}` : `- ${Math.abs(d)}`;
   const xSign = xCoeff >= 0 ? `+ ${xCoeff}x` : `- ${Math.abs(xCoeff)}x`, cSign = constant >= 0 ? `+ ${constant}` : `- ${Math.abs(constant)}`;
-  return { q: `Multiply: (${a}x ${bSign})(${c}x ${dSign})`, a: `${x2}x² ${xSign} ${cSign}` };
+  return { q: `Multiply: (${term(a)} ${bSign})(${term(c)} ${dSign})`, a: `${term(x2, "x²")} ${xSign} ${cSign}` };
 };
 const genProbability: Gen = (grade, diff, rng) => {
   const { randInt, pick } = makeHelpers(rng);

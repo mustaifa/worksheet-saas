@@ -8,7 +8,13 @@ export type Topic = {
   grades: number[];
   aliases: string[]; // keywords the command-box parser matches against
   group?: string; // optional cluster label — topics sharing a group render together under one heading
+  desc?: string; // one-sentence description for the public topic page (falls back to lib/topicContent)
 };
+
+/** Shorthand for curriculum skill topics; their grades are filled in from the curriculum book. */
+export function skillTopic(id: string, label: string, aliases: string[], desc: string): Topic {
+  return { id, label, grades: [], aliases, desc };
+}
 
 export type Gen = (grade: number, diff: Difficulty, rng: RNG) => Question;
 

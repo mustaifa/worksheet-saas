@@ -14,6 +14,7 @@ import { isFreeMode } from "@/lib/access";
 import { absoluteUrl, SITE_NAME, OG_IMAGE } from "@/lib/site";
 import { topicDescription, gradeBand, howToUse, gradeEquivalents } from "@/lib/topicContent";
 import { SUBJECTS, SubjectId, allGrades, allTopics, topicsForGrade, topicLabel, generateWorksheet } from "@/lib/subjects";
+import { locateSkill, LEVEL_LABEL, LEVEL_BADGE } from "@/lib/curriculum";
 
 // Number of questions on the free public worksheet (reading comprehension
 // ignores this and uses its passage's own question set).
@@ -87,11 +88,27 @@ export default function TopicPage({ params }: { params: Params }) {
   const name = topic.label.replace(/^The /, ""); // used after "Grade N" and in sentences
   const tips = howToUse(grade);
 
-  // Related links: same-group topics first, then the rest of this grade; and
-  // the same topic at the other grades it's offered in.
+  // Where this skill sits in the grade's curriculum book (unit, lesson, standard), if there is one.
+  const loc = locateSkill(subjectId, grade, topic.id);
+  const level = loc?.skill.level ?? "core";
+
+  // Related links: with a book, the rest of the same lesson and unit come
+  // first (the skills a teacher covers next); otherwise same-group topics
+  // first. Then the rest of this grade, and the same topic at other grades.
+  const closeness = (id: string) => {
+    if (loc) {
+      if (loc.lesson.skills.some((s) => s.topic === id)) return 2;
+      if (loc.unit.lessons.some((l) => l.skills.some((s) => s.topic === id))) return 1;
+      return 0;
+    }
+    const t = gradeTopics.find((x) => x.id === id);
+    return t && topic.group && t.group === topic.group ? 1 : 0;
+  };
   const sameGrade = gradeTopics
     .filter((t) => t.id !== topic.id)
-    .sort((a, b) => Number(b.group === topic.group && !!topic.group) - Number(a.group === topic.group && !!topic.group))
+    .map((t, i) => ({ t, i, c: closeness(t.id) }))
+    .sort((a, b) => b.c - a.c || a.i - b.i)
+    .map((x) => x.t)
     .slice(0, 8);
   const otherGrades = (allTopics(subjectId).find((t) => t.id === topic.id)?.grades || []).filter((g) => g !== grade);
 
@@ -157,6 +174,15 @@ export default function TopicPage({ params }: { params: Params }) {
         <p className="print:hidden mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
           Grade {grade} (US) · Year {gradeEquivalents(grade).ukYear} (UK) · Class {grade} (India) · {subject.label}
         </p>
+        {loc && (
+          <p className="print:hidden mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-slate-600 dark:text-slate-300">
+            <Link href={`/worksheets/${subject.id}/${grade}#unit-${loc.unitNumber}`} className="hover:underline">Unit {loc.unitNumber}: {loc.unit.title}</Link>
+            <span aria-hidden>›</span>
+            <span>{loc.lesson.title}</span>
+            {loc.skill.std && <span className="font-mono text-xs rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5" title="Common Core State Standard">CCSS {loc.skill.std}</span>}
+            {level !== "core" && <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${LEVEL_BADGE[level]}`}>{LEVEL_LABEL[level]}</span>}
+          </p>
+        )}
         <p className="print:hidden text-slate-600 dark:text-slate-300 mt-3">
           {description ? `${description} ` : ""}
           This free {gradeBand(grade)} worksheet has {questions.length} questions and a full answer key. Print it or save it as a PDF — every answer is checked by code, not guessed.
