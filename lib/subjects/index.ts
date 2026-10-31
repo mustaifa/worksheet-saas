@@ -187,11 +187,11 @@ export function parseCommand(
   text: string,
   current: { subject: SubjectId; grade: number; topic: string; difficulty: Difficulty; count: number }
 ) {
-  const t = text.toLowerCase();
+  const t = normalizeRequest(text);
 
   let subject: SubjectId | null = null;
   if (/\b(math|maths|arithmetic|algebra|geometry)\b/.test(t)) subject = "math";
-  else if (/\b(english|grammar|vocabulary|spelling|reading|writing)\b/.test(t)) subject = "english";
+  else if (/\b(english|grammar|spelling|phonics)\b/.test(t)) subject = "english";
   else if (/\b(computer science|computing|coding|programming)\b/.test(t)) subject = "computer";
   else if (/\b(science|biology|chemistry|physics)\b/.test(t)) subject = "science";
 
@@ -233,7 +233,11 @@ export function parseCommand(
     unsupported = UNSUPPORTED_LABEL[um[1]] || um[1].replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
-  let resolvedSubject: SubjectId = subject || current.subject;
+  // "reading", "writing", "vocabulary" usually mean English, but also appear in
+  // Math and Science topic names ("Reading Bar Graphs", "Genetics Vocabulary").
+  const englishHint = !subject && /\b(vocabulary|reading|writing|comprehension)\b/.test(t);
+
+  let resolvedSubject: SubjectId = subject || (englishHint ? "english" : current.subject);
 
   // Best match = longest matching alias ("intro to fraction" beats "fraction"),
   // with a tie-break for topics offered at the requested grade.
@@ -241,28 +245,41 @@ export function parseCommand(
   // lands in Science even when Math is currently selected.
   let topicId: string | null = null;
   let best = 0;
+  let bestAlias = "";
   let bestSubject: SubjectId = resolvedSubject;
   const searchIn: SubjectId[] = subject ? [subject] : [resolvedSubject, ...SUBJECTS.map((x) => x.id).filter((x) => x !== resolvedSubject)];
   for (const subj of searchIn) {
     for (const top of TOPICS_BY_SUBJECT[subj]) {
-      const names = [...top.aliases, top.label.toLowerCase()];
+      const label = normalizeRequest(top.label.replace(/\s*\(.*?\)/g, "")); // "Ratios & Rates (Mixed)" → "ratios and rates"
+      const names = [...top.aliases, ...(EXTRA_ALIASES[top.id] || [])].map(normalizeRequest).concat(label);
       for (const alias of names) {
+        // a topic name that includes the course ("Physics Formulas") is matched against the full text
+        // (the course name on its own — "chemistry" — still doesn't pick a topic)
+        if (course && alias === course[1] && subject === course[1]) continue;
+        const hay = course && alias.includes(course[1]) ? t : topicText;
         // whole words only (plurals allowed), so "worksheet" doesn't match "work"
-        if (alias.length < 3 || !topicText.includes(alias) || !aliasRegex(alias).test(topicText)) continue;
+        if (alias.length < 3 || !hay.includes(alias) || !aliasRegex(alias).test(hay)) continue;
         // small bonus for the current subject and for topics offered at the requested grade
-        const score = alias.length * 10 + (grade && top.grades.includes(grade) ? 5 : 0) + (subj === resolvedSubject ? 1 : 0);
-        if (score > best) { best = score; topicId = top.id; bestSubject = subj; }
+        // A topic offered at the requested grade beats a closer wording that isn't:
+        // "grade 3 fractions" means Intro to Fractions, not grade 5 Fractions.
+        const score = alias.length * 10 + (grade && top.grades.includes(grade) ? 1000 : 0) + (subj === resolvedSubject ? 1 : 0) + (/mixed/i.test(top.label) ? 0 : 2)
+          + (subject || ["math", "english", "science"].includes(subj) ? 4 : 0); // unnamed subject: core subjects first ("integers" is Math, not CS) // a specific topic beats "(Mixed Practice)" on a tie
+        const exact = alias === label ? 3 : 0; // the topic's own name beats another topic's alias
+        if (score + exact > best) { best = score + exact; topicId = top.id; bestSubject = subj; bestAlias = alias; }
       }
     }
   }
   const matchedTopic = !!topicId;
   if (topicId) resolvedSubject = bestSubject;
+  // "Geologic Time & Earth's History" is Science, not the History subject.
+  if (unsupported && um && bestAlias.includes(um[1])) unsupported = null;
 
   // Courses only cover some grades (Computer Science 6–12, Physics/Chemistry/Biology 9–12).
   const offered = gradesFor(resolvedSubject);
   const want = grade ?? current.grade;
   if (!topicId && offered.length && !offered.includes(want)) grade = offered.reduce((b, x) => (Math.abs(x - want) < Math.abs(b - want) ? x : b), offered[0]);
 
+  const askedGrade = grade;
   if (topicId && grade) {
     const top = TOPICS_BY_SUBJECT[resolvedSubject].find((x) => x.id === topicId)!;
     if (!top.grades.includes(grade)) {
@@ -285,10 +302,49 @@ export function parseCommand(
     count: count ?? current.count,
     /** A subject we don't offer yet (e.g. "Arabic"), when no offered subject was named. */
     unsupported,
+    /** The grade asked for, when that topic or course isn't offered there and a nearby grade was used. */
+    gradeAdjustedFrom: askedGrade && grade !== askedGrade ? askedGrade : null,
     /** True when the text named a subject or a topic we recognise. */
-    recognised: !!subject || matchedTopic,
+    recognised: !!subject || matchedTopic || englishHint,
   };
 }
+
+/** Lower-case, "&" → "and", hyphens → spaces, no apostrophes, single spaces. */
+function normalizeRequest(x: string) {
+  return x.toLowerCase().replace(/&/g, " and ").replace(/[-_/]/g, " ").replace(/['’]/g, "").replace(/\s+/g, " ").trim();
+}
+
+/** Everyday wordings teachers and parents type, beyond each topic's own aliases. */
+const EXTRA_ALIASES: Record<string, string[]> = {
+  // math
+  add_within_10: ["addition within 10", "adding within 10", "add to 10"],
+  sub_within_10: ["subtraction within 10", "subtracting within 10"],
+  add_within_20: ["addition within 20", "adding within 20"],
+  sub_within_20: ["subtraction within 20", "subtracting within 20"],
+  money: ["counting coins", "coin"],
+  skip_counting: ["skip counting"],
+  fractions_intro: ["fraction"],
+  angles_measure: ["angle"],
+  multi_step_equations: ["solving equations", "solve equations", "multi step equations"],
+  algebra_solve: ["solving equations", "solve equations"],
+  factoring_trinomials: ["factoring", "factorise", "factorize"],
+  surface_area_solids: ["surface area"],
+  integers_add_sub: ["adding negative", "subtracting negative", "negative numbers"],
+  mult_facts: ["times tables", "times table", "multiplication tables"],
+  // english
+  synonyms_antonyms: ["synonyms and antonyms"],
+  sentence_types: ["sentence types", "types of sentences", "kinds of sentences"],
+  fragments_runons: ["run on", "sentence fragment"],
+  // science
+  human_body_systems: ["human body", "body systems"],
+  earth_rocks_tectonics: ["rocks and minerals", "mineral", "rock"],
+  rocks_erosion: ["rock"],
+  wave_equation: ["wave"],
+  circuits: ["circuit"],
+  literary_devices: ["figurative language"],
+  // computer science
+  search_sort: ["sorting algorithm", "search algorithm", "searching algorithm"],
+};
 
 const aliasCache = new Map<string, RegExp>();
 function aliasRegex(alias: string) {
