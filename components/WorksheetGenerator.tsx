@@ -175,7 +175,8 @@ export default function WorksheetGenerator() {
     setDifficulty(parsed.difficulty);
     setCount(parsed.count);
     generate(parsed);
-    setFeedback(`Understood: ${SUBJECTS.find((s) => s.id === parsed.subject)?.label} · Grade ${parsed.grade} · ${topicLabel(parsed.subject, parsed.topic)} · ${parsed.difficulty} · ${parsed.count} questions.`);
+    const adjusted = parsed.gradeAdjustedFrom ? ` (Not available for grade ${parsed.gradeAdjustedFrom}, so this uses the nearest grade.)` : "";
+    setFeedback(`Understood: ${SUBJECTS.find((s) => s.id === parsed.subject)?.label} · Grade ${parsed.grade} · ${topicLabel(parsed.subject, parsed.topic)} · ${parsed.difficulty} · ${parsed.count} questions.${adjusted}`);
   }
 
   function handlePrint() {
