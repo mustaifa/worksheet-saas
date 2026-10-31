@@ -224,6 +224,15 @@ export function parseCommand(
     break;
   }
 
+  // Subjects we don't make worksheets for yet: say so instead of quietly
+  // producing a worksheet in whatever subject happens to be selected.
+  let unsupported: string | null = null;
+  // ("Arabic reading" is Arabic, unless an offered subject is also named outright.)
+  const um = t.match(UNSUPPORTED_SUBJECTS);
+  if (um && !/\b(english|math|maths|science|biology|chemistry|physics|computer science)\b/.test(t)) {
+    unsupported = UNSUPPORTED_LABEL[um[1]] || um[1].replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
   let resolvedSubject: SubjectId = subject || current.subject;
 
   // Best match = longest matching alias ("intro to fraction" beats "fraction"),
@@ -238,13 +247,15 @@ export function parseCommand(
     for (const top of TOPICS_BY_SUBJECT[subj]) {
       const names = [...top.aliases, top.label.toLowerCase()];
       for (const alias of names) {
-        if (alias.length < 3 || !topicText.includes(alias)) continue;
+        // whole words only (plurals allowed), so "worksheet" doesn't match "work"
+        if (alias.length < 3 || !topicText.includes(alias) || !aliasRegex(alias).test(topicText)) continue;
         // small bonus for the current subject and for topics offered at the requested grade
         const score = alias.length * 10 + (grade && top.grades.includes(grade) ? 5 : 0) + (subj === resolvedSubject ? 1 : 0);
         if (score > best) { best = score; topicId = top.id; bestSubject = subj; }
       }
     }
   }
+  const matchedTopic = !!topicId;
   if (topicId) resolvedSubject = bestSubject;
 
   // Courses only cover some grades (Computer Science 6–12, Physics/Chemistry/Biology 9–12).
@@ -272,8 +283,25 @@ export function parseCommand(
     topic: topicId ?? current.topic,
     difficulty: difficulty ?? current.difficulty,
     count: count ?? current.count,
+    /** A subject we don't offer yet (e.g. "Arabic"), when no offered subject was named. */
+    unsupported,
+    /** True when the text named a subject or a topic we recognise. */
+    recognised: !!subject || matchedTopic,
   };
 }
+
+const aliasCache = new Map<string, RegExp>();
+function aliasRegex(alias: string) {
+  let r = aliasCache.get(alias);
+  if (!r) { r = new RegExp(`(^|[^a-z0-9])${alias.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(s|es)?($|[^a-z0-9])`); aliasCache.set(alias, r); }
+  return r;
+}
+
+const UNSUPPORTED_SUBJECTS =
+  /\b(arabic|urdu|hindi|french|spanish|german|italian|turkish|persian|farsi|chinese|mandarin|japanese|korean|russian|quran|qur'an|islamic studies|islamiat|islamic|religious studies|religion|history|geography|social studies|civics|economics|accounting|business studies|art|music|physical education)\b/;
+const UNSUPPORTED_LABEL: Record<string, string> = {
+  quran: "Quran", "qur'an": "Quran", islamiat: "Islamic Studies", islamic: "Islamic Studies", farsi: "Persian", mandarin: "Chinese",
+};
 
 /** One extra question (not on the sheet) to show as a worked example. */
 export function exampleQuestion(opts: { subject: SubjectId; grade: number; topic: string; seed: number; avoid: Question[] }): Question | undefined {
