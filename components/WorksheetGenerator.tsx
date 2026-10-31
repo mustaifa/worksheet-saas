@@ -133,9 +133,42 @@ export default function WorksheetGenerator() {
     generate({ subject: preset.subject, grade: preset.grade, topic: preset.topic });
   }
 
+  const [unmatched, setUnmatched] = useState("");
+  const [requestState, setRequestState] = useState<"idle" | "sending" | "sent">("idle");
+
+  async function sendRequest() {
+    if (!unmatched) return;
+    setRequestState("sending");
+    const g = unmatched.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s*grade\b/i) || unmatched.match(/grade\s*(\d{1,2})/i);
+    try {
+      const res = await fetch("/api/topic-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: unmatched.slice(0, 300), subject: "other", grade: g ? g[1] : "", page: "dashboard: describe box" }),
+      });
+      if (!res.ok) throw new Error();
+      setRequestState("sent");
+    } catch {
+      setRequestState("idle");
+      toast("Could not send right now. Please try again.");
+    }
+  }
+
   function handleCommandGo() {
     if (!command.trim()) { setFeedback('Type a request first, e.g. "grade 5 science, 12 hard questions".'); return; }
     const parsed = parseCommand(command, { subject, grade, topic, difficulty, count });
+    setRequestState("idle");
+    if (parsed.unsupported) {
+      setFeedback(`${parsed.unsupported} worksheets aren't available yet. We currently make Math, English, Science (plus Physics, Chemistry, Biology and Computer Science) worksheets.`);
+      setUnmatched(command.trim());
+      return;
+    }
+    if (!parsed.recognised) {
+      setFeedback('We couldn\'t match that to one of our topics. Try naming the subject and topic, e.g. "grade 2 science, plants" or "grade 4 fractions, 10 questions".');
+      setUnmatched(command.trim());
+      return;
+    }
+    setUnmatched("");
     setSubject(parsed.subject);
     setGrade(parsed.grade);
     setTopic(parsed.topic);
@@ -326,7 +359,20 @@ export default function WorksheetGenerator() {
           >
             Generate from request
           </button>
-          {feedback && <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">{feedback}</p>}
+          {feedback && <p className={`text-xs mt-2 ${unmatched ? "text-amber-700 dark:text-amber-400" : "text-slate-500 dark:text-slate-400"}`}>{feedback}</p>}
+          {unmatched && (
+            requestState === "sent" ? (
+              <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-2">Thanks, your request has been sent. We use these requests to decide what to add next.</p>
+            ) : (
+              <button
+                onClick={sendRequest}
+                disabled={requestState === "sending"}
+                className="w-full mt-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold py-2 rounded-lg disabled:opacity-50"
+              >
+                {requestState === "sending" ? "Sending…" : "Ask us to add this worksheet"}
+              </button>
+            )
+          )}
         </div>
       </aside>
 
