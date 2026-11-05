@@ -12,6 +12,7 @@ import { pickPassageForGrade } from "./comprehension";
 import { THINKING_TOPICS, THINKING_GENERATORS } from "./thinkingSkills";
 import { CREATIVE_MATH_TOPICS, CREATIVE_ENGLISH_TOPICS, CREATIVE_SCIENCE_TOPICS, CREATIVE_GENERATORS } from "./creativeSkills";
 import { CS_TOPICS, CS_GENERATORS } from "./csSkills";
+import { SENIOR_MATH_TOPICS, SENIOR_SCIENCE_TOPICS, SENIOR_CS_TOPICS, SENIOR_ENGLISH_TOPICS, SENIOR_GENERATORS, SENIOR_CHALLENGE_IDS } from "./challengeSenior";
 import { PICTURE_MATH_TOPICS, PICTURE_ENGLISH_TOPICS, PICTURE_SCIENCE_TOPICS, PICTURE_GENERATORS } from "./pictureSkills";
 
 export type { Difficulty, Question, Topic };
@@ -52,26 +53,26 @@ function courseTopics(subject: SubjectId, pool: Topic[]): Topic[] {
   const fromBook = bookGradesByTopic(subject);
   return pool.filter((t) => fromBook.has(t.id)).map((t) => ({ ...t, grades: [...fromBook.get(t.id)!].sort((a, b) => a - b) }));
 }
-const SCIENCE_POOL = [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS, ...CREATIVE_SCIENCE_TOPICS];
+const SCIENCE_POOL = [...SCIENCE_TOPICS, ...SCIENCE_SKILL_TOPICS, ...PICTURE_SCIENCE_TOPICS, ...CREATIVE_SCIENCE_TOPICS, ...SENIOR_SCIENCE_TOPICS];
 
 const TOPICS_BY_SUBJECT: Record<SubjectId, Topic[]> = {
-  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS, ...THINKING_TOPICS, ...CREATIVE_MATH_TOPICS]),
-  english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS, ...PICTURE_ENGLISH_TOPICS, ...CREATIVE_ENGLISH_TOPICS]),
+  math: withBookGrades("math", [...MATH_TOPICS, ...MATH_ELEM_TOPICS, ...MATH_MIDDLE_TOPICS, ...MATH_HIGH_TOPICS, ...PICTURE_MATH_TOPICS, ...THINKING_TOPICS, ...CREATIVE_MATH_TOPICS, ...SENIOR_MATH_TOPICS]),
+  english: withBookGrades("english", [...ENGLISH_TOPICS, ...ENGLISH_SKILL_TOPICS, ...PICTURE_ENGLISH_TOPICS, ...CREATIVE_ENGLISH_TOPICS, ...SENIOR_ENGLISH_TOPICS]),
   science: withBookGrades("science", SCIENCE_POOL),
   physics: courseTopics("physics", SCIENCE_POOL),
   chemistry: courseTopics("chemistry", SCIENCE_POOL),
   biology: courseTopics("biology", SCIENCE_POOL),
-  computer: courseTopics("computer", CS_TOPICS),
+  computer: courseTopics("computer", [...CS_TOPICS, ...SENIOR_CS_TOPICS]),
 };
 
 const GENERATORS_BY_SUBJECT: Record<SubjectId, Record<string, any>> = {
-  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS, ...THINKING_GENERATORS, ...CREATIVE_GENERATORS },
-  english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS },
-  science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS },
-  physics: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS },
-  chemistry: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS },
-  biology: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS },
-  computer: CS_GENERATORS,
+  math: { ...MATH_GENERATORS, ...MATH_ELEM_GENERATORS, ...MATH_MIDDLE_GENERATORS, ...MATH_HIGH_GENERATORS, ...PICTURE_GENERATORS, ...THINKING_GENERATORS, ...CREATIVE_GENERATORS, ...SENIOR_GENERATORS },
+  english: { ...ENGLISH_GENERATORS, ...ENGLISH_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS, ...SENIOR_GENERATORS },
+  science: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...PICTURE_GENERATORS, ...CREATIVE_GENERATORS, ...SENIOR_GENERATORS },
+  physics: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...SENIOR_GENERATORS },
+  chemistry: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...SENIOR_GENERATORS },
+  biology: { ...SCIENCE_GENERATORS, ...SCIENCE_SKILL_GENERATORS, ...SENIOR_GENERATORS },
+  computer: { ...CS_GENERATORS, ...SENIOR_GENERATORS },
 };
 
 export function allGrades(): number[] {
@@ -374,7 +375,7 @@ export function challengeQuestion(opts: { subject: SubjectId; grade: number; top
   const skills = bookSkills(units);
   if (skills.some((s) => s.topic === opts.topic && s.level === "challenge")) return undefined;
   // Puzzle topics added later stay out of the pool so existing sheets keep the same challenge question.
-  const LATER = new Set(["logic_grids", "mini_sudoku", "secret_codes", "word_ladders"]);
+  const LATER = new Set(["logic_grids", "mini_sudoku", "secret_codes", "word_ladders", ...SENIOR_CHALLENGE_IDS]);
   const pool = skills.filter((s) => s.level === "challenge" && s.topic !== opts.topic && !LATER.has(s.topic) && GENERATORS_BY_SUBJECT[opts.subject]?.[s.topic]);
   if (!pool.length) return undefined;
   const pick = pool[(opts.seed >>> 3) % pool.length];

@@ -345,7 +345,8 @@ export const ENGLISH_BOOK: SubjectBook = {
       L("Transitions & Cohesion", c("transitions", "W.11-12.1c")),
       L("Research & Sources", c("sources", "W.11-12.8"))),
     U("Going Further", FURTHER,
-      L("Challenge Puzzles", ch("challenge_anagrams"), ch("challenge_riddles"))),
+      L("Challenge Puzzles", ch("challenge_anagrams"), ch("challenge_riddles")),
+      L("Critical Reading Challenge", ch("challenge_bias_detective"))),
   ],
 
   12: [
@@ -373,6 +374,7 @@ export const ENGLISH_BOOK: SubjectBook = {
       L("Transitions & Cohesion", c("transitions", "W.11-12.2c")),
       L("Research & Sources", c("sources", "W.11-12.8"))),
     U("Going Further", FURTHER,
-      L("Challenge Puzzles", ch("challenge_anagrams"), ch("challenge_riddles"))),
+      L("Challenge Puzzles", ch("challenge_anagrams"), ch("challenge_riddles")),
+      L("Critical Reading Challenge", ch("challenge_bias_detective"))),
   ],
 };

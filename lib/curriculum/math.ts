@@ -344,7 +344,8 @@ export const MATH_BOOK: SubjectBook = {
       L("Normal Distributions", c("std_dev_zscore", "S-ID.A.4"))),
     U("Going Further", FURTHER,
       L("Advanced: Precalculus & Calculus Preview", adv("matrices", "N-VM.C.8"), adv("vectors", "N-VM.A.1"), adv("limits")),
-      L("Challenge Puzzles", ch("challenge_algebra"), ch("challenge_counting"))),
+      L("Challenge Puzzles", ch("challenge_algebra"), ch("challenge_counting")),
+      L("Real-World Challenges", ch("challenge_money_math"), ch("challenge_exponential_world"), ch("challenge_probability_paradoxes"), ch("challenge_number_codes"), ch("challenge_optimization"))),
   ],
 
   12: [
@@ -366,6 +367,7 @@ export const MATH_BOOK: SubjectBook = {
       L("Derivatives", adv("derivatives_power")),
       L("Integrals", adv("integrals_basic"))),
     U("Going Further", FURTHER,
-      L("Challenge Puzzles", ch("challenge_algebra"), ch("challenge_geometry"), ch("challenge_counting"))),
+      L("Challenge Puzzles", ch("challenge_algebra"), ch("challenge_geometry"), ch("challenge_counting")),
+      L("Real-World Challenges", ch("challenge_optimization"), ch("challenge_probability_paradoxes"), ch("challenge_money_math"), ch("challenge_number_codes"), ch("challenge_exponential_world"))),
   ],
 };

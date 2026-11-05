@@ -123,7 +123,7 @@ export const COMPUTER_BOOK: SubjectBook = {
       L("Efficiency", c("big_o", "3B-AP-11"))),
     U("Security", NET,
       L("Encryption & Passwords", c("cybersecurity"))),
-    U("Going Further", FURTHER, CHALLENGE),
+    U("Going Further", FURTHER, CHALLENGE, L("Real-World Challenge", ch("challenge_cs_senior"))),
   ],
   12: [
     U("Algorithms", ALG,
@@ -140,6 +140,6 @@ export const COMPUTER_BOOK: SubjectBook = {
     U("Networks & Security", NET,
       L("Networks", c("networks_internet")),
       L("Cybersecurity", c("cybersecurity"))),
-    U("Going Further", FURTHER, CHALLENGE),
+    U("Going Further", FURTHER, CHALLENGE, L("Real-World Challenge", ch("challenge_cs_senior"))),
   ],
 };

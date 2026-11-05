@@ -15,6 +15,7 @@ const U = (title: string, domain: string, ...lessons: Lesson[]): Unit => ({ titl
 const FURTHER = "Enrichment for curious students";
 const PS = "Physical Science", LS = "Life Science", ESS = "Earth & Space Science";
 const CHALLENGE = L("Challenge Puzzles", ch("challenge_science_thinking"));
+const REAL = (topic: string) => L("Real-World Challenge", ch(topic));
 
 export const PHYSICS_BOOK: SubjectBook = {
   9: [
@@ -71,7 +72,7 @@ export const PHYSICS_BOOK: SubjectBook = {
       L("Radioactivity", c("half_life", "HS-PS1-8"))),
     U("Going Further", FURTHER,
       L("Advanced: Orbits & the Universe", adv("keplers_laws", "HS-ESS1-4"), adv("universe", "HS-ESS1-2")),
-      CHALLENGE),
+      CHALLENGE, REAL("challenge_physics_world")),
   ],
   12: [
     U("Mechanics", PS,
@@ -89,7 +90,7 @@ export const PHYSICS_BOOK: SubjectBook = {
       L("Stars & the Big Bang", c("universe", "HS-ESS1-2"))),
     U("Review", PS,
       L("Mixed Formula Practice", c("physics_formulas", "HS-PS3-1"), c("kinematics", "HS-PS2-1"), c("newton_second_law", "HS-PS2-1"))),
-    U("Going Further", FURTHER, CHALLENGE),
+    U("Going Further", FURTHER, CHALLENGE, REAL("challenge_physics_world")),
   ],
 };
 
@@ -148,7 +149,7 @@ export const CHEMISTRY_BOOK: SubjectBook = {
     U("Gases & Nuclear Chemistry", PS,
       L("Gas Laws", c("gas_laws", "HS-PS3-2")),
       L("Radioactive Decay", c("half_life", "HS-PS1-8"))),
-    U("Going Further", FURTHER, CHALLENGE),
+    U("Going Further", FURTHER, CHALLENGE, REAL("challenge_chemistry_world")),
   ],
   12: [
     U("Structure of Matter", PS,
@@ -165,7 +166,7 @@ export const CHEMISTRY_BOOK: SubjectBook = {
       L("Half-Life", c("half_life", "HS-PS1-8"))),
     U("Review", PS,
       L("Mixed Chemistry Review", c("chemistry_basics"), c("chemistry_compounds", "HS-PS1-2"))),
-    U("Going Further", FURTHER, CHALLENGE),
+    U("Going Further", FURTHER, CHALLENGE, REAL("challenge_chemistry_world")),
   ],
 };
 
@@ -220,7 +221,7 @@ export const BIOLOGY_BOOK: SubjectBook = {
       L("Populations", c("ecology_populations", "HS-LS2-1"))),
     U("Going Further", FURTHER,
       L("Advanced: Mixed Biology", adv("biology_advanced")),
-      CHALLENGE),
+      CHALLENGE, REAL("challenge_biology_world")),
   ],
   12: [
     U("Cells & Energy", LS,
@@ -234,6 +235,6 @@ export const BIOLOGY_BOOK: SubjectBook = {
       L("Sustainability", c("sustainability", "HS-ESS3-3"))),
     U("Review", LS,
       L("Mixed Biology Review", c("biology_advanced"), c("genetics_basics", "HS-LS3-2"))),
-    U("Going Further", FURTHER, CHALLENGE),
+    U("Going Further", FURTHER, CHALLENGE, REAL("challenge_biology_world")),
   ],
 };

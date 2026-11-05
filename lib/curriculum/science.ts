@@ -268,7 +268,8 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("Cells & Genetics", c("bio_photosynthesis_respiration"), c("bio_cell_division"), c("biology_advanced"), c("genetics_vocabulary"), c("genetics_punnett"), c("genetics_basics"))),
     U("Going Further", FURTHER,
       L("Advanced: Earth & Space Preview", adv("keplers_laws", "HS-ESS1-4"), adv("universe", "HS-ESS1-2")),
-      L("Challenge Puzzles", ch("challenge_science_thinking"))),
+      L("Challenge Puzzles", ch("challenge_science_thinking")),
+      L("Real-World Challenges", ch("challenge_physics_world"), ch("challenge_chemistry_world"), ch("challenge_biology_world"))),
   ],
 
   12: [
@@ -285,6 +286,7 @@ export const SCIENCE_BOOK: SubjectBook = {
       L("Cells & Genetics", c("bio_photosynthesis_respiration"), c("bio_cell_division"), c("biology_advanced"), c("genetics_vocabulary"), c("genetics_punnett"), c("genetics_basics")),
       L("Physics Formulas", c("physics_formulas"))),
     U("Going Further", FURTHER,
-      L("Challenge Puzzles", ch("challenge_science_thinking"))),
+      L("Challenge Puzzles", ch("challenge_science_thinking")),
+      L("Real-World Challenges", ch("challenge_physics_world"), ch("challenge_chemistry_world"), ch("challenge_biology_world"))),
   ],
 };
