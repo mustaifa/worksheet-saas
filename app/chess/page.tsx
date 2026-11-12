@@ -5,7 +5,7 @@ import ChessGame from "@/components/chess/ChessGame";
 
 export const metadata: Metadata = {
   title: "Play Chess Online — Free, No Sign-Up",
-  description: "Play chess against the computer at four levels or with a friend on the same device. Full rules, hints, undo and move notation. Free, no ads, no account needed.",
+  description: "Play chess against the computer at four levels, with a friend on the same device, or online with a join code. Full rules, hints and move notation. Free, no ads, no account needed.",
   alternates: { canonical: "/chess" },
 };
 
@@ -23,7 +23,7 @@ export default function ChessPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Chess</h1>
         <p className="mt-2 mb-6 text-slate-600 dark:text-slate-300 max-w-2xl">
-          Play the computer or a friend. All the rules are built in, including castling, en passant, pawn promotion and draws. Free, with no ads and no account needed.
+          Play the computer, a friend on the same device, or a friend online with a join code. All the rules are built in, including castling, en passant, pawn promotion and draws. Free, with no ads and no account needed.
         </p>
         <ChessGame />
 

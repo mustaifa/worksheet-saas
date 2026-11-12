@@ -26,6 +26,7 @@ const PUBLIC_LINKS: NavItem[] = [
 const APP_LINKS: NavItem[] = ([
   { href: "/dashboard", label: "Create worksheet" },
   { href: "/dashboard/family", label: "Family" },
+  { href: "/chess", label: "Chess" },
   { href: "/dashboard/tutor", label: "Homework help" },
   { href: "/worksheets", label: "Library" },
   { href: "/blog", label: "Blog" },
@@ -35,7 +36,6 @@ const TOOL_LINKS: NavItem[] = ([
   { href: "/dashboard/whiteboard", label: "Whiteboard", desc: "Draw live for a class, students join with a code" },
   { href: "/dashboard/custom-worksheet", label: "Custom worksheet", desc: "Type or draw your own worksheet, export to PDF" },
   { href: "/dashboard/worksheet-scan", label: "Scan a worksheet", desc: "Turn a photo of a worksheet into a clean PDF" },
-  { href: "/chess", label: "Chess", desc: "Play the computer or a friend on one device" },
 ] as NavItem[]).filter(showLink);
 
 function isActive(pathname: string, href: string) {
