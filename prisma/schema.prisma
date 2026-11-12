@@ -212,3 +212,20 @@ model ScannedWorksheet {
 
   @@index([hostUserId])
 }
+
+// Online chess between two devices. Players join with a code and a nickname;
+// no account needed. Each player holds a secret token that proves which side
+// they are. The table is created on first use (see lib/chess/online.ts).
+model ChessMatch {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  whiteName  String
+  blackName  String?
+  whiteToken String
+  blackToken String?
+  moves      String   @default("[]") @db.Text // JSON array of [from, to, promotion]
+  status     String   @default("waiting") // waiting | active | over
+  result     String?  // "white:checkmate", "black:resignation", "draw:stalemate", …
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
