@@ -8,7 +8,7 @@ import { BRAND } from "@/lib/brand";
 const KEY = "ps-analytics-consent"; // "granted" | "denied"
 
 // Screens children use directly — never tracked, and no banner shown.
-const CHILD_ROUTES = [/^\/play(\/|$)/, /^\/dashboard\/family(\/|$)/, /^\/whiteboard\/[^/]+/, /^\/w\//];
+const CHILD_ROUTES = [/^\/chess(\/|$)/, /^\/play(\/|$)/, /^\/dashboard\/family(\/|$)/, /^\/whiteboard\/[^/]+/, /^\/w\//];
 
 function readConsent(): string | null {
   try { return localStorage.getItem(KEY); } catch { return null; }
